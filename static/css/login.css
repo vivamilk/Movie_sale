@@ -1,0 +1,16 @@
+.login-form{
+    text-shadow: 0 2px 4px rgba(0,0,0,.1);
+    width: 500px;
+    height: 600px;
+    background-color: #142430;
+
+}
+h1{
+    color: #ffffff;
+}
+label{
+    color:#ffffff;
+}
+.sub-button{
+
+}

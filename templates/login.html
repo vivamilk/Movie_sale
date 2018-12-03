@@ -2,12 +2,13 @@
 <html lang="en">
 
 <head>
-<title>Flask Intro - login page</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link href="static/bootstrap.min.css" rel="stylesheet" media="screen">
+    <title>Flask Intro - login page</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="static/css/bootstrap.css" rel="stylesheet">
+    <link href="static/css/login.css" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
+    <div class="container login-form">
       <h1>Sign In</h1>
         <form action="" method="post" novalidate>
             {{ form.hidden_tag() }}
@@ -20,7 +21,7 @@
                 {{ form.password(size=32, class='my_passport') }}
             </p>
             <p>{{ form.remember_me() }} {{ form.remember_me.label }}</p>
-            <p>{{ form.submit() }}</p>
+            <p>{{ form.submit(class='sub-button') }}</p>
         </form>
     </div>
 </body>

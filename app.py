@@ -3,6 +3,7 @@ from form import LoginForm, Register
 from config import Config
 import sqlite3
 
+
 app = Flask(__name__)
 app.config.from_object(Config)
 
@@ -15,9 +16,11 @@ def hello_world():
 def index():
     return render_template('index.html')
 
+
 @app.route('/test')
 def test():
     return render_template('test.html')
+
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -26,7 +29,6 @@ def register():
     if form.validate_on_submit():
         return redirect(url_for('index'))
     return render_template('register.html', form=form)
-
 
 
 

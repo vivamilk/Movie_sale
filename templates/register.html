@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <title>Register</title>
+    <link href="static/css/bootstrap.css" rel="stylesheet">
+    <link href="static/css/register.css" rel="stylesheet">
 </head>
 <body>
-  <div class="container">
+  <div class="container register-form">
       <h1>Sign Up</h1>
         <form action="" method="post" novalidate>
             {{ form.hidden_tag() }}
@@ -15,11 +17,11 @@
             </p>
             <p>
                 {{ form.password.label }}<br>
-                {{ form.password(size=32, class='my_passport') }}
+                {{ form.password(size=32) }}
             </p>
             <p>
                 {{ form.repeat_password.label }}<br>
-                {{ form.repeat_password(size=32, class='my_passport') }}
+                {{ form.repeat_password(size=32) }}
             </p>
             <p>{{ form.submit() }}</p>
         </form>
