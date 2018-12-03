@@ -2,10 +2,16 @@ from flask import Flask, render_template, redirect, url_for, request, flash
 from form import LoginForm, Register
 from config import Config
 import sqlite3
+import hashlib
 
 
 app = Flask(__name__)
 app.config.from_object(Config)
+
+# connect to database
+conn = sqlite3.connect('database.db')
+cur = conn.cursor()
+
 
 @app.route('/')
 def hello_world():
@@ -27,7 +33,26 @@ def register():
     form = Register()
     if form.validate_on_submit():
         return redirect(url_for('index'))
-    return render_template('register.html', form=form)
+    # check user conflicts
+    try:
+        cur.execute('insert into customer (password, email, firstName, lastName, address1, address2, zipcode, city, state, country, phone) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            (hashlib.md5(password.encode()).hexdigest(), email, firstName, lastName, address1, address2, zipcode, city,
+             state, country, phone))
+        conn.commit()
+        msg = "Registered Successfully"
+    except sqlite3.IntegrityError:
+        conn.rollback()
+        msg = "User existed, please try another username"
+
+    return render_template('register.html', form=form, error=msg)
+
+
+def is_user_valid(form: LoginForm):
+    cur.execute('SELECT loginName, password FROM customer')
+    data = cur.fetchall()
+    for (longin_name, password) in data:
+        if row[0] == email and row[1] == hashlib.md5(password.encode()).hexdigest():
+            return True
 
 
 @app.route('/shopping')
@@ -64,7 +89,6 @@ def login():
         return render_template('login.html', error=error)
     '''
     return render_template('login.html', form=form)
-
 
 
 if __name__ == '__main__':
