@@ -22,7 +22,6 @@ def test():
     return render_template('test.html')
 
 
-
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     form = Register()
