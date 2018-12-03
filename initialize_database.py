@@ -32,7 +32,7 @@ if __name__ == '__main__':
     (
       customerID   INTEGER
         primary key,
-      name         TEXT,
+      name         TEXT not null,
       address      TEXT,
       phoneNumber  NUMERIC,
       type         TEXT not null,

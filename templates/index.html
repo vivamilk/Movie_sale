@@ -6,7 +6,6 @@
     <link href="static/css/bootstrap.css" rel="stylesheet">
     {% block cssfile %}{% endblock %}
 </head>
-</head>
 <body>
     <nav class="navbar navbar-default" role="navigation">
         <div class="container-fluid">
@@ -20,8 +19,13 @@
             </ul>
             {% if home %}
             <ul class="nav navbar-nav navbar-right">
-                <li><a href="register"><span class="glyphicon glyphicon-user"></span> Sign Up</a></li>
-                <li><a href="login"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
+                {% if current_user.is_anonymous %}
+                    <li><a href="register"><span class="glyphicon glyphicon-user"></span> Sign Up </a></li>
+                    <li><a href="login"><span class="glyphicon glyphicon-log-in"></span> Login </a></li>
+                {% else %}
+                    <li><a><span class="glyphicon glyphicon-user"></span> Hi, {{ current_user.username}} </a></li>
+                    <li><a href="{{ url_for('logout') }}"><span class="glyphicon glyphicon-log-out"></span> Logout </a></li>
+                {% endif %}
             </ul>
             {% endif %}
         </div>
