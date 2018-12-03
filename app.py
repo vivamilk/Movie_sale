@@ -31,6 +31,9 @@ def register():
     return render_template('register.html', form=form)
 
 
+@app.route('./shopping')
+def get_shopping_data():
+    pass
 
 
 @app.route('/login', methods=['GET', 'POST'])
