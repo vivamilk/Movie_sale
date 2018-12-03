@@ -14,7 +14,7 @@ def hello_world():
 
 @app.route('/index')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', home=True)
 
 
 @app.route('/test')
@@ -29,6 +29,7 @@ def register():
     if form.validate_on_submit():
         return redirect(url_for('index'))
     return render_template('register.html', form=form)
+
 
 
 
