@@ -30,9 +30,20 @@ def register():
     return render_template('register.html', form=form)
 
 
-@app.route('./shopping')
+@app.route('/shopping')
 def get_shopping_data():
-    pass
+    image = [
+        {
+            'id': '3'
+        },
+        {
+            'id': '4'
+        },
+        {
+            'id': '6'
+        }
+    ]
+    return render_template('shopping.html', images=image)
 
 
 @app.route('/login', methods=['GET', 'POST'])

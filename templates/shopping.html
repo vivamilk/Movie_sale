@@ -2,18 +2,11 @@
 {% block content %}
     <div class="container">
         <div class="row">
+            {% for image in images %}
             <div class="col-md-3 text-center">
-
+                <img src="{{url_for('static', filename='posters/' + image.id + '.jpg')}}">
             </div>
-            <div class="col-md-3 text-center">
-
-            </div>
-            <div class="col-md-3 text-center">
-
-            </div>
-            <div class="col-md-3 text-center">
-
-            </div>
+            {% endfor %}
         </div>
 
         <div class="row">
