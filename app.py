@@ -36,9 +36,9 @@ def get_shopping_data():
         movieID, title = select_data
         # TODO Here use random data / Join table to get data instead
         price = random.randint(3, 20)
-        movie.append({'id': str(movieID), 'imdbid': title, 'price': price})
+        movie.append({'id': str(movieID), 'title': title, 'price': price})
 
-    return render_template('shopping.html', images=movie)
+    return render_template('shopping.html', images=movie, home=True)
 
 
 @app.route('/manager')
