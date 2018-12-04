@@ -26,68 +26,19 @@ def test():
 
 @app.route('/shopping')
 def get_shopping_data():
-    # image = [
-    #     [
-    #     {
-    #         'id': '3'
-    #     },
-    #     {
-    #         'id': '4'
-    #     },
-    #     {
-    #         'id': '6'
-    #     }
-    #     ],
-    #     [
-    #         {
-    #             'id': '3'
-    #         },
-    #         {
-    #             'id': '4'
-    #         },
-    #         {
-    #             'id': '6'
-    #         }
-    #     ]
-    # ]
-    image = [{
-        'id':'3',
-        'price':'4'
-        },
-        {
-            'id':'4',
-            'price': '4'
-        },
-        {
-            'id':'5',
-            'price': '4'
-        },
-        {
-            'id':'6',
-            'price': '4'
-        },
-        {
-            'id':'7',
-            'price': '4'
-        },
-        {
-            'id': '8',
-            'price': '4'
-        },
-        {
-            'id': '9',
-            'price': '6'
-        },
-        {
-            'id': '10',
-            'price': '10'
-        },
-        {
-            'id': '11',
-            'price': '3'
-        }
-    ]
-    return render_template('shopping.html', images=image)
+    movie = []
+    with sqlite3.connect('database.db') as conn:
+        cur = conn.cursor()
+        cur.execute('select movieID, title from movie limit 20')
+        data = cur.fetchall()
+
+    for select_data in data:
+        movieID, title = select_data
+        # TODO Here use random data / Join table to get data instead
+        price = random.randint(3, 20)
+        movie.append({'id': str(movieID), 'imdbid': title, 'price': price})
+
+    return render_template('shopping.html', images=movie)
 
 
 @app.route('/manager')

@@ -9,6 +9,7 @@
                     <div class="wrapper">
                         <img src="{{url_for('static', filename='posters/' + img.id + '.jpg')}}">
                         <h5>${{ img.price }}</h5>
+                        <h5>{{ img.title }}</h5>
                         <button type="button" class="btn btn-primary" id={{ img.id }}>ADD TO CART</button>
                     </div>
                 </div>
