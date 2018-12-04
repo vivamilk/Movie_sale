@@ -1,3 +1,4 @@
+import random
 import sqlite3
 from flask import Flask, render_template, redirect, url_for, flash
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -119,7 +120,25 @@ def manage_data():
     ]
     return render_template('admin.html', movies=movie)
 
-@app.route('./')
+
+@app.route('/list')
+# TODO User Login -> List Movie / Admin Login -> Manger Movie
+def list_movie():
+    movie = []
+    with sqlite3.connect('database.db') as conn:
+        cur = conn.cursor()
+        cur.execute('select movieID, imdbID, title, year, country, rating from movie')
+        data = cur.fetchall()
+    for select_data in data:
+        movieID, imdbID, title, year, country, rating = select_data
+        # TODO Here use random data / Join table to get data instead
+        stock = random.randint(4, 10)
+        price = random.randint(3, 20)
+        movie.append({'id': movieID, 'imdbid': imdbID, 'title': title, 'year': year,
+                      'country': country, 'rating': rating, 'stock': stock, 'price': price})
+    return render_template('list_metadata.html', movies=movie, home=True)
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
@@ -231,4 +250,4 @@ def load_user(user_id):
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
