@@ -1,26 +1,35 @@
-.login-form{
-    text-shadow: 0 2px 4px rgba(0,0,0,.1);
-    width: 500px;
-    height: 600px;
-    background-color: #142430;
-
+/*h1{*/
+    /*color: #ffffff;*/
+/*}*/
+/*label{*/
+    /*color:#ffffff;*/
+/*}*/
+body
+{
+background-color:#20303B;
 }
-h1{
-    color: #ffffff;
-}
-label{
-    color:#ffffff;
-}
-.login-form{
+.log{
     text-shadow: 0 2px 4px rgba(0,0,0,.1);
     width: 500px;
     height: 600px;
     background-color: #ffffff;
 }
+.login-form{
+    margin: 30px 30px 20px;
+}
 input{
     border-radius:3px;
     width:100%;
 }
+.rem{
+    width:20px;
+}
 .sub-button{
+}
 
+.login-nav{
+    background-color: #20303B;
+}
+.navbar{
+    border-color:#20303B;
 }
