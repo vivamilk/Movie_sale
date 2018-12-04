@@ -1,0 +1,57 @@
+{% extends "index.html" %}
+{% block content %}
+    <div class="container">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+            <th>Id</th>
+            <th>Picture</th>
+            <th>Region</th>
+            <th>Inventory</th>
+            <th>Sale Price</th>
+            <th>Cost</th>
+            </tr>
+            <tr>
+            <td>New</td>
+            <td>
+            <div class="img-container">
+                <img class="picture" height="42" width="42" alt="select a picture" title="select a picture" src="static/posters/0.jpg">
+                <input class="image" id="my-file-selector" type="file" style="display:none;" accept="image/x-png,image/gif,image/jpeg">
+            </div>
+            <td><input type="text" class="form-control region" value=""></td>
+            <td><input type="text" class="form-control inventory" value=""></td>
+            <td><input type="text" class="form-control sale-price" value=""></td>
+            <td><input type="text" class="form-control cost" value=""></td>
+            <td>
+            <a href="#" class="del-btn admin-p-add"><span class="glyphicon glyphicon-plus"> Add</span></a>
+            </td>
+            </tr>
+            </thead>
+            {#            Manage the movie#}
+            {%  for movie in movies %}
+            <tr>
+            <td>{{ movie.id }}</td>
+            <td>
+            <div class="img-container">
+            <img class="picture" height="42" width="42" alt="select a picture" title="select a picture" src={{url_for('static', filename='posters/' + movie.id + '.jpg')}}/>
+            <div class="img-centered">
+            <label class="img-label" for="my-file-selector'.$product_id.'">
+                <input fn="'.$image.'" class="image" id="my-file-selector'.$product_id.'" type="file" style="display:none;" accept="image/x-png,image/gif,image/jpeg">
+            </label>
+            </div>
+            </div>
+            </td>
+            <td><input type="text" class="form-control name" value={{ movie.region }}></td>
+            <td><input type="text" class="form-control name" value={{ movie.name }}></td>
+{#            <td><input type="text" class="form-control keywords" value="'.$keywords.'"></td>#}
+            <td><input type="text" class="form-control inventory_amount" value={{ movie.stockAmount }}></td>
+            <td><input type="text" class="form-control price" value={{ movie.price }}></td>
+            <td>
+            <a href="#" remove_id={{ movie.id }} class="del-btn admin-p-remove"><span class="glyphicon glyphicon-trash"></span></a>
+            <a href="#" update_id={{ movie.id }} class="del-btn admin-p-update"><span class="glyphicon glyphicon-refresh"></span></a>
+            </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+{% endblock %}

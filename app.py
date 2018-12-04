@@ -25,20 +25,101 @@ def test():
 
 @app.route('/shopping')
 def get_shopping_data():
-    image = [
-        {
-            'id': '3'
+    # image = [
+    #     [
+    #     {
+    #         'id': '3'
+    #     },
+    #     {
+    #         'id': '4'
+    #     },
+    #     {
+    #         'id': '6'
+    #     }
+    #     ],
+    #     [
+    #         {
+    #             'id': '3'
+    #         },
+    #         {
+    #             'id': '4'
+    #         },
+    #         {
+    #             'id': '6'
+    #         }
+    #     ]
+    # ]
+    image = [{
+        'id':'3',
+        'price':'4'
         },
         {
-            'id': '4'
+            'id':'4',
+            'price': '4'
         },
         {
-            'id': '6'
+            'id':'5',
+            'price': '4'
+        },
+        {
+            'id':'6',
+            'price': '4'
+        },
+        {
+            'id':'7',
+            'price': '4'
+        },
+        {
+            'id': '8',
+            'price': '4'
+        },
+        {
+            'id': '9',
+            'price': '6'
+        },
+        {
+            'id': '10',
+            'price': '10'
+        },
+        {
+            'id': '11',
+            'price': '3'
         }
     ]
     return render_template('shopping.html', images=image)
 
 
+@app.route('/manager')
+def manage_data():
+    # Here to fetch the data
+    movie = [{
+        'id': '3',
+        'name':'222',
+        'stockAmount':222,
+        'price':5
+         },
+        {
+            'id': '3',
+            'name': '222',
+            'stockAmount': 222,
+            'price': 5
+        },
+        {
+            'id': '3',
+            'name': '222',
+            'stockAmount': 222,
+            'price': 5
+        },
+        {
+            'id': '3',
+            'name': '222',
+            'stockAmount': 222,
+            'price': 5
+        }
+    ]
+    return render_template('admin.html', movies=movie)
+
+@app.route('./')
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:

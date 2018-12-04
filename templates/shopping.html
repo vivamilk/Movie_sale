@@ -1,13 +1,20 @@
+{% block cssfile %}<link href="static/css/shopping.css" rel="stylesheet">{% endblock %}
 {% extends "index.html" %}
 {% block content %}
     <div class="container">
+{#        {% for image in images %}#}
         <div class="row">
-            {% for image in images %}
-            <div class="col-md-3 text-center">
-                <img src="{{url_for('static', filename='posters/' + image.id + '.jpg')}}">
-            </div>
+            {% for img in images %}
+                <div class="col-md-3 text-center">
+                    <div class="wrapper">
+                        <img src="{{url_for('static', filename='posters/' + img.id + '.jpg')}}">
+                        <h5>${{ img.price }}</h5>
+                        <button type="button" class="btn btn-primary" id={{ img.id }}>ADD TO CART</button>
+                    </div>
+                </div>
             {% endfor %}
         </div>
+{#        {% endfor %}#}
 
         <div class="row">
             <div class="col-md-3 text-center">
