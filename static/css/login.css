@@ -11,6 +11,16 @@ h1{
 label{
     color:#ffffff;
 }
+.login-form{
+    text-shadow: 0 2px 4px rgba(0,0,0,.1);
+    width: 500px;
+    height: 600px;
+    background-color: #ffffff;
+}
+input{
+    border-radius:3px;
+    width:100%;
+}
 .sub-button{
 
 }

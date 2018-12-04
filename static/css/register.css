@@ -1,16 +1,34 @@
+body
+{
+background-color:#20303B;
+}
 .register-form{
     text-shadow: 0 2px 4px rgba(0,0,0,.1);
     width: 500px;
     height: 600px;
-    background-color: #142430;
+    background-color: #ffffff;
 
 }
-h1{
-    color: #ffffff;
+.register-nav{
+    background-color: #20303B;
 }
-label{
+.navbar{
+    border-color:#20303B;
+}
+
+/*h1{*/
+    /*color: #ffffff;*/
+/*}*/
+/*label{
     color:#ffffff;
-}
+}*/
 .sub-button{
 
+}
+input{
+    border-radius:3px;
+    width:100%;
+}
+.registeration{
+    margin: 30px 30px 20px;
 }
