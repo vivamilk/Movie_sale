@@ -38,25 +38,25 @@ if __name__ == '__main__':
     (
       customerID   INTEGER
         primary key autoincrement,
+      userID       INTEGER
+        references users,
       name         VARCHAR(20) not null,
       emailAddress VARCHAR(30),
-      phoneNumber  INTEGER(16),
-      username     VARCHAR(20) unique not null,
-      password     VARCHAR(100) not null
+      phoneNumber  INTEGER(16)
     )
     ''')
 
     cur.execute('''
     create table manager
     (
-      managerID INTEGER
+      managerID     INTEGER
         primary key autoincrement,
-      managerLevel      BOOLEAN not null,
-      username  VARCHAR(20) unique not null,
-      password  VARCHAR(100) not null,
-      name      VARCHAR(20) not null,
-      emailAddress   VARCHAR(30),
-      salary    NUMERIC
+      userID        INTEGER
+        references users,
+      managerLevel  BOOLEAN not null,
+      name          VARCHAR(20) not null,
+      emailAddress  VARCHAR(30),
+      salary        NUMERIC
     )
     ''')
 
@@ -134,15 +134,33 @@ if __name__ == '__main__':
     )
     ''')
 
+    cur.execute('''
+    create table users
+    (
+      userID      INTEGER
+        primary key,
+      username    VARCHAR(20) unique not null,
+      password    VARCHAR(100) not null,
+      is_manager  BOOLEAN
+    )
+    ''')
+
     # sample customer data
-    cur.execute('insert into customer values (?,?,?,?,?,?)',
-                (None,	'brian', 'pittsburgh', '4121231234', 'test', 'pbkdf2:sha256:50000$Eh6bXq9p$f1d73e42b410a6ab463cc597ecaece0ed2de5253f9a87835416c732b0a74981e'))
-    cur.execute('insert into main.manager values (?,?,?,?,?,?,?)',
-                (None, True, 'admin1', 'pbkdf2:sha256:50000$Eh6bXq9p$f1d73e42b410a6ab463cc597ecaece0ed2de5253f9a87835416c732b0a74981e', 'manager1', 'manager1@gamil.com', 6000))
-    cur.execute('insert into main.manager values (?,?,?,?,?,?,?)',
-                (None, False, 'admin2',
-                 'pbkdf2:sha256:50000$Eh6bXq9p$f1d73e42b410a6ab463cc597ecaece0ed2de5253f9a87835416c732b0a74981e',
-                 'senior_manager1', 's_manager1@gamil.com', 9000))
+    cur.execute('insert into users values (?,?,?,?)',
+                (1, 'test', 'pbkdf2:sha256:50000$Eh6bXq9p$f1d73e42b410a6ab463cc597ecaece0ed2de5253f9a87835416c732b0a74981e', False))
+    cur.execute('insert into customer values (?,?,?,?,?)',
+                (None, 1, 'brian', 'pittsburgh', '4121231234'))
+
+    cur.execute('insert into users values (?,?,?,?)',
+                (2, 'admin1', 'pbkdf2:sha256:50000$Eh6bXq9p$f1d73e42b410a6ab463cc597ecaece0ed2de5253f9a87835416c732b0a74981e', True))
+    cur.execute('insert into manager values (?,?,?,?,?,?)',
+                (None, 2, True, 'manager1', 'manager1@gamil.com', 6000))
+
+    cur.execute('insert into users values (?,?,?,?)',
+                (3, 'admin2', 'pbkdf2:sha256:50000$Eh6bXq9p$f1d73e42b410a6ab463cc597ecaece0ed2de5253f9a87835416c732b0a74981e', True))
+    cur.execute('insert into manager values (?,?,?,?,?,?)',
+                (None, 3, False, 'senior_manager1', 's_manager1@gamil.com', 9000))
+
     cur.execute('insert into store values (?,?,?)',
                 (None, 'us_store@gmail.com', 'US'))
     cur.execute('insert into store values (?,?,?)',
@@ -173,25 +191,25 @@ if __name__ == '__main__':
                     cur.execute('insert into genres values (?,?)', (movie_data[0], genre))
                 # stock
                 for store_id in range(1, 3):
-                    sale_price = random.uniform(7, 19)
-                    cost = sale_price - random.uniform(1, 5)
+                    sale_price = random.randint(700, 1900)
+                    cost = sale_price - random.randint(200, 500)
                     cur.execute('insert into stock values (?,?,?,?,?)',
-                                (store_id, movie_data[0], random.randint(100, 300), sale_price, cost))
+                                (store_id, movie_data[0], random.randint(100, 300), sale_price/100, cost/100))
             except sqlite3.IntegrityError:
                 print('IntegrityError: movieID {}'.format(movie_data[0]))
 
     # sample transactions
-    dt = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    dt = datetime.datetime.now() + datetime.timedelta(-100)
     cur.execute('insert into transactions values (?,?,?,?,?,?)',
-                (None, 1, dt, 1, 4, 1))
-    dt = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                (None, 1, dt.strftime("%Y-%m-%d %H:%M:%S"), 1, 4, 1))
+    dt = datetime.datetime.now() + datetime.timedelta(-90)
     cur.execute('insert into transactions values (?,?,?,?,?,?)',
-                (None, 2, dt, 1, 5, 1))
-    dt = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                (None, 2, dt.strftime("%Y-%m-%d %H:%M:%S"), 1, 5, 1))
+    dt = datetime.datetime.now() + datetime.timedelta(-80)
     cur.execute('insert into transactions values (?,?,?,?,?,?)',
-                (None, 2, dt, 1, 6, 2))
-    dt = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                (None, 2, dt.strftime("%Y-%m-%d %H:%M:%S"), 1, 6, 2))
+    dt = datetime.datetime.now() + datetime.timedelta(-70)
     cur.execute('insert into transactions values (?,?,?,?,?,?)',
-                (None, 1, dt, 1, 7, 2))
+                (None, 1, dt.strftime("%Y-%m-%d %H:%M:%S"), 1, 7, 2))
     conn.commit()
     conn.close()

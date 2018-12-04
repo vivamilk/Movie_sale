@@ -57,16 +57,9 @@
                     {% endfor %}
                 </p>
                 <p>
-                    {{ form.type.label }}<br>
-                    {{ form.type(size=32) }}<br>
-                    {% for error in form.type.errors %}
-                        <span style="color: red;">[{{ error }}]</span>
-                    {% endfor %}
-                </p>
-                <p>
-                    {{ form.address.label }}<br>
-                    {{ form.address(size=64) }}<br>
-                    {% for error in form.address.errors %}
+                    {{ form.email.label }}<br>
+                    {{ form.email(size=32) }}<br>
+                    {% for error in form.email.errors %}
                         <span style="color: red;">[{{ error }}]</span>
                     {% endfor %}
                 </p>
