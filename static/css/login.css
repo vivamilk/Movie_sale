@@ -4,14 +4,32 @@
 /*label{*/
     /*color:#ffffff;*/
 /*}*/
-.login-form{
+body
+{
+background-color:#20303B;
+}
+.log{
     text-shadow: 0 2px 4px rgba(0,0,0,.1);
-    background-color: #ffff;
+    width: 500px;
+    height: 600px;
+    background-color: #ffffff;
+}
+.login-form{
+    margin: 30px 30px 20px;
 }
 input{
     border-radius:3px;
     width:100%;
 }
+.rem{
+    width:20px;
+}
 .sub-button{
+}
 
+.login-nav{
+    background-color: #20303B;
+}
+.navbar{
+    border-color:#20303B;
 }

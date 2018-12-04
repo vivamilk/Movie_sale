@@ -66,15 +66,15 @@ def list_movie():
     movie = []
     with sqlite3.connect('database.db') as conn:
         cur = conn.cursor()
-        cur.execute('select movieID, imdbID, title, year, country, rating from movie')
+        cur.execute('select movieID, imdbID, title, year, rating from movie')
         data = cur.fetchall()
     for select_data in data:
-        movieID, imdbID, title, year, country, rating = select_data
+        movieID, imdbID, title, year, rating = select_data
         # TODO Here use random data / Join table to get data instead
         stock = random.randint(4, 10)
         price = random.randint(3, 20)
         movie.append({'id': movieID, 'imdbid': imdbID, 'title': title, 'year': year,
-                      'country': country, 'rating': rating, 'stock': stock, 'price': price})
+                       'rating': rating, 'stock': stock, 'price': price})
     return render_template('list_metadata.html', movies=movie, home=True)
 
 

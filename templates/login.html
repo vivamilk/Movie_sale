@@ -14,10 +14,10 @@
     <meta charset="UTF-8">
     <title>Register</title>
     <link href="static/css/bootstrap.css" rel="stylesheet">
-    <link href="static/css/register.css" rel="stylesheet">
+    <link href="static/css/login.css" rel="stylesheet">
 </head>
 <body>
-<nav class="navbar navbar-default register-nav" role="navigation">
+<nav class="navbar navbar-default login-nav" role="navigation">
     <div class="container-fluid">
         <div class="navbar-header">
             <a class="navbar-brand" href="#">Movie Sales</a>
@@ -43,8 +43,8 @@
                     {{ form.password.label }}<br>
                     {{ form.password(size=32, class='my_passport') }}
                 </p>
-                <p>{{ form.remember_me() }} {{ form.remember_me.label }}</p>
-                <p>{{ form.submit(class='sub-button') }}</p>
+                <p>{{ form.remember_me() }}{{ form.remember_me.label }}</p>
+                <p><h4>{{ form.submit(class='sub-button') }}</h4></p>
             </form>
         </div>
     </div>
