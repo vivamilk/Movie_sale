@@ -7,61 +7,82 @@
     <link href="static/css/register.css" rel="stylesheet">
 </head>
 <body>
-  <div class="container register-form">
-      <h1>Sign Up</h1>
-        <form action="" method="post" novalidate>
-            {{ form.hidden_tag() }}
-            <p>
-                {{ form.username.label }}<br>
-                {{ form.username(size=32) }}<br>
-                {% for error in form.username.errors %}
-                    <span style="color: red;">[{{ error }}]</span>
-                {% endfor %}
-            </p>
-            <p>
-                {{ form.password.label }}<br>
-                {{ form.password(size=32) }}<br>
-                {% for error in form.password.errors %}
-                    <span style="color: red;">[{{ error }}]</span>
-                {% endfor %}
-            </p>
-            <p>
-                {{ form.password2.label }}<br>
-                {{ form.password2(size=32) }}<br>
-                {% for error in form.password2.errors %}
-                    <span style="color: red;">[{{ error }}]</span>
-                {% endfor %}
-            </p>
-            <p>
-                {{ form.name.label }}<br>
-                {{ form.name(size=32) }}<br>
-                {% for error in form.name.errors %}
-                    <span style="color: red;">[{{ error }}]</span>
-                {% endfor %}
-            </p>
-            <p>
-                {{ form.type.label }}<br>
-                {{ form.type(size=32) }}<br>
-                {% for error in form.type.errors %}
-                    <span style="color: red;">[{{ error }}]</span>
-                {% endfor %}
-            </p>
-            <p>
-                {{ form.address.label }}<br>
-                {{ form.address(size=64) }}<br>
-                {% for error in form.address.errors %}
-                    <span style="color: red;">[{{ error }}]</span>
-                {% endfor %}
-            </p>
-            <p>
-                {{ form.phone_number.label }}<br>
-                {{ form.phone_number(size=32) }}<br>
-                {% for error in form.phone_number.errors %}
-                    <span style="color: red;">[{{ error }}]</span>
-                {% endfor %}
-            </p>
-            <p>{{ form.submit() }}</p>
-        </form>
+<nav class="navbar navbar-default register-nav" role="navigation">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="#">Movie Sales</a>
+        </div>
+        <div>
+            <ul class="nav navbar-nav">
+                <li ><a href="/index">Manage</a></li>
+            </ul>
+        </div>
     </div>
+</nav>
+
+
+
+<div class="container register-form">
+    <div class="row">
+
+        <div class="registeration">
+            <h1>Sign Up</h1>
+            <form action="" method="post" novalidate>
+                {{ form.hidden_tag() }}
+                <p>
+                    {{ form.username.label }}<br>
+                    {{ form.username(size=32) }}<br>
+                    {% for error in form.username.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                    {% endfor %}
+                </p>
+                <p>
+                    {{ form.password.label }}<br>
+                    {{ form.password(size=32) }}<br>
+                    {% for error in form.password.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                    {% endfor %}
+                </p>
+                <p>
+                    {{ form.password2.label }}<br>
+                    {{ form.password2(size=32) }}<br>
+                    {% for error in form.password2.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                    {% endfor %}
+                </p>
+                <p>
+                    {{ form.name.label }}<br>
+                    {{ form.name(size=32) }}<br>
+                    {% for error in form.name.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                    {% endfor %}
+                </p>
+                <p>
+                    {{ form.type.label }}<br>
+                    {{ form.type(size=32) }}<br>
+                    {% for error in form.type.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                    {% endfor %}
+                </p>
+                <p>
+                    {{ form.address.label }}<br>
+                    {{ form.address(size=64) }}<br>
+                    {% for error in form.address.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                    {% endfor %}
+                </p>
+                <p>
+                    {{ form.phone_number.label }}<br>
+                    {{ form.phone_number(size=32) }}<br>
+                    {% for error in form.phone_number.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                    {% endfor %}
+                </p>
+                <br>
+                <p><h4>{{ form.submit() }}<h4></p>
+            </form>
+        </div>
+    </div>
+</div>
 </body>
 </html>

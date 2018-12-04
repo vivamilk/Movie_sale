@@ -6,7 +6,7 @@
             <tr>
                 <th>Id</th>
                 <th>Picture</th>
-                <th>Region</th>
+                <th>Name</th>
                 <th>Inventory</th>
                 <th>Sale Price</th>
                 <th>Cost</th>
@@ -45,11 +45,11 @@
                             </div>
                         </div>
                     </td>
-                    <td><input type="text" class="form-control name" value={{ movie.region }}></td>
                     <td><input type="text" class="form-control name" value={{ movie.name }}></td>
+                    <td><input type="text" class="form-control name" value={{ movie.inventory }}></td>
                     {#            <td><input type="text" class="form-control keywords" value="'.$keywords.'"></td>#}
-                    <td><input type="text" class="form-control inventory_amount" value={{ movie.stockAmount }}></td>
-                    <td><input type="text" class="form-control price" value={{ movie.price }}></td>
+                    <td><input type="text" class="form-control inventory_amount" value={{ movie.price }}></td>
+                    <td><input type="text" class="form-control price" value={{ movie.cost }}></td>
                     <td>
                         <a href="#" remove_id={{ movie.id }} class="del-btn admin-p-remove"><span
                             class="glyphicon glyphicon-trash"></span></a>

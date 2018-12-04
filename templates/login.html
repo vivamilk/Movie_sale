@@ -8,25 +8,47 @@
 {#    <link href="static/css/login.css" rel="stylesheet">#}
 {#</head>#}
 {#<body>#}
-{% extends "index.html" %}
-{% block cssfile %}<link href="static/css/login.css" rel="stylesheet"> {% endblock %}
-{% block content %}
-    <div class="container login-form">
-      <h1>Sign In</h1>
-        <form action="" method="post" novalidate>
-            {{ form.hidden_tag() }}
-            <p>
-                {{ form.username.label }}<br>
-                {{ form.username(size=32) }}
-            </p>
-            <p>
-                {{ form.password.label }}<br>
-                {{ form.password(size=32, class='my_passport') }}
-            </p>
-            <p>{{ form.remember_me() }} {{ form.remember_me.label }}</p>
-            <p>{{ form.submit(class='sub-button') }}</p>
-        </form>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Register</title>
+    <link href="static/css/bootstrap.css" rel="stylesheet">
+    <link href="static/css/register.css" rel="stylesheet">
+</head>
+<body>
+<nav class="navbar navbar-default register-nav" role="navigation">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="#">Movie Sales</a>
+        </div>
+        <div>
+            <ul class="nav navbar-nav">
+                <li ><a href="/index">Manage</a></li>
+            </ul>
+        </div>
     </div>
-{% endblock %}
+</nav>
+<div class="container log">
+    <div class="row">
+        <div class="container login-form">
+          <h1>Sign In</h1>
+            <form action="" method="post" novalidate>
+                {{ form.hidden_tag() }}
+                <p>
+                    {{ form.username.label }}<br>
+                    {{ form.username(size=32) }}
+                </p>
+                <p>
+                    {{ form.password.label }}<br>
+                    {{ form.password(size=32, class='my_passport') }}
+                </p>
+                <p>{{ form.remember_me() }} {{ form.remember_me.label }}</p>
+                <p>{{ form.submit(class='sub-button') }}</p>
+            </form>
+        </div>
+    </div>
+</div>
+
 {#</body>#}
 {#</html>#}

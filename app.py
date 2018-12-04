@@ -44,32 +44,20 @@ def get_shopping_data():
 @app.route('/manager')
 def manage_data():
     # Here to fetch the data
-    movie = [{
-        'id': '3',
-        'name':'222',
-        'stockAmount':222,
-        'price':5
-         },
-        {
-            'id': '3',
-            'name': '222',
-            'stockAmount': 222,
-            'price': 5
-        },
-        {
-            'id': '3',
-            'name': '222',
-            'stockAmount': 222,
-            'price': 5
-        },
-        {
-            'id': '3',
-            'name': '222',
-            'stockAmount': 222,
-            'price': 5
-        }
-    ]
-    return render_template('admin.html', movies=movie)
+    movie = []
+    with sqlite3.connect('database.db') as conn:
+        cur = conn.cursor()
+        cur.execute('select movieID, title from movie limit 20')
+        data = cur.fetchall()
+
+    for select_data in data:
+        movieID, title = select_data
+        # TODO Here use random data / Join table to get data instead
+        stock = random.randint(10, 20)
+        price = random.randint(3, 20)
+        cost = price - random.randint(0, 3)
+        movie.append({'id': str(movieID), 'name': title, 'price': price, 'cost': cost, 'price': price, 'inventory':stock})
+    return render_template('admin.html', movies=movie, home=True, manager=True)
 
 
 @app.route('/list')
