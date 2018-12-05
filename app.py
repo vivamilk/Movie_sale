@@ -267,6 +267,10 @@ def register():
 def receipt():
     """Function to display receipt after purchase"""
     content = copy(context_base)
+
+    result = request.args.get('st')
+    if result == 'Completed':
+        flash("Completed!")
     return render_template("receipt.html", **content)
 
 
