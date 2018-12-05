@@ -1,8 +1,13 @@
-{% block cssfile %}<link href="static/css/shopping.css" rel="stylesheet">{% endblock %}
 {% extends "index.html" %}
+
+{% block cssfile %}<link href="static/css/shopping.css" rel="stylesheet">{% endblock %}
+
 {% block content %}
     <div class="container">
-{#        {% for image in images %}#}
+        {% if not images %}
+            <p>No Result Found!</p>
+            <button type="button" class="btn btn-default" onclick="location='/shopping'">Show All</button>
+        {% endif %}
         <div class="row">
             {% for img in images %}
                 <div class="col-md-3 text-center">
@@ -10,12 +15,17 @@
                         <img src="{{url_for('static', filename='posters/' + img.id + '.jpg')}}">
                         <span class="highlight-price"><h5>${{ img.price }}</h5></span>
                         <h5>{{ img.title }}</h5>
-                        <button type="button" class="btn btn-primary" id={{ img.id }}>ADD TO CART</button>
+                        <form target="paypal" action="https://www.sandbox.paypal.com/cgi-bin/webscr" method="post">
+                            <input type="hidden" name="cmd" value="_s-xclick">
+                            <input type="hidden" name="hosted_button_id" value="DZFVCLFR4P29N">
+                            <input type="image" src="https://www.sandbox.paypal.com/en_US/i/btn/btn_cart_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+                            <img alt="" border="0" src="https://www.sandbox.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1">
+                        </form>
+{#                        <button type="button" class="btn btn-primary" id={{ img.id }}>ADD TO CART</button>#}
                     </div>
                 </div>
             {% endfor %}
         </div>
-{#        {% endfor %}#}
 
         <div class="row">
             <div class="col-md-3 text-center">

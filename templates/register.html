@@ -1,80 +1,73 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Register</title>
-    <link href="static/css/bootstrap.css" rel="stylesheet">
-    <link href="static/css/register.css" rel="stylesheet">
-</head>
-<body>
-<nav class="navbar navbar-default register-nav" role="navigation">
-    <div class="container-fluid">
-        <div class="navbar-header">
-            <a class="navbar-brand" href="#">Movie Sales</a>
+{% extends "base.html" %}
+
+{% block cssfile %}<link href="static/css/register.css" rel="stylesheet">{% endblock %}
+
+{% block body %}
+    <nav class="navbar navbar-default register-nav" role="navigation">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#">Movie Sales</a>
+            </div>
+            <div>
+                <ul class="nav navbar-nav">
+                    <li ><a href="/index">Manage</a></li>
+                </ul>
+            </div>
         </div>
-        <div>
-            <ul class="nav navbar-nav">
-                <li ><a href="/index">Manage</a></li>
-            </ul>
-        </div>
-    </div>
-</nav>
+    </nav>
 
-
-
-<div class="container register-form">
-    <div class="row">
-        <div class="registeration">
-            <h1>Sign Up</h1>
-            <form action="" method="post" novalidate>
-                {{ form.hidden_tag() }}
-                <p>
-                    {{ form.username.label }}<br>
-                    {{ form.username(size=32) }}<br>
-                    {% for error in form.username.errors %}
-                        <span style="color: red;">[{{ error }}]</span>
-                    {% endfor %}
-                </p>
-                <p>
-                    {{ form.password.label }}<br>
-                    {{ form.password(size=32) }}<br>
-                    {% for error in form.password.errors %}
-                        <span style="color: red;">[{{ error }}]</span>
-                    {% endfor %}
-                </p>
-                <p>
-                    {{ form.password2.label }}<br>
-                    {{ form.password2(size=32) }}<br>
-                    {% for error in form.password2.errors %}
-                        <span style="color: red;">[{{ error }}]</span>
-                    {% endfor %}
-                </p>
-                <p>
-                    {{ form.name.label }}<br>
-                    {{ form.name(size=32) }}<br>
-                    {% for error in form.name.errors %}
-                        <span style="color: red;">[{{ error }}]</span>
-                    {% endfor %}
-                </p>
-                <p>
-                    {{ form.email.label }}<br>
-                    {{ form.email(size=32) }}<br>
-                    {% for error in form.email.errors %}
-                        <span style="color: red;">[{{ error }}]</span>
-                    {% endfor %}
-                </p>
-                <p>
-                    {{ form.phone_number.label }}<br>
-                    {{ form.phone_number(size=32) }}<br>
-                    {% for error in form.phone_number.errors %}
-                        <span style="color: red;">[{{ error }}]</span>
-                    {% endfor %}
-                </p>
-                <br>
-                <p><h4>{{ form.submit() }}<h4></p>
-            </form>
+    <div class="container register-form">
+        <div class="row">
+            <div class="registeration">
+                <h1>Sign Up</h1>
+                <form action="" method="post" novalidate>
+                    {{ form.hidden_tag() }}
+                    <p>
+                        {{ form.username.label }}<br>
+                        {{ form.username(size=32) }}<br>
+                        {% for error in form.username.errors %}
+                            <span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
+                    </p>
+                    <p>
+                        {{ form.password.label }}<br>
+                        {{ form.password(size=32) }}<br>
+                        {% for error in form.password.errors %}
+                            <span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
+                    </p>
+                    <p>
+                        {{ form.password2.label }}<br>
+                        {{ form.password2(size=32) }}<br>
+                        {% for error in form.password2.errors %}
+                            <span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
+                    </p>
+                    <p>
+                        {{ form.name.label }}<br>
+                        {{ form.name(size=32) }}<br>
+                        {% for error in form.name.errors %}
+                            <span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
+                    </p>
+                    <p>
+                        {{ form.email.label }}<br>
+                        {{ form.email(size=32) }}<br>
+                        {% for error in form.email.errors %}
+                            <span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
+                    </p>
+                    <p>
+                        {{ form.phone_number.label }}<br>
+                        {{ form.phone_number(size=32) }}<br>
+                        {% for error in form.phone_number.errors %}
+                            <span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
+                    </p>
+                    <br>
+                    <p><h4>{{ form.submit() }}<h4></p>
+                </form>
+            </div>
         </div>
     </div>
-</div>
-</body>
-</html>
+{% endblock %}

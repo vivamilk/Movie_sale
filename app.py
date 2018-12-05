@@ -1,17 +1,21 @@
 import random
 import sqlite3
-from flask import Flask, render_template, redirect, url_for, flash
+from flask import Flask, render_template, redirect, url_for, flash, request
+from werkzeug.urls import url_parse
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import current_user, login_user, logout_user, login_required, LoginManager, UserMixin
 from config import Config
 from form import LoginForm, RegistrationForm
 from functools import wraps
+import datetime
+from copy import copy
 
 
 app = Flask(__name__)
 app.config.from_object(Config)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
+context_base = {'current_year': datetime.date.today().year}
 
 
 def roles_accepted(*roles):
@@ -23,16 +27,16 @@ def roles_accepted(*roles):
             return 'Create Post'
     The current user must have either the `editor` role or `author` role in
     order to view the page.
-    :param args: The possible roles.
+    :param roles: The possible roles.
     """
     def wrapper(func):
         @wraps(func)
         def decorated_view(*args, **kwargs):
             if not current_user.is_authenticated:
                 return login_manager.unauthorized()
-            elif current_user.type in roles:
-                # TODO return to previous page if login but don't have role
-                return login_manager.unauthorized()
+            elif current_user.type not in roles:
+                flash("Sorry, You do not have the permission to view this page. Return to homepage.")
+                return redirect(url_for('index'))
             return func(*args, **kwargs)
         return decorated_view
     return wrapper
@@ -41,35 +45,81 @@ def roles_accepted(*roles):
 @app.route('/index')
 @app.route('/')
 def index():
-    return render_template('index.html', home=True)
+    content = copy(context_base)
+    content['home'] = True
+    return render_template('index.html', **content)
 
 
 @app.route('/test')
 @roles_accepted('senior_manager')
 def test():
-    return render_template('test.html')
+    content = copy(context_base)
+    return render_template('test.html', **content)
 
 
 @app.route('/shopping')
 def get_shopping_data():
-    movie = []
+    content = copy(context_base)
+
+    # get keywords
+    search_term = request.args.get('search_term')
+    sort_by = request.args.get('sort_by')
+    is_descent = request.args.get('order') == 'True'
+    if is_descent:
+        ordered = 'DESC'
+    else:
+        ordered = ''
+
+    # select movies from db
     with sqlite3.connect('database.db') as conn:
         cur = conn.cursor()
-        cur.execute('select movieID, title from movie limit 20')
-        data = cur.fetchall()
+        if search_term:
+            # TODO sorting on searched items
+            cur.execute('''
+            select M.movieID, M.title, S.salePrice
+            from movie M
+            join stock S
+            where M.movieID=S.movieID and title like '%{}%' and S.storeID=1
+            limit 20
+            '''.format(search_term))
+            data = cur.fetchall()
+        elif sort_by:
+            cur.execute('''
+            select M.movieID, M.title, S.salePrice
+            from movie M
+            join stock S
+            where M.movieID=S.movieID and S.storeID=1
+            order by M.{} {}
+            limit 20
+            '''.format(sort_by, ordered))
+            data = cur.fetchall()
+        else:
+            # TODO show result from different stores
+            cur.execute('''
+            select M.movieID, M.title, S.salePrice
+            from movie M
+            join stock S
+            where M.movieID=S.movieID and S.storeID=1
+            limit 20
+            ''')
+            data = cur.fetchall()
 
+    movie = []
     for select_data in data:
-        movieID, title = select_data
-        # TODO Here use random data / Join table to get data instead
-        price = random.randint(3, 20)
+        movieID, title, price = select_data
         movie.append({'id': str(movieID), 'title': title, 'price': price})
 
-    return render_template('shopping.html', images=movie, home=True)
+    content['images'] = movie
+    content['home'] = True
+    content['order'] = not is_descent
+    return render_template('shopping.html', **content)
 
 
 @app.route('/manager')
 @roles_accepted('manager', 'senior_manager')
 def manage_data():
+    content = copy(context_base)
+
     # Here to fetch the data
     movie = []
     with sqlite3.connect('database.db') as conn:
@@ -84,29 +134,40 @@ def manage_data():
         price = random.randint(3, 20)
         cost = price - random.randint(0, 3)
         movie.append({'id': str(movieID), 'name': title, 'price': price, 'cost': cost, 'inventory':stock})
-    return render_template('admin.html', movies=movie, home=True)
+
+    content['movies'] = movie
+    content['home'] = True
+    return render_template('admin.html', **content)
 
 
 @app.route('/list')
 # TODO User Login -> List Movie / Admin Login -> Manger Movie
 def list_movie():
+    content = copy(context_base)
+
     movie = []
     with sqlite3.connect('database.db') as conn:
         cur = conn.cursor()
-        cur.execute('select movieID, imdbID, title, year, rating from movie')
+        # TODO show result from different stores
+        cur.execute('''
+        select M.movieID, M.imdbID, M.title, M.year, M.rating, S.stockAmount, S.salePrice
+        from movie M, stock S
+        where M.movieID=S.movieID and S.storeID=1
+        ''')
         data = cur.fetchall()
     for select_data in data:
-        movieID, imdbID, title, year, rating = select_data
-        # TODO Here use random data / Join table to get data instead
-        stock = random.randint(4, 10)
-        price = random.randint(3, 20)
+        movieID, imdbID, title, year, rating, stock, price = select_data
         movie.append({'id': movieID, 'imdbid': imdbID, 'title': title, 'year': year,
-                       'rating': rating, 'stock': stock, 'price': price})
-    return render_template('list_metadata.html', movies=movie, home=True)
+                      'rating': rating, 'stock': stock, 'price': price})
+    content['movies'] = movie
+    content['home'] = True
+    return render_template('list_metadata.html', **content)
 
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    content = copy(context_base)
+
     if current_user.is_authenticated:
         return redirect(url_for('index'))
 
@@ -118,19 +179,28 @@ def login():
             return redirect(url_for('login'))
         else:
             login_user(user, remember=form.remember_me.data)
-            return redirect(url_for('index'))
-    return render_template('login.html', title='Sign In', form=form)
+            next_page = request.args.get('next')
+            if not next_page or url_parse(next_page).netloc != '':
+                next_page = url_for('index')
+            return redirect(next_page)
+
+    content['title'] = 'Sign In'
+    content['form'] = form
+    return render_template('login.html', **content)
 
 
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
+    flash("Logout Successfully!")
     return redirect(url_for('index'))
 
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    content = copy(context_base)
+
     if current_user.is_authenticated:
         return redirect(url_for('index'))
 
@@ -139,7 +209,18 @@ def register():
         User().new_user(form.username.data, form.name.data, form.password.data, 'customer', form.email.data, form.phone_number.data)
         flash('Congratulations, you are now a registered user!')
         return redirect(url_for('login'))
-    return render_template('register.html', title='Register', form=form)
+
+    content['title'] = 'Register'
+    content['form'] = form
+    return render_template('register.html', **content)
+
+
+@app.route("/receipt")
+@roles_accepted('customer')
+def receipt():
+    """Function to display receipt after purchase"""
+    content = copy(context_base)
+    return render_template("receipt.html", **content)
 
 
 # login utility functions
@@ -183,22 +264,22 @@ class User(UserMixin):
         with sqlite3.connect('database.db') as conn:
             cur = conn.cursor()
             cur.execute('select username, password, is_manager from users where userID=?', (user_id,))
-            username, password, is_manager = cur.fetchone()
-            if username is None:
+            result = cur.fetchone()
+            if result is None:
                 return None
             else:
-                return self._get_user_info(user_id, username, password, is_manager)
+                return self._get_user_info(user_id, result[0], result[1], result[2])
 
     def query_by_username(self, username):
         # connect to database
         with sqlite3.connect('database.db') as conn:
             cur = conn.cursor()
             cur.execute('select userID, password, is_manager from users where username=?', (username,))
-            user_id, password, is_manager = cur.fetchone()
-            if password is None:
+            result = cur.fetchone()
+            if result is None:
                 return None
             else:
-                return self._get_user_info(user_id, username, password, is_manager)
+                return self._get_user_info(result[0], username, result[1], result[2])
 
     def check_password(self, password):
         return check_password_hash(self.password, password)

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>
+        {% if not title %}Movie World{% endif %}
+        {{ title }}
+    </title>
+    <link href="static/css/bootstrap.css" rel="stylesheet">
+    {% block cssfile %}{% endblock %}
+</head>
+<body>
+
+{% block body %}{% endblock %}
+
+{% block footer %}{% endblock %}
+
+{% for message in get_flashed_messages() %}
+    <script>
+        alert("{{ message }}");
+    </script>
+{% endfor %}
+
+</body>
+</html>

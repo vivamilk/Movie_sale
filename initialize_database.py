@@ -174,8 +174,8 @@ if __name__ == '__main__':
         for record in reader:
             movie_data = [
                 record['Media ID'],
-                record['Title'],
-                record['Summary'],
+                record['Title'].replace('\n', ' '),
+                record['Summary'].replace('\n', ' '),
                 record['Year'],
                 record['Content Rating'],
                 record['Rating'],
