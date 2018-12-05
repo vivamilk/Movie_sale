@@ -1,11 +1,7 @@
 import random
 import sqlite3
-<<<<<<< Updated upstream
-from flask import Flask, render_template, redirect, url_for, flash, request
 from werkzeug.urls import url_parse
-=======
 from flask import Flask, render_template, redirect, url_for, flash, jsonify, request
->>>>>>> Stashed changes
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import current_user, login_user, logout_user, login_required, LoginManager, UserMixin
 from config import Config
