@@ -210,6 +210,8 @@ def list_movie():
     content['home'] = True
     return render_template('list_metadata.html', **content)
 
+@app.route('')
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -234,6 +236,12 @@ def login():
     content['title'] = 'Sign In'
     content['form'] = form
     return render_template('login.html', **content)
+
+
+@app.route('/shopping/count_item', methods=['GET', 'POST'])
+def count_item_in_cart():
+    # TODO return some information about current shopping cart / Need Virtual Data
+    return "5"
 
 
 @app.route('/logout')

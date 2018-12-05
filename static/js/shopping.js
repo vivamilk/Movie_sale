@@ -12,29 +12,24 @@ $(document).ready(function () {
             type:"POST",
             data: JSON.stringify({'number':1}),
             success: function(response) {
-            console.log(response);
+                console.log(response);
+                count_item()
             },
             error: function(error) {
                 console.log(error);
             }
         });
     });
-
-    //
-    // $("button#3").click(function () {
-    //     $.ajax({
-    //         url: '/shopping/3',
-    //         contentType: "application/json; charset=utf-8",
-    //         type:"POST",
-    //         data: JSON.stringify({'number':1}),
-    //         success: function(response) {
-    //         console.log(response);
-    //         },
-    //         error: function(error) {
-    //             console.log(error);
-    //         }
-    //     });
-    // });
-})
+    count_item();
+    function count_item(){
+        $.ajax({
+            url: '/shopping/count_item',
+            success: function(data){
+                console.log(data);
+                $('.badge').html(data);
+            }
+        });
+    }
+});
 // span class = badge  press the button will increase the number of badge
 //
