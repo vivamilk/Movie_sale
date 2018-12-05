@@ -26,20 +26,13 @@
                             <input type="hidden" name="cmd" value="_cart">
                             <input type="hidden" name="add" value="1">
                             <!-- Specify details about the item that buyers will purchase. -->
-                            <input type="hidden" name="item_name" value="Birthday - Cake and Candle">
-                            <input type="hidden" name="amount" value="3.95">
+                            <input type="hidden" name="item_name" value="{{ img.title }}">
+                            <input type="hidden" name="amount" value="{{ img.price }}">
                             <input type="hidden" name="currency_code" value="USD">
                             <!-- Display the payment button. -->
                             <input type="image" src="https://www.sandbox.paypal.com/en_US/i/btn/btn_cart_LG.gif" name="submit" alt="PayPal - The safer, easier way to pay online!">
                             <img alt="" border="0" src="https://www.sandbox.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1">
                         </form>
-
-{#                        <form target="paypal" action="https://www.sandbox.paypal.com/cgi-bin/webscr" method="post">#}
-{#                            <input type="hidden" name="cmd" value="_s-xclick">#}
-{#                            <input type="hidden" name="hosted_button_id" value="DZFVCLFR4P29N">#}
-{#                            <input type="image" src="https://www.sandbox.paypal.com/en_US/i/btn/btn_cart_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">#}
-{#                            <img alt="" border="0" src="https://www.sandbox.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1">#}
-{#                        </form>#}
 
 {#                        <button type="button" class="btn btn-primary" id={{ img.id }}>ADD TO CART</button>#}
                     </div>
