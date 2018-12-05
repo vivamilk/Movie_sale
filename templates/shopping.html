@@ -24,10 +24,15 @@
                             <input type="hidden" name="business" value="YS7BL7A8J8N9E">
                             <!-- Specify a PayPal Shopping Cart Add to Cart button. -->
                             <input type="hidden" name="cmd" value="_cart">
-                            <input type="hidden" name="add" value="1">
+                            <input type="hidden" name="upload" value="1">
                             <!-- Specify details about the item that buyers will purchase. -->
-                            <input type="hidden" name="item_name" value="{{ img.title }}">
-                            <input type="hidden" name="amount" value="{{ img.price }}">
+                            <input type="hidden" name="item_number_1" value="{{ img.id }}">
+                            <input type="hidden" name="item_name_1" value="{{ img.title }}">
+                            <input type="hidden" name="amount_1" value="{{ img.price }}">
+                            <input type="hidden" name="quantity_1" value="{{ 3 }}">
+                            <input type="hidden" name="tax_rate_1" value="{{ 7 }}">
+                            <input type="hidden" name="no_shipping" value="1">
+                            <input type="hidden" name="return" value="http://127.0.0.1:5000/shopping">
                             <input type="hidden" name="currency_code" value="USD">
                             <!-- Display the payment button. -->
                             <input type="image" src="https://www.sandbox.paypal.com/en_US/i/btn/btn_cart_LG.gif" name="submit" alt="PayPal - The safer, easier way to pay online!">
