@@ -6,7 +6,8 @@
         {% if not title %}Movie World{% endif %}
         {{ title }}
     </title>
-    <link href="static/css/bootstrap.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/bootstrap.css') }}" rel="stylesheet">
+    <script src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}"></script>
     {% block cssfile %}{% endblock %}
 </head>
 <body>

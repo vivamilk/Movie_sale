@@ -1,7 +1,7 @@
 import random
 import sqlite3
-from werkzeug.urls import url_parse
 from flask import Flask, render_template, redirect, url_for, flash, jsonify, request
+from werkzeug.urls import url_parse
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import current_user, login_user, logout_user, login_required, LoginManager, UserMixin
 from config import Config
@@ -94,6 +94,7 @@ def get_new_item(page_id):
 
     return render_template('shopping.html', images=movie, home=True)
 
+
 @app.route('/shopping/<int:product_id>', methods=['GET', 'POST'])
 def add_item_to_session(product_id):
     # TEST WHETHER IT WILL WORK
@@ -101,6 +102,7 @@ def add_item_to_session(product_id):
     print(product_id)
     print(json_data)
     return jsonify({"result": "IT WORKS WELL"})
+
 
 @app.route('/shopping')
 def get_shopping_data():
