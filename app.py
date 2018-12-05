@@ -1,7 +1,11 @@
 import random
 import sqlite3
+<<<<<<< Updated upstream
 from flask import Flask, render_template, redirect, url_for, flash, request
 from werkzeug.urls import url_parse
+=======
+from flask import Flask, render_template, redirect, url_for, flash, jsonify, request
+>>>>>>> Stashed changes
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import current_user, login_user, logout_user, login_required, LoginManager, UserMixin
 from config import Config
@@ -42,6 +46,27 @@ def roles_accepted(*roles):
     return wrapper
 
 
+@app.route('/todo/api/tasks/<int:task_id>', methods=['GET'])
+def get_objects(task_id):
+    tasks = [
+        {
+            'id': 1,
+            'title': 'Buy groceries',
+            'description': u'Milk, Cheese, Pizza, Fruit, Tylenol',
+            'done': False
+        },
+        {
+            'id': 2,
+            'title': 'Learn Python',
+            'description': u'Need to find a good Python tutorial on the web',
+            'done': False
+        }
+    ]
+    task = [task for task in tasks if task['id'] == task_id]
+
+    return jsonify({'tasks': task})
+
+
 @app.route('/index')
 @app.route('/')
 def index():
@@ -56,6 +81,30 @@ def test():
     content = copy(context_base)
     return render_template('test.html', **content)
 
+
+@app.route('/shopping/page=<int:page_id>', methods=['GET'])
+def get_new_item(page_id):
+    movie = []
+    with sqlite3.connect('database.db') as conn:
+        cur = conn.cursor()
+        cur.execute('select movieID, title from movie limit 20')
+        data = cur.fetchall()
+
+    for select_data in data:
+        movieID, title = select_data
+        # TODO Here use random data / Join table to get data instead
+        price = random.randint(3, 20)
+        movie.append({'id': str(movieID), 'title': title, 'price': price})
+
+    return render_template('shopping.html', images=movie, home=True)
+
+@app.route('/shopping/<int:product_id>', methods=['GET', 'POST'])
+def add_item_to_session(product_id):
+    # TEST WHETHER IT WILL WORK
+    json_data = request.get_json()
+    print(product_id)
+    print(json_data)
+    return jsonify({"result": "IT WORKS WELL"})
 
 @app.route('/shopping')
 def get_shopping_data():
