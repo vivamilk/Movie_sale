@@ -1,7 +1,6 @@
 {% extends "base.html" %}
-
 {% block body %}
-    <nav class="navbar navbar-default" role="navigation">
+    <nav class="navbar navbar-default running-nav" role="navigation">
         <div class="container-fluid">
             <div class="navbar-header">
                 <a class="navbar-brand" href="#">Movie Sales</a>
@@ -15,7 +14,8 @@
                     {% endif %}
                 </ul>
                 {% if home %}
-                    <ul class="nav navbar-nav navbar-right">
+                    <ul class="nav navbar-nav navbar-right running-nav-right" style="width:70%">
+
                         <div class="col-sm-3">
                             <form class="navbar-form">
                                 <div class="input-group">
@@ -26,7 +26,8 @@
                                         <option value="contentRating">Content Rating</option>
                                     </select>
                                     <div class="input-group-btn">
-                                        <button class="btn btn-default" type="submit" value="{{ order }}" id="order" name="order">
+                                        <button class="btn btn-default" type="submit" value="{{ order }}" id="order"
+                                                name="order">
                                             {% if order %}
                                                 <i class="glyphicon glyphicon-sort-by-attributes"></i>
                                             {% else %}
@@ -54,13 +55,17 @@
                             <li><a href="login"><span class="glyphicon glyphicon-log-in"></span> Login </a></li>
                         {% else %}
                             {% if current_user.type == 'customer' %}
-                                <li><a target="paypal" href="https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_cart&business=YS7BL7A8J8N9E&display=1" class="dropdown-toggle" data-toggle="dropdown">
-                                <span class="glyphicon glyphicon-shopping-cart"></span> CART <span
-                                    class="badge">0</span>
+                                <li><a target="paypal"
+                                       href="https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_cart&business=YS7BL7A8J8N9E&display=1"
+                                       class="dropdown-toggle" data-toggle="dropdown">
+                                    <span class="glyphicon glyphicon-shopping-cart"></span> CART <span
+                                        class="badge">0</span>
                                 </a></li>
                             {% endif %}
-                            <li><a><span class="glyphicon glyphicon-user"></span> Hi, {{ current_user.username }} </a></li>
-                            <li><a href="{{ url_for('logout') }}"><span class="glyphicon glyphicon-log-out"></span> Logout
+                            <li><a><span class="glyphicon glyphicon-user"></span> Hi, {{ current_user.username }} </a>
+                            </li>
+                            <li><a href="{{ url_for('logout') }}"><span class="glyphicon glyphicon-log-out"></span>
+                                Logout
                             </a></li>
                         {% endif %}
                     </ul>

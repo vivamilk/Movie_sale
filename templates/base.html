@@ -1,14 +1,13 @@
 {% extends "template.html" %}
 
 {% block footer %}
-<div class="navbar navbar-default navbar-fixed-bottom">
+<footer>
     <div class="container-fluid">
-        <ul>
-            <li><a href="http://twitter.com/treehouse">Twitter</a></li>
-            <li><a href="https://www.facebook.com/TeamTreehouse">Facebook</a></li>
-        </ul>
-        <p>Sample Footer, Please Change</p>
-        <p>&copy;{{ current_year }} Movie World</p>
+        <div class="row">
+            <div class="col-md-12 text-center">
+                <strong>&copy;{{ current_year }} Movie World</strong>
+            </div>
+        </div>
     </div>
-</div>
+</footer>
 {% endblock %}
