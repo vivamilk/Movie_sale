@@ -13,9 +13,7 @@
                         <li class="active"><a href="list">VIEW ALL</a></li>
                     {% endif %}
                 </ul>
-                {% if home %}
-                    <ul class="nav navbar-nav navbar-right running-nav-right" style="width:70%">
-
+                    {% if search_bar %}
                         <div class="col-sm-8">
                             <form class="navbar-form">
                                 <div class="input-group">
@@ -47,10 +45,18 @@
                                 </div>
                             </form>
                         </div>
+                    {% endif %}
+                    <ul class="nav navbar-nav navbar-right running-nav-right" style="width:20%">
                         {% if current_user.is_anonymous %}
                             <li><a href="register"><span class="glyphicon glyphicon-user"></span> Sign Up </a></li>
                             <li><a href="login"><span class="glyphicon glyphicon-log-in"></span> Login </a></li>
                         {% else %}
+                            <li><a><span class="glyphicon glyphicon-user"></span> Hi, {{ current_user.username }} </a>
+                            </li>
+                            <li><a href="{{ url_for('logout') }}"><span class="glyphicon glyphicon-log-out"></span>
+                                Logout
+                            </a></li>
+
                             {% if current_user.type == 'customer' %}
                                 <li>
                                     <a class="dropdown-toggle" data-toggle="dropdown">
@@ -59,27 +65,14 @@
                                     <div id="shoppingcart-content" class="dropdown-menu scrollable-menu" role="menu">
                                         <div class="container" style="width:600px;color:black !important;">
                                             <div class="product_list">
-{#                                                <div class="row top-buffer">#}
-{#                                                    <div class="col-md-3 text-center"><h5>Poster</h5></div>#}
-{#                                                    <div class="col-md-2 text-center"><h5>Title</h5></div>#}
-{#                                                    <div class="col-md-2 text-center"><h5>Amount</h5></div>#}
-{#                                                    <div class="col-md-2 text-center"><h5>Price</h5></div>#}
-{#                                                    <div class="col-md-2 text-center"><h5>Subtotal</h5></div>#}
-{#                                                </div>#}
                                                 <div id="cart_product"></div>
                                             </div>
                                         </div>
                                     </div>
                                 </li>
                             {% endif %}
-                            <li><a><span class="glyphicon glyphicon-user"></span> Hi, {{ current_user.username }} </a>
-                            </li>
-                            <li><a href="{{ url_for('logout') }}"><span class="glyphicon glyphicon-log-out"></span>
-                                Logout
-                            </a></li>
                         {% endif %}
                     </ul>
-                {% endif %}
             </div>
         </div>
     </nav>

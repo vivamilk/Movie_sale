@@ -49,7 +49,6 @@ def roles_accepted(*roles):
 @app.route('/')
 def index():
     content = copy(context_base)
-    content['home'] = True
     return render_template('index.html', **content)
 
 
@@ -71,7 +70,6 @@ def shopping():
         movie.append({'id': str(movieID), 'title': title, 'price': price})
 
     content['images'] = movie
-    content['home'] = True
     return render_template('shopping.html', **content)
 
 
@@ -87,7 +85,6 @@ def manage_data():
         movie.append({'id': str(movie_id), 'name': title, 'price': price, 'cost': cost, 'inventory': stock})
 
     content['movies'] = movie
-    content['home'] = True
     return render_template('admin.html', **content)
 
 
@@ -107,7 +104,6 @@ def update_info():
 
 
 @app.route('/list')
-# TODO User Login -> List Movie / Admin Login -> Manger Movie
 def list_movie():
     # get movies from database
     data, content = get_movies_with_params('M.movieID, M.imdbID, M.title, M.year, M.rating, S.amount, S.salePrice')
@@ -118,7 +114,6 @@ def list_movie():
         movie.append({'id': movieID, 'imdbid': imdbID, 'title': title, 'year': year,
                       'rating': rating, 'stock': stock, 'price': price})
     content['movies'] = movie
-    content['home'] = True
     return render_template('list_metadata.html', **content)
 
 
@@ -137,12 +132,11 @@ def get_movies_with_params(movie_columns):
         ordered = 'DESC'
     else:
         ordered = ''
-    if search_term == 'None':
+    if not search_term:
         search_term = ""
-    if search_term:
-        search_sql = "and title like '%{}%' ".format(search_term)
-    else:
         search_sql = ""
+    else:
+        search_sql = "and title like '%{}%' ".format(search_term)
     if sort_by == 'price':
         sort_sql = "order by S.salePrice {}".format(ordered)
     elif sort_by:
@@ -159,7 +153,6 @@ def get_movies_with_params(movie_columns):
     join stock S
     where M.movieID=S.movieID {}and S.storeID=1
     {}
-    limit 20
     '''.format(movie_columns, search_sql, sort_sql))
     data = cur.fetchall()
     conn.close()
@@ -168,24 +161,25 @@ def get_movies_with_params(movie_columns):
     content['order'] = not is_descent
     content['sort_by'] = sort_by
     content['search_term'] = search_term
+    content['search_bar'] = True
     return data, content
 
 
-@app.route('/shopping/page=<int:page_id>', methods=['GET'])
-def get_new_item(page_id):
-    movie = []
-    conn, cur = connect2db(Config.database_path)
-    cur.execute('select movieID, title from movie limit 20')
-    data = cur.fetchall()
-    conn.close()
-
-    for select_data in data:
-        movieID, title = select_data
-        # TODO Here use random data / Join table to get data instead
-        price = random.randint(3, 20)
-        movie.append({'id': str(movieID), 'title': title, 'price': price})
-
-    return render_template('shopping.html', images=movie, home=True)
+# @app.route('/shopping/page=<int:page_id>', methods=['GET'])
+# def get_new_item(page_id):
+#     movie = []
+#     conn, cur = connect2db(Config.database_path)
+#     cur.execute('select movieID, title from movie limit 20')
+#     data = cur.fetchall()
+#     conn.close()
+#
+#     for select_data in data:
+#         movieID, title = select_data
+#         # TODO Here use random data / Join table to get data instead
+#         price = random.randint(3, 20)
+#         movie.append({'id': str(movieID), 'title': title, 'price': price})
+#
+#     return render_template('shopping.html', images=movie, home=True)
 
 
 def get_items():
@@ -290,11 +284,21 @@ def add_item_to_cart(movie_id):
 
 
 @app.route('/manage_customer')
+@roles_accepted('senior_manager', 'manager')
 def manager_all_customer():
-    # TODO Here to show all the customers
-    customer = [{'username': "test", 'name': 11, 'email':11, 'tele_number': 12},
-                {'username':11, 'name': 11, 'email':11, 'tele_number': 12}]
-    return render_template('manager_customer.html', customers=customer)
+    content = copy(context_base)
+    conn, cur = connect2db(Config.database_path)
+    cur.execute('select name, emailAddress, phoneNumber from customer')
+    customers = cur.fetchone()[0]
+    conn.close()
+    data = []
+    for customer in customers:
+        data.append({
+            'name': customer[0], 'email': customer, 'tele_number': customer[2]
+        })
+    content['customer'] = data
+    return render_template('manager_customer.html', **content)
+
 
 @app.route('/shopping/update?<int:movie_id>', methods=['POST'])
 @roles_accepted('customer')
@@ -359,9 +363,7 @@ def count_items_in_cart():
 def checkout_for_cart():
     records = get_items()
     if not records:
-        # TODO how to flash a window without template
-        flash("Your shopping cart is empty. Please add movies first.")
-        return redirect(url_for('shopping'))
+        return jsonify({"error": "Your shopping cart is empty. Please add movies first."})
     data = {
         'business': '9AK39BT347LLA',
         'cmd': '_cart',
