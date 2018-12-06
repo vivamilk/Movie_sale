@@ -4,32 +4,69 @@ function get_all_button() {
 
 $(document).ready(function () {
     let but = get_all_button();
-    $('.movie-list').delegate('button', "click", function(event){
+    $('.movie-list').delegate('button', "click", function (event) {
         var movie_id = this.id;
-         $.ajax({
+        $.ajax({
             url: '/shopping/' + movie_id,
             contentType: "application/json; charset=utf-8",
-            type:"POST",
-            data: JSON.stringify({'number':1}),
-            success: function(response) {
+            type: "POST",
+            data: JSON.stringify({'number': 1}),
+            success: function (response) {
                 console.log(response);
-                count_item()
+                count_item();
+                get_cart_item();
             },
-            error: function(error) {
+            error: function (error) {
                 console.log(error);
             }
         });
     });
     count_item();
-    function count_item(){
+
+    function count_item() {
         $.ajax({
             url: '/shopping/count_item',
-            success: function(data){
+            success: function (data) {
                 console.log(data);
                 $('.badge').html(data);
             }
         });
     }
+
+    function get_cart_item() {
+        $.ajax({
+            url: '/shopping/get_item',
+            success: function (data) {
+                $('#cart_product').empty();
+                let total = 0;
+                for (var keys in data) {
+                    var product_id = data[keys]['movieID'];
+                    var price = data[keys]['price'];
+                    var amount = data[keys]['amount'];
+                    var subtotal = parseFloat(price) * parseFloat(amount);
+                    subtotal = subtotal.toFixed(2);
+                    total += subtotal;
+                    let item = `
+                        <div class="row top-buffer">
+                            <div class="col-md-3"><img class="img-responsive" src="/static/posters/${product_id}.jpg/"/>
+                        </div>
+                        <div class="col-md-2 text-center">
+                            <h5>Movie_name</h5>
+                        </div>
+                        <div class="col-md-2 text-center"><h5>${amount}</h5></div>
+                        <div class="col-md-2 text-center"><h5>${price}</h5></div>
+                        <div class="col-md-3 text-center"><h5>${subtotal}</h5></div>
+                       </div>
+                    `;
+                    $('#cart_product').append(item);
+                }
+                    total = total.toFixed(2);
+                    var button_item =  `<div class="row top-buffer text-right"><hr>
+                                    <div class="col-md-9"><h5>Total Price: ${total}</h5></div>
+                                    <div class="col-md-3"><button type="button" style="float:right;" class="btn btn-default">
+                                    Checkout</button></div>`
+                    $('#cart_product').append(button_item);
+            }
+        })
+    }
 });
-// span class = badge  press the button will increase the number of badge
-//

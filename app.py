@@ -96,12 +96,31 @@ def get_new_item(page_id):
     return render_template('shopping.html', images=movie, home=True)
 
 
-@app.route('/shopping/<int:product_id>', methods=['GET', 'POST'])
-def add_item_to_session(product_id):
-    # TODO In session add product
-    json_data = request.get_json()
-    print(product_id)
-    print(json_data)
+@app.route('/shopping/<int:movie_id>', methods=['GET', 'POST'])
+@roles_accepted('customer')
+def add_item_to_cart(movie_id):
+    response = request.get_json()
+    amount = response['number']
+    # TODO get store_id
+    # store_id = response['store_id']
+    store_id = 1
+
+    with sqlite3.connect('database.db') as conn:
+        cur = conn.cursor()
+
+        cur.execute('select customerID from customer where userID=?', (current_user.id,))
+        customer_id = cur.fetchone()[0]
+
+        # insert record into database.shopping_cart
+        cur.execute('select amount from shopping_cart where customerID=? and movieID=? and storeID=?', (customer_id, movie_id, store_id))
+        record = cur.fetchone()
+        if record is None:
+            cur.execute('insert into shopping_cart values (?,?,?,?)',
+                        (amount, customer_id, movie_id, store_id))
+        else:
+            cur.execute('update shopping_cart set amount=? where customerID=? and movieID=? and storeID=?',
+                        (record[0] + amount, customer_id, movie_id, store_id))
+        conn.commit()
     return jsonify({"result": "IT WORKS WELL"})
 
 
@@ -241,8 +260,38 @@ def count_item_in_cart():
     # TODO return some information about current shopping cart / Need Virtual Data
     return str(random.randint(3, 10))
 
+@app.route('/shopping/get_item', methods=['GET', 'POST'])
+@roles_accepted('customer')
+def get_item_in_cart():
+    # TODO get store_id
+    # response = request.get_json()
+    # store_id = response['store_id']
+    store_id = 1
 
-# @app.route('')
+    with sqlite3.connect('database.db') as conn:
+        cur = conn.cursor()
+
+        cur.execute('select customerID from customer where userID=?', (current_user.id,))
+        customer_id = cur.fetchone()[0]
+
+        # get items in the cart with their price
+        cur.execute('''
+        select Shop.amount, Shop.movieID, S.salePrice
+        from shopping_cart Shop
+        join stock S
+        where Shop.movieID=S.movieID and Shop.storeID=S.storeID and customerID=? and Shop.storeID=?
+        ''', (customer_id, store_id))
+        records = cur.fetchall()
+    json_data = []
+    for record in records:
+        json_data.append(
+            {'amount': record[0], 'movieID': record[1], 'price': record[2]}
+        )
+    return jsonify(json_data)
+
+@app.route('/checkout')
+def checkout_for_cart():
+    pass
 
 @app.route('/logout')
 @login_required
