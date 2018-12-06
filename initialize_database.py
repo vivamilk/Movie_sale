@@ -156,15 +156,14 @@ if __name__ == '__main__':
     cur.execute('''
     create table shopping_cart
     (
-    recordID    INTEGER
-      primary key autoincrement,
     amount      INTEGER(10) not null,
     customerID  INTEGER not null
       references customer,
     movieID     INTEGER not null
       references movie,
     storeID     INTEGER not null
-      references store
+      references store,
+    primary key (customerID, movieID, storeID)
     )
     ''')
 

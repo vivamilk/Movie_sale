@@ -51,12 +51,15 @@
                             <li><a href="login"><span class="glyphicon glyphicon-log-in"></span> Login </a></li>
                         {% else %}
                             {% if current_user.type == 'customer' %}
-                                <li><a target="paypal"
-                                       href="https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_cart&business=9AK39BT347LLA&display=1"
-                                       class="dropdown-toggle" data-toggle="dropdown">
-                                    <span class="glyphicon glyphicon-shopping-cart"></span> CART <span
-                                        class="badge">0</span>
-                                </a></li>
+                                <li>
+                                    <div class="dropdown">
+                                        <a target="paypal"
+                                           href="https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_cart&business=9AK39BT347LLA&display=1"
+                                           class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <span class="glyphicon glyphicon-shopping-cart"></span> CART <span
+                                            class="badge">0</span></a>
+                                    </div>
+                                </li>
                             {% endif %}
                             <li><a><span class="glyphicon glyphicon-user"></span> Hi, {{ current_user.username }} </a>
                             </li>
