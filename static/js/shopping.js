@@ -48,7 +48,7 @@ $(document).ready(function () {
                     total += parseFloat(subtotal)
                     let item = `
                         <div class="row top-buffer">
-                            <div class="col-md-3 product"><img class="img-responsive" src="/static/posters/${product_id}.jpg/"/>
+                            <div class="col-md-3" id=${product_id}><img class="img-responsive" src="/static/posters/${product_id}.jpg/"/>
                         </div>
                         <div class="col-md-2 text-center">
                             <h5>Movie_name</h5>
@@ -72,28 +72,7 @@ $(document).ready(function () {
     }
     function send_checkout(){
         $('#co').click(function(){
-            // # TODO IF use the delegata will work?
-            var shopping_items = $('#cart_product').children();
-            var product_id=[];
-            var price = [];
-            var amount = [];
-            name.push('sulfikar');
-            age.push('24');
-            var ent={};
-            for(var i=0; i<shopping_items.length; i++)
-            {
-                ent.name=name[i];
-                ent.age=age[i];
-            }
-            JSON.Stringify(ent);
-            $.ajax({
-                'contentType': "application/json; charset=utf-8",
-                'type': "POST",
-                'data': JSON.stringify({'number': 1}),
-                'success': function (response) {
-
-                },
-            })
+            window.location.href = "/checkout";
         })
     }
 });
