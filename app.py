@@ -276,6 +276,13 @@ def add_item_to_cart(movie_id):
     return jsonify({"operation": "add item", "movieID": movie_id, "amount": amount})
 
 
+@app.route('/manage_customer')
+def manager_all_customer():
+    # TODO Here to show all the customers
+    customer = [{'username': "test", 'name': 11, 'email':11, 'tele_number': 12},
+                {'username':11, 'name': 11, 'email':11, 'tele_number': 12}]
+    return render_template('manager_customer.html', customers=customer)
+
 @app.route('/shopping/update?<int:movie_id>', methods=['POST'])
 @roles_accepted('customer')
 def update_item_in_cart(movie_id):
