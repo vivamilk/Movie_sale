@@ -269,37 +269,22 @@ def register():
     return render_template('register.html', **content)
 
 
-@app.route("/receipt/<string:status>")
+@app.route("/receipt/<status>")
 @roles_accepted('customer')
 def receipt(status):
     """Function to display receipt after purchase"""
     content = copy(context_base)
-    transaction_id, status = status[1:-1].split("&")
+    transaction_id, status = status.split("&")
     content['transaction_id'] = transaction_id
     content['status'] = status
-
-    # if transaction_id:
-    #     # flash("Success!")
-    #     # return redirect('/receipt')
-    #     data = {
-    #         'cmd': '_notify-synch',
-    #         'tx': transaction_id,
-    #         'at': 'Rs8M8Q-rndgOUSnWmGaYxR76aPnZSrWX8P3oWNivJ0TLN2hKthF8cu65Rwa'
-    #     }
-    #     responce = requests.post(
-    #         "https://www.sandbox.paypal.com/cgi-bin/webscr", data=data).text
-    #     if responce.startswith('SUCCESS'):
-    #         flash("Success!")
-    #         return redirect('/receipt')
-    #     else:
-    #         flash("Something wrong with your purchase, please contact PayPal for more information.")
-    # else:
-    #     return redirect('/shopping')
     return render_template("receipt.html", **content)
 
 
 @app.route('/listener')
 def listener():
+    """
+    Validate transaction status from PayPal, and insert transaction record into database.
+    """
     transaction_id = request.args.get('tx')
     data = {
         'cmd': '_notify-synch',
@@ -310,10 +295,10 @@ def listener():
         "https://www.sandbox.paypal.com/cgi-bin/webscr", data=data).text
     if response.startswith('SUCCESS'):
         flash("Success!")
-        return redirect('/receipt/<{}&{}>'.format(transaction_id, 'success'))
+        return redirect('/receipt/{}&{}'.format(transaction_id, 'success'))
     else:
         flash("Something wrong with your purchase, please contact PayPal for more information.")
-        return redirect('/receipt/<{}&{}>'.format(transaction_id, 'fail'))
+        return redirect('/receipt/{}&{}'.format(transaction_id, 'fail'))
 
 
 # login utility functions

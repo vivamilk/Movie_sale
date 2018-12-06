@@ -2,6 +2,8 @@ import sqlite3
 import csv
 import random
 import datetime
+from config import Config
+import os
 
 
 def imdb_link_to_imdb_id(link: str):
@@ -28,8 +30,12 @@ def genres_to_list(genres: str):
 
 
 if __name__ == '__main__':
+    # delete db file if exist
+    if os.path.isfile(Config.database_path):
+        os.remove(Config.database_path)
+
     # connect to database
-    conn = sqlite3.connect('database.db')
+    conn = sqlite3.connect(Config.database_path)
     cur = conn.cursor()
 
     # create tables
@@ -147,6 +153,21 @@ if __name__ == '__main__':
     )
     ''')
 
+    cur.execute('''
+    create table shopping_cart
+    (
+    recordID    INTEGER
+      primary key autoincrement,
+    amount      INTEGER(10) not null,
+    customerID  INTEGER not null
+      references customer,
+    movieID     INTEGER not null
+      references movie,
+    storeID     INTEGER not null
+      references store
+    )
+    ''')
+
     # sample customer data
     cur.execute('insert into users values (?,?,?,?)',
                 (1, 'test', 'pbkdf2:sha256:50000$Eh6bXq9p$f1d73e42b410a6ab463cc597ecaece0ed2de5253f9a87835416c732b0a74981e', False))
@@ -204,15 +225,15 @@ if __name__ == '__main__':
     # sample transactions
     dt = datetime.datetime.now() + datetime.timedelta(-100)
     cur.execute('insert into transactions values (?,?,?,?,?,?,?)',
-                (None, 1, dt.strftime("%Y-%m-%d %H:%M:%S"), 1, '89U78003ES8880109', 4, 1))
+                (None, 1, dt.strftime("%Y-%m-%d %H:%M:%S"), '89U78003ES8880109', 1, 4, 1))
     dt = datetime.datetime.now() + datetime.timedelta(-90)
     cur.execute('insert into transactions values (?,?,?,?,?,?,?)',
-                (None, 2, dt.strftime("%Y-%m-%d %H:%M:%S"), 1, '59U48003ES8850109', 5, 1))
+                (None, 2, dt.strftime("%Y-%m-%d %H:%M:%S"), '89U78003ES8880109', 1, 5, 1))
     dt = datetime.datetime.now() + datetime.timedelta(-80)
     cur.execute('insert into transactions values (?,?,?,?,?,?,?)',
-                (None, 2, dt.strftime("%Y-%m-%d %H:%M:%S"), 1, '45U78043ES4578010', 6, 2))
+                (None, 2, dt.strftime("%Y-%m-%d %H:%M:%S"), '45U78043ES4578010', 1, 6, 2))
     dt = datetime.datetime.now() + datetime.timedelta(-70)
     cur.execute('insert into transactions values (?,?,?,?,?,?,?)',
-                (None, 1, dt.strftime("%Y-%m-%d %H:%M:%S"), 1, '15U34504ES4546097', 7, 2))
+                (None, 1, dt.strftime("%Y-%m-%d %H:%M:%S"), '15U34504ES4546097', 1, 7, 2))
     conn.commit()
     conn.close()
