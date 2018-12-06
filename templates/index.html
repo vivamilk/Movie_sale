@@ -54,9 +54,13 @@
                                 <li><a target="paypal"
                                        href="https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_cart&business=9AK39BT347LLA&display=1"
                                        class="dropdown-toggle" data-toggle="dropdown">
-                                    <span class="glyphicon glyphicon-shopping-cart"></span> CART <span
-                                        class="badge">0</span>
-                                </a></li>
+                                    <span class="glyphicon glyphicon-shopping-cart"></span> CART <span class="badge">0</span>
+
+                                   </a>
+                                    <button onclick="popupYear()">test</button>
+                                    <div id="shoppingcart-content" class="dropdown-menu scrollable-menu" role="menu">
+                                    </div>
+                                </li>
                             {% endif %}
                             <li><a><span class="glyphicon glyphicon-user"></span> Hi, {{ current_user.username }} </a>
                             </li>

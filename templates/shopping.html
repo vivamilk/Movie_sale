@@ -18,26 +18,7 @@
                         <img src="{{url_for('static', filename='posters/' + img.id + '.jpg')}}">
                         <span class="highlight-price"><h5>${{ img.price }}</h5></span>
                         <h5>{{ img.title }}</h5>
-
-                        <form target="paypal" action="https://www.sandbox.paypal.com/cgi-bin/webscr" method="post">
-                            <!-- Identify your business so that you can collect the payments. -->
-                            <input type="hidden" name="business" value="9AK39BT347LLA">
-                            <!-- Specify a PayPal Shopping Cart Add to Cart button. -->
-                            <input type="hidden" name="cmd" value="_cart">
-                            <input type="hidden" name="upload" value="1">
-                            <!-- Specify details about the item that buyers will purchase. -->
-                            <input type="hidden" name="item_number_1" value="{{ img.id }}">
-                            <input type="hidden" name="item_name_1" value="{{ img.title }}">
-                            <input type="hidden" name="amount_1" value="{{ img.price }}">
-                            <input type="hidden" name="quantity_1" value="{{ 3 }}">
-                            <input type="hidden" name="tax_rate_1" value="{{ 7 }}">
-                            <input type="hidden" name="no_shipping" value="1">
-                            <input type="hidden" name="currency_code" value="USD">
-                            <!-- Display the payment button. -->
-                            <input id="{{ img.id }}" type="image" src="https://www.sandbox.paypal.com/en_US/i/btn/btn_cart_LG.gif" name="submit" alt="PayPal - The safer, easier way to pay online!">
-                            <img alt="" border="0" src="https://www.sandbox.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1">
-                        </form>
-{#                        <button type="button" class="btn btn-primary" id={{ img.id }}>ADD TO CART</button>#}
+                        <button type="button" class="btn btn-primary" id={{ img.id }}>ADD TO CART</button>
                     </div>
                 </div>
             {% endfor %}

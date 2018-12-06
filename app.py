@@ -98,7 +98,7 @@ def get_new_item(page_id):
 
 @app.route('/shopping/<int:product_id>', methods=['GET', 'POST'])
 def add_item_to_session(product_id):
-    # TEST WHETHER IT WILL WORK
+    # TODO In session add product
     json_data = request.get_json()
     print(product_id)
     print(json_data)
@@ -211,7 +211,6 @@ def list_movie():
     content['home'] = True
     return render_template('list_metadata.html', **content)
 
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     content = copy(context_base)
@@ -240,8 +239,10 @@ def login():
 @app.route('/shopping/count_item', methods=['GET', 'POST'])
 def count_item_in_cart():
     # TODO return some information about current shopping cart / Need Virtual Data
-    return "5"
+    return str(random.randint(3, 10))
 
+
+# @app.route('')
 
 @app.route('/logout')
 @login_required
