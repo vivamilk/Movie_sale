@@ -352,7 +352,6 @@ def list_movie():
     content['home'] = True
     return render_template('list_metadata.html', **content)
 
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     content = copy(context_base)
@@ -381,8 +380,12 @@ def login():
 @app.route('/shopping/count_item', methods=['GET', 'POST'])
 def count_item_in_cart():
     # TODO return some information about current shopping cart / Need Virtual Data
+    return str(random.randint(3, 10))
 
-    return "5"
+
+@app.route('/checkout')
+def checkout_for_cart():
+    pass
 
 
 @app.route('/logout')
