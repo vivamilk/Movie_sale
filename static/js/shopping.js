@@ -3,19 +3,25 @@ function get_all_button() {
 }
 
 function StandardPost(args)
-    {
-        var form = $("<form target='paypal' method='post'></form>"), input;
-        form.attr({"action":"https://www.sandbox.paypal.com/cgi-bin/webscr"});
-        for (arg in args)
+    {   if ( "error" in args)
         {
-            input = $("<input type='hidden'>");
-            input.attr({"name":arg});
-            input.val(args[arg]);
-            form.append(input);
+            alert(args["error"]);
         }
-        form.appendTo(document.body);
-        form.submit();
-        document.body.removeChild(form[0]);
+        else
+        {
+            var form = $("<form target='paypal' method='post'></form>"), input;
+            form.attr({"action":"https://www.sandbox.paypal.com/cgi-bin/webscr"});
+            for (arg in args)
+            {
+                input = $("<input type='hidden'>");
+                input.attr({"name":arg});
+                input.val(args[arg]);
+                form.append(input);
+            }
+            form.appendTo(document.body);
+            form.submit();
+            document.body.removeChild(form[0]);
+        }
     }
 
 $(document).ready(function () {
