@@ -1,0 +1,79 @@
+{% extends "index.html" %}
+
+{% block cssfile %}
+    <link href="{{ url_for('static', filename='css/shopping.css') }}" rel="stylesheet">
+    <script src="{{ url_for('static', filename='js/shopping.js') }}"></script>
+{% endblock %}
+{% block content %}
+    <div class="container">
+        <form>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <select class="form-control" name="month_from">
+                        <option value="January">January</option>
+                        <option value="February">February</option>
+                        <option value="March">March</option>
+                        <option value="April">April</option>
+                        <option value="May">May</option>
+                        <option value="June">June</option>
+                        <option value="July">July</option>
+                        <option value="August">August</option>
+                        <option value="September">September</option>
+                        <option value="October">October</option>
+                        <option value="November">November</option>
+                        <option value="December">December</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-2">
+                <div class="form-group">
+                    <select class="form-control" name="month_from">
+                        <option value="January">January</option>
+                        <option value="February">February</option>
+                        <option value="March">March</option>
+                        <option value="April">April</option>
+                        <option value="May">May</option>
+                        <option value="June">June</option>
+                        <option value="July">July</option>
+                        <option value="August">August</option>
+                        <option value="September">September</option>
+                        <option value="October">October</option>
+                        <option value="November">November</option>
+                        <option value="December">December</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="form-group">
+                    <select class="form-control" name="movie_tpye">
+                        <option value="Adventure" class="option">Adventure</option>
+                        <option value="Sci-Fi" class="option">Sci-Fi</option>
+                        <option value="Comedy" class="option">Comedy</option>
+                        <option value="Action" class="option">Action</option>
+                        <option value="Crime" class="option">Crime</option>
+                        <option value="Action" class="option">Action</option>
+                        <option value="Crime" class="option">Crime</option>
+                        <option value="History" class="option">History</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <select class="form-control" name="result">
+                        <option value="Cost" class="option">Cost</option>
+                        <option value="Profile" class="option">Proifle</option>
+                        <option value="Sales-Number" class="option">Sales Number</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="input-group-btn">
+                    <button class="btn btn-default" type="submit" name="search_btn"><i
+                            class="glyphicon glyphicon-search"></i></button>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}

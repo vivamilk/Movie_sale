@@ -91,6 +91,21 @@ def manage_data():
     return render_template('admin.html', **content)
 
 
+@app.route('/stat')
+def get_stat_data():
+    # 销量成本利润
+    # 选择电影类型
+    # 按照时间
+    #
+    return render_template('stat.html')
+
+
+@app.route('/update')
+# @login_required
+def update_info():
+    return render_template('user_info_update.html')
+
+
 @app.route('/list')
 # TODO User Login -> List Movie / Admin Login -> Manger Movie
 def list_movie():
@@ -273,6 +288,13 @@ def add_item_to_cart(movie_id):
     conn.close()
     return jsonify({"operation": "add item", "movieID": movie_id, "amount": amount})
 
+
+@app.route('/manage_customer')
+def manager_all_customer():
+    # TODO Here to show all the customers
+    customer = [{'username': "test", 'name': 11, 'email':11, 'tele_number': 12},
+                {'username':11, 'name': 11, 'email':11, 'tele_number': 12}]
+    return render_template('manager_customer.html', customers=customer)
 
 @app.route('/shopping/update?<int:movie_id>', methods=['POST'])
 @roles_accepted('customer')
