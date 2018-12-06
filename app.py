@@ -91,9 +91,11 @@ def manage_data():
     return render_template('admin.html', **content)
 
 
-# @app.route()
-# @roles_accepted('manager', 'senior_manager')
-#
+@app.route('/update')
+# @login_required
+def update_info():
+    return render_template('user_info_update.html')
+
 
 @app.route('/list')
 # TODO User Login -> List Movie / Admin Login -> Manger Movie

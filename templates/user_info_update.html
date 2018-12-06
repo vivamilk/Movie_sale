@@ -1,10 +1,55 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "base.html" %}
+{% block cssfile %}
+    <link href="static/css/update.css" rel="stylesheet">
+{% endblock %}
+{% block body %}
+    <nav class="navbar navbar-default update-nav" role="navigation">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#">Movie Sales</a>
+            </div>
+            <div>
+                <ul class="nav navbar-nav">
+                    <li><a href="/index">Home</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="container update-form">
+            <div class="row">
+                <div class="update">
+                    <form action="http://127.0.0.1:5000/update" method="post" novalidate="">
+                        <input id="csrf_token" name="csrf_token" type="hidden"
+                               value="IjEwNTRlNWNlM2JiMjA4YmJkNWRlNGQ2MmVhMzUzNGVjODIwMDRhOTQi.DusPcA.ri-1Da3WTzaFIIUNcoaEqiDWnsM">
+                        <p>
+                            <label for="username">Username</label><br>
+                            <input id="username" name="username" required="" size="32" type="text" value=""><br>
+                        </p>
+                        <p>
+                            <label for="password">Password</label><br>
+                            <input id="password" name="password" required="" size="32" type="password" value=""><br>
+                        </p>
+                        <p>
+                            <label for="name">Name</label><br>
+                            <input id="name" name="name" required="" size="32" type="text" value=""><br>
+                        </p>
+                        <p>
+                            <label for="email">New E-mail</label><br>
+                            <input id="email" name="email" size="32" type="text" value=""><br>
+                        </p>
+                        <p>
+                            <label for="phone_number">New Phone Number</label><br>
+                            <input id="phone_number" name="phone_number" size="32" type="text" value=""><br>
+                        </p>
+                        <br>
+                        <p></p><h4><input id="submit" name="submit" type="submit" value="update"></h4>
+                        <h4><p></p>
 
-</body>
-</html>
+                        </h4>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
