@@ -91,6 +91,15 @@ def manage_data():
     return render_template('admin.html', **content)
 
 
+@app.route('/stat')
+def get_stat_data():
+    # 销量成本利润
+    # 选择电影类型
+    # 按照时间
+    #
+    return render_template('stat.html')
+
+
 @app.route('/update')
 # @login_required
 def update_info():
@@ -128,6 +137,8 @@ def get_movies_with_params(movie_columns):
         ordered = 'DESC'
     else:
         ordered = ''
+    if search_term == "None":
+        search_term = ""
     if search_term:
         search_sql = "and title like '%{}%' ".format(search_term)
     else:
