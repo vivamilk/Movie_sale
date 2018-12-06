@@ -45,27 +45,6 @@ def roles_accepted(*roles):
     return wrapper
 
 
-@app.route('/todo/api/tasks/<int:task_id>', methods=['GET'])
-def get_objects(task_id):
-    tasks = [
-        {
-            'id': 1,
-            'title': 'Buy groceries',
-            'description': u'Milk, Cheese, Pizza, Fruit, Tylenol',
-            'done': False
-        },
-        {
-            'id': 2,
-            'title': 'Learn Python',
-            'description': u'Need to find a good Python tutorial on the web',
-            'done': False
-        }
-    ]
-    task = [task for task in tasks if task['id'] == task_id]
-
-    return jsonify({'tasks': task})
-
-
 @app.route('/index')
 @app.route('/')
 def index():
@@ -81,11 +60,96 @@ def test():
     return render_template('test.html', **content)
 
 
-@app.route('/checkout')
-@roles_accepted('customer')
-def checkout(purchase_json):
-    print(purchase_json)
-    return
+@app.route('/shopping')
+def shopping():
+    # get movies from database
+    data, content = get_movies_with_params('M.movieID, M.title, S.salePrice')
+
+    movie = []
+    for select_data in data:
+        movieID, title, price = select_data
+        movie.append({'id': str(movieID), 'title': title, 'price': price})
+
+    content['images'] = movie
+    content['home'] = True
+    return render_template('shopping.html', **content)
+
+
+@app.route('/manager')
+@roles_accepted('manager', 'senior_manager')
+def manage_data():
+    # get movies from database
+    data, content = get_movies_with_params('M.movieID, M.title, S.salePrice, S.cost, S.amount')
+
+    movie = []
+    for select_data in data:
+        movie_id, title, price, cost, stock = select_data
+        movie.append({'id': str(movie_id), 'name': title, 'price': price, 'cost': cost, 'inventory': stock})
+
+    content['movies'] = movie
+    content['home'] = True
+    return render_template('admin.html', **content)
+
+
+@app.route('/list')
+# TODO User Login -> List Movie / Admin Login -> Manger Movie
+def list_movie():
+    # get movies from database
+    data, content = get_movies_with_params('M.movieID, M.imdbID, M.title, M.year, M.rating, S.amount, S.salePrice')
+
+    movie = []
+    for select_data in data:
+        movieID, imdbID, title, year, rating, stock, price = select_data
+        movie.append({'id': movieID, 'imdbid': imdbID, 'title': title, 'year': year,
+                      'rating': rating, 'stock': stock, 'price': price})
+    content['movies'] = movie
+    content['home'] = True
+    return render_template('list_metadata.html', **content)
+
+
+def get_movies_with_params(movie_columns):
+    """
+    Get list of movie data from database given the parameters.
+    :param movie_columns: which columns are needed (a string)
+    :return:
+    """
+    # get keywords
+    search_term = request.args.get('search_term')
+    sort_by = request.args.get('sort_by')
+    is_descent = request.args.get('order') == 'True'
+
+    if is_descent:
+        ordered = 'DESC'
+    else:
+        ordered = ''
+    if search_term:
+        search_sql = "and title like '%{}%' ".format(search_term)
+    else:
+        search_sql = ""
+    if sort_by:
+        sort_sql = "order by M.{} {}".format(sort_by, ordered)
+    else:
+        sort_sql = ""
+
+    # select movies from db
+    conn, cur = connect2db(Config.database_path)
+    # TODO show result from different stores
+    cur.execute('''
+    select {}
+    from movie M
+    join stock S
+    where M.movieID=S.movieID {}and S.storeID=1
+    {}
+    limit 20
+    '''.format(movie_columns, search_sql, sort_sql))
+    data = cur.fetchall()
+    conn.close()
+
+    content = copy(context_base)
+    content['order'] = not is_descent
+    content['sort_by'] = sort_by
+    content['search_term'] = search_term
+    return data, content
 
 
 @app.route('/shopping/page=<int:page_id>', methods=['GET'])
@@ -105,9 +169,8 @@ def get_new_item(page_id):
     return render_template('shopping.html', images=movie, home=True)
 
 
-@app.route('/shopping/get_items', methods=['POST'])
-@roles_accepted('customer')
-def get_items_in_cart():
+def get_items():
+    """Inner function to get items in cart."""
     # TODO get store_id
     # response = request.get_json()
     # store_id = response['store_id']
@@ -120,19 +183,24 @@ def get_items_in_cart():
 
     # get items in the cart with their price
     cur.execute('''
-    select Shop.amount, Shop.movieID, S.salePrice
-    from shopping_cart Shop
-    join stock S
-    where Shop.movieID=S.movieID and Shop.storeID=S.storeID and customerID=? and Shop.storeID=?
-    ''', (customer_id, store_id))
+        select Shop.amount, Shop.movieID, M.title, S.salePrice
+        from shopping_cart Shop
+        join stock S on Shop.movieID=S.movieID and Shop.storeID=S.storeID
+        join movie M on S.movieID = M.movieID
+        where customerID=? and Shop.storeID=?
+        ''', (customer_id, store_id))
     records = cur.fetchall()
     conn.close()
+    return records
 
+
+@app.route('/shopping/get_items', methods=['POST'])
+@roles_accepted('customer')
+def get_items_in_cart():
+    records = get_items()
     json_data = []
     for record in records:
-        json_data.append(
-            {'amount': record[0], 'movieID': record[1], 'price': record[2]}
-        )
+        json_data.append({'amount': record[0], 'movieID': record[1], 'title': record[2], 'price': record[3]})
     return jsonify(json_data)
 
 
@@ -237,112 +305,53 @@ def update_item_in_cart(movie_id):
     return jsonify({"operation": "update item", "movieID": movie_id, "amount": amount})
 
 
-@app.route('/shopping')
-def shopping():
-    content = copy(context_base)
+@app.route('/shopping/count_items', methods=['POST'])
+@roles_accepted('customer')
+def count_items_in_cart():
+    # TODO get store_id
+    # response = request.get_json()
+    # store_id = response['store_id']
+    store_id = 1
 
-    # get movies from database
-    data, search_term, sort_by, is_descent = get_movies_with_params('M.movieID, M.title, S.salePrice')
-
-    movie = []
-    for select_data in data:
-        movieID, title, price = select_data
-        movie.append({'id': str(movieID), 'title': title, 'price': price})
-
-    content['images'] = movie
-    content['home'] = True
-    content['order'] = not is_descent
-    return render_template('shopping.html', **content)
-
-
-def get_movies_with_params(movie_columns):
-    """
-    Get list of movie data from database given the parameters.
-    :param movie_columns: which columns are needed (a string)
-    :return:
-    """
-    # get keywords
-    search_term = request.args.get('search_term')
-    sort_by = request.args.get('sort_by')
-    is_descent = request.args.get('order') == 'True'
-
-    if is_descent:
-        ordered = 'DESC'
-    else:
-        ordered = ''
-
-    # select movies from db
     conn, cur = connect2db(Config.database_path)
 
-    if search_term:
-        cur.execute('''
-        select {}
-        from movie M
-        join stock S
-        where M.movieID=S.movieID and title like '%{}%' and S.storeID=1
-        limit 20
-        '''.format(movie_columns, search_term))
-        data = cur.fetchall()
-    elif sort_by:
-        cur.execute('''
-        select {}
-        from movie M
-        join stock S
-        where M.movieID=S.movieID and S.storeID=1
-        order by M.{} {}
-        limit 20
-        '''.format(movie_columns, sort_by, ordered))
-        data = cur.fetchall()
-    else:
-        # TODO show result from different stores
-        cur.execute('''
-        select {}
-        from movie M
-        join stock S
-        where M.movieID=S.movieID and S.storeID=1
-        limit 20
-        '''.format(movie_columns))
-        data = cur.fetchall()
+    cur.execute('select customerID from customer where userID=?', (current_user.id,))
+    customer_id = cur.fetchone()[0]
+
+    cur.execute('''
+        select COUNT(*)
+        from shopping_cart Shop
+        where customerID=? and Shop.storeID=?
+        ''', (customer_id, store_id))
+    count = cur.fetchone()
     conn.close()
-    return data, search_term, sort_by, is_descent
+    return jsonify(count)
 
 
-@app.route('/manager')
-@roles_accepted('manager', 'senior_manager')
-def manage_data():
-    content = copy(context_base)
-
-    # get movies from database
-    data, search_term, sort_by, is_descent = get_movies_with_params('M.movieID, M.title, S.salePrice, S.cost, S.amount')
-
-    movie = []
-    for select_data in data:
-        movie_id, title, price, cost, stock = select_data
-        movie.append({'id': str(movie_id), 'name': title, 'price': price, 'cost': cost, 'inventory': stock})
-
-    content['movies'] = movie
-    content['home'] = True
-    content['order'] = not is_descent
-    return render_template('admin.html', **content)
-
-
-@app.route('/list')
-# TODO User Login -> List Movie / Admin Login -> Manger Movie
-def list_movie():
-    content = copy(context_base)
-
-    # get movies from database
-    data, search_term, sort_by, is_descent = get_movies_with_params('M.movieID, M.imdbID, M.title, M.year, M.rating, S.amount, S.salePrice')
-
-    movie = []
-    for select_data in data:
-        movieID, imdbID, title, year, rating, stock, price = select_data
-        movie.append({'id': movieID, 'imdbid': imdbID, 'title': title, 'year': year,
-                      'rating': rating, 'stock': stock, 'price': price})
-    content['movies'] = movie
-    content['home'] = True
-    content['order'] = not is_descent
-    return render_template('list_metadata.html', **content)
+@app.route('/checkout', methods=['POST'])
+@roles_accepted('customer')
+def checkout_for_cart():
+    records = get_items()
+    if not records:
+        # TODO how to flash a window without template
+        flash("Your shopping cart is empty. Please add movies first.")
+        return redirect(url_for('shopping'))
+    data = {
+        'business': '9AK39BT347LLA',
+        'cmd': '_cart',
+        'upload': 1,
+        'no_shipping': 1,
+        'currency_code': 'USD',
+    }
+    for idx, record in enumerate(records):
+        data_append = {
+            'item_number_%d' % (idx+1): record[1],
+            'item_name_%d' % (idx+1): record[2],
+            'amount_%d' % (idx+1): record[3],
+            'quantity_%d' % (idx+1): record[0],
+            'tax_rate_%d' % (idx + 1): 7}
+        data = {**data, **data_append}
+    return jsonify(data)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -368,17 +377,6 @@ def login():
     content['title'] = 'Sign In'
     content['form'] = form
     return render_template('login.html', **content)
-
-
-@app.route('/shopping/count_item', methods=['GET', 'POST'])
-def count_item_in_cart():
-    # TODO return some information about current shopping cart / Need Virtual Data
-    return str(random.randint(3, 10))
-
-
-@app.route('/checkout')
-def checkout_for_cart():
-    pass
 
 
 @app.route('/logout')
@@ -424,6 +422,9 @@ def listener():
     Validate transaction status from PayPal, and insert transaction record into database.
     """
     transaction_id = request.args.get('tx')
+    if not transaction_id:
+        return redirect(url_for('index'))
+
     data = {
         'cmd': '_notify-synch',
         'tx': transaction_id,
@@ -432,11 +433,42 @@ def listener():
     response = requests.post(
         "https://www.sandbox.paypal.com/cgi-bin/webscr", data=data).text
     if response.startswith('SUCCESS'):
+        record_transaction()
         flash("Success!")
         return redirect('/receipt/{}&{}'.format(transaction_id, 'success'))
     else:
         flash("Something wrong with your purchase, please contact PayPal for more information.")
         return redirect('/receipt/{}&{}'.format(transaction_id, 'fail'))
+
+
+@roles_accepted('customer')
+def record_transaction():
+    # TODO get store_id
+    # response = request.get_json()
+    # store_id = response['store_id']
+    store_id = 1
+
+    conn, cur = connect2db(Config.database_path)
+
+    cur.execute('select customerID from customer where userID=?', (current_user.id,))
+    customer_id = cur.fetchone()[0]
+
+    # get items in the cart
+    cur.execute('select amount, movieID from shopping_cart where customerID=? and storeID=?', (customer_id, store_id))
+    records = cur.fetchall()
+
+    # remove records from database.shopping_cart
+    cur.execute('delete from shopping_cart where customerID=? and storeID=?', (customer_id, store_id))
+
+    # update database.stock
+    for amount, movie_id in records:
+        cur.execute('select amount from stock where movieID=? and storeID=?', (movie_id, store_id))
+        amount_all = cur.fetchone()[0]
+        cur.execute('update stock set amount=? where movieID=? and storeID=?', (amount_all-amount, movie_id, store_id))
+
+    conn.commit()
+    conn.close()
+    return jsonify({"operation": "record transaction"})
 
 
 # login utility functions
