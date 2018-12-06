@@ -82,7 +82,7 @@ def test():
 
 
 @app.route('/checkout')
-@login_required
+@roles_accepted('customer')
 def checkout(purchase_json):
     print(purchase_json)
     return
@@ -105,7 +105,7 @@ def get_new_item(page_id):
     return render_template('shopping.html', images=movie, home=True)
 
 
-@app.route('/shopping/get_item', methods=['GET', 'POST'])
+@app.route('/shopping/get_items', methods=['POST'])
 @roles_accepted('customer')
 def get_items_in_cart():
     # TODO get store_id
@@ -460,13 +460,13 @@ class User(UserMixin):
             self.id = str(1)
         try:
             if self.type == 'customer':
-                cur.execute('insert into users values (?,?,?)',
-                            (self.id, self.username, self.password))
+                cur.execute('insert into users values (?,?,?,?)',
+                            (self.id, self.username, self.password, False))
                 cur.execute('insert into customer values (?,?,?,?,?)',
                             (None, self.id, self.name, self.email, self.phone_number))
             else:
-                cur.execute('insert into users values (?,?,?)',
-                            (self.id, self.username, self.password))
+                cur.execute('insert into users values (?,?,?,?)',
+                            (self.id, self.username, self.password, True))
                 cur.execute('insert into manager values (?,?,?,?,?,?)',
                             (None, self.id, False, self.name, self.email, self.salary))
             conn.commit()
