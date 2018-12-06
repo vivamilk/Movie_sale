@@ -91,6 +91,10 @@ def manage_data():
     return render_template('admin.html', **content)
 
 
+# @app.route()
+# @roles_accepted('manager', 'senior_manager')
+#
+
 @app.route('/list')
 # TODO User Login -> List Movie / Admin Login -> Manger Movie
 def list_movie():

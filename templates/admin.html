@@ -1,4 +1,7 @@
 {% extends "index.html" %}
+{% block cssfile %}
+    <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% endblock %}
 {% block content %}
     <div class="container">
         <table class="table table-striped">
@@ -12,7 +15,7 @@
                 <th>Cost</th>
             </tr>
             <tr>
-                <td>New</td>
+                <td><input type="text" class="form-control movieid" value=""></td>
                 <td>
                     <div class="img-container">
                         <img class="picture" height="42" width="42" alt="select a picture" title="select a picture"
@@ -20,7 +23,7 @@
                         <input class="image" id="my-file-selector" type="file" style="display:none;"
                                accept="image/x-png,image/gif,image/jpeg">
                     </div>
-                <td><input type="text" class="form-control region" value=""></td>
+                <td><input type="text" class="form-control name" value=""></td>
                 <td><input type="text" class="form-control inventory" value=""></td>
                 <td><input type="text" class="form-control sale-price" value=""></td>
                 <td><input type="text" class="form-control cost" value=""></td>
@@ -46,10 +49,10 @@
                         </div>
                     </td>
                     <td><input type="text" class="form-control name" value={{ movie.name }}></td>
-                    <td><input type="text" class="form-control name" value={{ movie.inventory }}></td>
+                    <td><input type="text" class="form-control inventory" value={{ movie.inventory }}></td>
                     {#            <td><input type="text" class="form-control keywords" value="'.$keywords.'"></td>#}
-                    <td><input type="text" class="form-control inventory_amount" value={{ movie.price }}></td>
-                    <td><input type="text" class="form-control price" value={{ movie.cost }}></td>
+                    <td><input type="text" class="form-control price" value={{ movie.price }}></td>
+                    <td><input type="text" class="form-control cost" value={{ movie.cost }}></td>
                     <td>
                         <a href="#" remove_id={{ movie.id }} class="del-btn admin-p-remove"><span
                             class="glyphicon glyphicon-trash"></span></a>
