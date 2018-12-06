@@ -81,6 +81,13 @@ def test():
     return render_template('test.html', **content)
 
 
+@app.route('/checkout')
+@login_required
+def checkout(purchase_json):
+    print(purchase_json)
+    return
+
+
 @app.route('/shopping/page=<int:page_id>', methods=['GET'])
 def get_new_item(page_id):
     movie = []
@@ -98,7 +105,7 @@ def get_new_item(page_id):
     return render_template('shopping.html', images=movie, home=True)
 
 
-@app.route('/shopping/get_items', methods=['POST'])
+@app.route('/shopping/get_item', methods=['GET', 'POST'])
 @roles_accepted('customer')
 def get_items_in_cart():
     # TODO get store_id
