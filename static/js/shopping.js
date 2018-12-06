@@ -35,7 +35,8 @@ $(document).ready(function () {
     get_cart_item()
     function get_cart_item() {
         $.ajax({
-            url: '/shopping/get_item',
+            url: '/shopping/get_items',
+            type: "POST",
             success: function (data) {
                 $('#cart_product').empty();
                 let total = 0;
