@@ -234,13 +234,8 @@ def update_item_in_cart(movie_id):
 def shopping():
     content = copy(context_base)
 
-    # get keywords
-    search_term = request.args.get('search_term')
-    sort_by = request.args.get('sort_by')
-    is_descent = request.args.get('order') == 'True'
-
     # get movies from database
-    data = get_movies_with_params(search_term, sort_by, is_descent)
+    data, search_term, sort_by, is_descent = get_movies_with_params('M.movieID, M.title, S.salePrice')
 
     movie = []
     for select_data in data:
@@ -253,15 +248,17 @@ def shopping():
     return render_template('shopping.html', **content)
 
 
-def get_movies_with_params(search_term, sort_by, is_descent):
+def get_movies_with_params(movie_columns):
     """
     Get list of movie data from database given the parameters.
-    :param movie_columns: which columns are needed
-    :param search_term:
-    :param sort_by:
-    :param is_descent:
+    :param movie_columns: which columns are needed (a string)
     :return:
     """
+    # get keywords
+    search_term = request.args.get('search_term')
+    sort_by = request.args.get('sort_by')
+    is_descent = request.args.get('order') == 'True'
+
     if is_descent:
         ordered = 'DESC'
     else:
@@ -272,35 +269,35 @@ def get_movies_with_params(search_term, sort_by, is_descent):
 
     if search_term:
         cur.execute('''
-        select M.movieID, M.title, S.salePrice
+        select {}
         from movie M
         join stock S
         where M.movieID=S.movieID and title like '%{}%' and S.storeID=1
         limit 20
-        '''.format(search_term))
+        '''.format(movie_columns, search_term))
         data = cur.fetchall()
     elif sort_by:
         cur.execute('''
-        select M.movieID, M.title, S.salePrice
+        select {}
         from movie M
         join stock S
         where M.movieID=S.movieID and S.storeID=1
         order by M.{} {}
         limit 20
-        '''.format(sort_by, ordered))
+        '''.format(movie_columns, sort_by, ordered))
         data = cur.fetchall()
     else:
         # TODO show result from different stores
         cur.execute('''
-        select M.movieID, M.title, S.salePrice
+        select {}
         from movie M
         join stock S
         where M.movieID=S.movieID and S.storeID=1
         limit 20
-        ''')
+        '''.format(movie_columns))
         data = cur.fetchall()
     conn.close()
-    return data
+    return data, search_term, sort_by, is_descent
 
 
 @app.route('/manager')
@@ -308,23 +305,17 @@ def get_movies_with_params(search_term, sort_by, is_descent):
 def manage_data():
     content = copy(context_base)
 
-    # Here to fetch the data
-    movie = []
-    conn, cur = connect2db(Config.database_path)
-    cur.execute('select movieID, title from movie limit 20')
-    data = cur.fetchall()
-    conn.close()
+    # get movies from database
+    data, search_term, sort_by, is_descent = get_movies_with_params('M.movieID, M.title, S.salePrice, S.cost, S.amount')
 
+    movie = []
     for select_data in data:
-        movieID, title = select_data
-        # TODO Here use random data / Join table to get data instead
-        stock = random.randint(10, 20)
-        price = random.randint(3, 20)
-        cost = price - random.randint(0, 3)
-        movie.append({'id': str(movieID), 'name': title, 'price': price, 'cost': cost, 'inventory':stock})
+        movie_id, title, price, cost, stock = select_data
+        movie.append({'id': str(movie_id), 'name': title, 'price': price, 'cost': cost, 'inventory': stock})
 
     content['movies'] = movie
     content['home'] = True
+    content['order'] = not is_descent
     return render_template('admin.html', **content)
 
 
@@ -333,24 +324,19 @@ def manage_data():
 def list_movie():
     content = copy(context_base)
 
-    movie = []
-    conn, cur = connect2db(Config.database_path)
-    # TODO show result from different stores
-    cur.execute('''
-    select M.movieID, M.imdbID, M.title, M.year, M.rating, S.amount, S.salePrice
-    from movie M, stock S
-    where M.movieID=S.movieID and S.storeID=1
-    ''')
-    data = cur.fetchall()
-    conn.close()
+    # get movies from database
+    data, search_term, sort_by, is_descent = get_movies_with_params('M.movieID, M.imdbID, M.title, M.year, M.rating, S.amount, S.salePrice')
 
+    movie = []
     for select_data in data:
         movieID, imdbID, title, year, rating, stock, price = select_data
         movie.append({'id': movieID, 'imdbid': imdbID, 'title': title, 'year': year,
                       'rating': rating, 'stock': stock, 'price': price})
     content['movies'] = movie
     content['home'] = True
+    content['order'] = not is_descent
     return render_template('list_metadata.html', **content)
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
