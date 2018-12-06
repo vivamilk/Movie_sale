@@ -11,8 +11,10 @@
                         <li class="active"><a href="#">Manage</a></li>
                     {% else %}
                         <li class="active"><a href="list">VIEW ALL</a></li>
+                        <li class="active"><a href="shopping">VIEW POST</a></li>
                     {% endif %}
                 </ul>
+                    <div class="nav navbar-nav navbar-default running-nav-right" style="width:50%">
                     {% if search_bar %}
                         <div class="col-sm-8">
                             <form class="navbar-form">
@@ -46,12 +48,13 @@
                             </form>
                         </div>
                     {% endif %}
-                    <ul class="nav navbar-nav navbar-right running-nav-right" style="width:20%">
+                    </div>
+                    <ul class="nav navbar-nav navbar-right running-nav-right" style="width:30%">
                         {% if current_user.is_anonymous %}
                             <li><a href="register"><span class="glyphicon glyphicon-user"></span> Sign Up </a></li>
                             <li><a href="login"><span class="glyphicon glyphicon-log-in"></span> Login </a></li>
                         {% else %}
-                            <li><a><span class="glyphicon glyphicon-user"></span> Hi, {{ current_user.username }} </a>
+                            <li><a href="manage_customer"><span class="glyphicon glyphicon-user"></span> Hi, {{ current_user.username }} </a>
                             </li>
                             <li><a href="{{ url_for('logout') }}"><span class="glyphicon glyphicon-log-out"></span>
                                 Logout
