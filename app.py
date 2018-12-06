@@ -289,14 +289,14 @@ def manager_all_customer():
     content = copy(context_base)
     conn, cur = connect2db(Config.database_path)
     cur.execute('select name, emailAddress, phoneNumber from customer')
-    customers = cur.fetchone()[0]
+    customers = cur.fetchall()
     conn.close()
     data = []
     for customer in customers:
         data.append({
-            'name': customer[0], 'email': customer, 'tele_number': customer[2]
+            'name': customer[0], 'email': customer[1], 'tele_number': customer[2]
         })
-    content['customer'] = data
+    content['customers'] = data
     return render_template('manager_customer.html', **content)
 
 
