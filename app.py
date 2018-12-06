@@ -122,11 +122,15 @@ def get_movies_with_params(movie_columns):
         ordered = 'DESC'
     else:
         ordered = ''
+    if search_term == 'None':
+        search_term = ""
     if search_term:
         search_sql = "and title like '%{}%' ".format(search_term)
     else:
         search_sql = ""
-    if sort_by:
+    if sort_by == 'price':
+        sort_sql = "order by S.salePrice {}".format(ordered)
+    elif sort_by:
         sort_sql = "order by M.{} {}".format(sort_by, ordered)
     else:
         sort_sql = ""
