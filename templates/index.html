@@ -16,14 +16,14 @@
                 {% if home %}
                     <ul class="nav navbar-nav navbar-right running-nav-right" style="width:70%">
 
-                        <div class="col-sm-3">
+                        <div class="col-sm-8">
                             <form class="navbar-form">
                                 <div class="input-group">
                                     <select class="form-control" name="sort_by" id="sort_by">
                                         <option value="title">Title</option>
                                         <option value="year">Year</option>
                                         <option value="rating">Rating</option>
-                                        <option value="contentRating">Content Rating</option>
+                                        <option value="contentRating" selected>Content Rating</option>
                                     </select>
                                     <div class="input-group-btn">
                                         <button class="btn btn-default" type="submit" value="{{ order }}" id="order"
@@ -36,10 +36,6 @@
                                         </button>
                                     </div>
                                 </div>
-                            </form>
-                        </div>
-                        <div class="col-sm-5 col-md-5">
-                            <form class="navbar-form" role="search">
                                 <div class="input-group">
                                     <input type="text" class="form-control" placeholder="Search" name="search_term"
                                            id="search_term">
@@ -56,7 +52,7 @@
                         {% else %}
                             {% if current_user.type == 'customer' %}
                                 <li><a target="paypal"
-                                       href="https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_cart&business=YS7BL7A8J8N9E&display=1"
+                                       href="https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_cart&business=9AK39BT347LLA&display=1"
                                        class="dropdown-toggle" data-toggle="dropdown">
                                     <span class="glyphicon glyphicon-shopping-cart"></span> CART <span
                                         class="badge">0</span>

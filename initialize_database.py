@@ -90,7 +90,8 @@ if __name__ == '__main__':
         references store,
       movieID     INTEGER
         references movie,
-      stockAmount INTEGER(10) not null,
+      amount      INTEGER(10) not null,
+      amountTemp  INTEGER(10) not null,
       salePrice   NUMERIC not null,
       cost        NUMERIC not null,
       primary key (storeID, movieID)
@@ -123,8 +124,9 @@ if __name__ == '__main__':
     (
       purchaseID   INTEGER
         primary key autoincrement,
-      orderAmount  INTEGER(10) not null,
+      amount       INTEGER(10) not null,
       purchaseDate datetime not null,
+      paypalID     VARCHAR(20) not null,
       customerID   INTEGER
         references customer,
       movieID      INTEGER
@@ -193,23 +195,24 @@ if __name__ == '__main__':
                 for store_id in range(1, 3):
                     sale_price = random.randint(700, 1900)
                     cost = sale_price - random.randint(200, 500)
-                    cur.execute('insert into stock values (?,?,?,?,?)',
-                                (store_id, movie_data[0], random.randint(100, 300), sale_price/100, cost/100))
+                    amount = random.randint(100, 300)
+                    cur.execute('insert into stock values (?,?,?,?,?,?)',
+                                (store_id, movie_data[0], amount, amount, sale_price/100, cost/100))
             except sqlite3.IntegrityError:
                 print('IntegrityError: movieID {}'.format(movie_data[0]))
 
     # sample transactions
     dt = datetime.datetime.now() + datetime.timedelta(-100)
-    cur.execute('insert into transactions values (?,?,?,?,?,?)',
-                (None, 1, dt.strftime("%Y-%m-%d %H:%M:%S"), 1, 4, 1))
+    cur.execute('insert into transactions values (?,?,?,?,?,?,?)',
+                (None, 1, dt.strftime("%Y-%m-%d %H:%M:%S"), 1, '89U78003ES8880109', 4, 1))
     dt = datetime.datetime.now() + datetime.timedelta(-90)
-    cur.execute('insert into transactions values (?,?,?,?,?,?)',
-                (None, 2, dt.strftime("%Y-%m-%d %H:%M:%S"), 1, 5, 1))
+    cur.execute('insert into transactions values (?,?,?,?,?,?,?)',
+                (None, 2, dt.strftime("%Y-%m-%d %H:%M:%S"), 1, '59U48003ES8850109', 5, 1))
     dt = datetime.datetime.now() + datetime.timedelta(-80)
-    cur.execute('insert into transactions values (?,?,?,?,?,?)',
-                (None, 2, dt.strftime("%Y-%m-%d %H:%M:%S"), 1, 6, 2))
+    cur.execute('insert into transactions values (?,?,?,?,?,?,?)',
+                (None, 2, dt.strftime("%Y-%m-%d %H:%M:%S"), 1, '45U78043ES4578010', 6, 2))
     dt = datetime.datetime.now() + datetime.timedelta(-70)
-    cur.execute('insert into transactions values (?,?,?,?,?,?)',
-                (None, 1, dt.strftime("%Y-%m-%d %H:%M:%S"), 1, 7, 2))
+    cur.execute('insert into transactions values (?,?,?,?,?,?,?)',
+                (None, 1, dt.strftime("%Y-%m-%d %H:%M:%S"), 1, '15U34504ES4546097', 7, 2))
     conn.commit()
     conn.close()

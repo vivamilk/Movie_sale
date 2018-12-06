@@ -1,16 +1,18 @@
 {% extends "index.html" %}
 {% block content %}
     <div class="container">
-
         <div class="wrapper">
 
-            <h1>Thank You!</h1>
+            {% if status == 'success' %}
+                <h1>Thank You!</h1>
+                <h4>Thank you for your payment. Your transaction has been completed, and a receipt for your purchase has been emailed to you. You may log into your account at <a href="http://www.paypal.com/us">www.paypal.com/us</a> to view details of this transaction.</h4>
+            {% else %}
+                <h1>Failure</h1>
+                <h4> Sorry, there is something wrong with your purchase, please contact PayPal for more information.</h4>
+            {% endif %}
 
-            <p>Thank you for your payment. Your transaction has been completed, and a receipt for your purchase has been emailed to you. You may log into your account at <a href="http://www.paypal.com/us">www.paypal.com/us</a> to view details of this transaction.</p>
-
-            <p>Need another shirt already? Visit the <a href="/shopping">Shopping</a> page again.</p>
-
+            <h4>Your PayPal transaction ID is: <span style="background-color: deepskyblue">{{ transaction_id }}</span></h4>
+            <h4>Want to buy more? Visit the <a href="/shopping">Shopping</a> page again.</h4>
         </div>
-
     </div>
 {% endblock %}

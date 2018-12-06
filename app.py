@@ -8,6 +8,7 @@ from config import Config
 from form import LoginForm, RegistrationForm
 from functools import wraps
 import datetime
+import requests
 from copy import copy
 
 
@@ -197,7 +198,7 @@ def list_movie():
         cur = conn.cursor()
         # TODO show result from different stores
         cur.execute('''
-        select M.movieID, M.imdbID, M.title, M.year, M.rating, S.stockAmount, S.salePrice
+        select M.movieID, M.imdbID, M.title, M.year, M.rating, S.amount, S.salePrice
         from movie M, stock S
         where M.movieID=S.movieID and S.storeID=1
         ''')
@@ -209,8 +210,6 @@ def list_movie():
     content['movies'] = movie
     content['home'] = True
     return render_template('list_metadata.html', **content)
-
-@app.route('')
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -270,16 +269,51 @@ def register():
     return render_template('register.html', **content)
 
 
-@app.route("/receipt")
+@app.route("/receipt/<string:status>")
 @roles_accepted('customer')
-def receipt():
+def receipt(status):
     """Function to display receipt after purchase"""
     content = copy(context_base)
+    transaction_id, status = status[1:-1].split("&")
+    content['transaction_id'] = transaction_id
+    content['status'] = status
 
-    result = request.args.get('st')
-    if result == 'Completed':
-        flash("Completed!")
+    # if transaction_id:
+    #     # flash("Success!")
+    #     # return redirect('/receipt')
+    #     data = {
+    #         'cmd': '_notify-synch',
+    #         'tx': transaction_id,
+    #         'at': 'Rs8M8Q-rndgOUSnWmGaYxR76aPnZSrWX8P3oWNivJ0TLN2hKthF8cu65Rwa'
+    #     }
+    #     responce = requests.post(
+    #         "https://www.sandbox.paypal.com/cgi-bin/webscr", data=data).text
+    #     if responce.startswith('SUCCESS'):
+    #         flash("Success!")
+    #         return redirect('/receipt')
+    #     else:
+    #         flash("Something wrong with your purchase, please contact PayPal for more information.")
+    # else:
+    #     return redirect('/shopping')
     return render_template("receipt.html", **content)
+
+
+@app.route('/listener')
+def listener():
+    transaction_id = request.args.get('tx')
+    data = {
+        'cmd': '_notify-synch',
+        'tx': transaction_id,
+        'at': 'Rs8M8Q-rndgOUSnWmGaYxR76aPnZSrWX8P3oWNivJ0TLN2hKthF8cu65Rwa'
+    }
+    response = requests.post(
+        "https://www.sandbox.paypal.com/cgi-bin/webscr", data=data).text
+    if response.startswith('SUCCESS'):
+        flash("Success!")
+        return redirect('/receipt/<{}&{}>'.format(transaction_id, 'success'))
+    else:
+        flash("Something wrong with your purchase, please contact PayPal for more information.")
+        return redirect('/receipt/<{}&{}>'.format(transaction_id, 'fail'))
 
 
 # login utility functions
