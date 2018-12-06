@@ -399,7 +399,10 @@ def login():
             login_user(user, remember=form.remember_me.data)
             next_page = request.args.get('next')
             if not next_page or url_parse(next_page).netloc != '':
-                next_page = url_for('index')
+                if current_user.type == "customer":
+                    next_page = url_for('shopping')
+                else:
+                    next_page = '/manager'
             return redirect(next_page)
 
     content['title'] = 'Sign In'
