@@ -68,17 +68,20 @@ $(document).ready(function () {
                     let item = `
                         <div class="row top-buffer">
                             <div class="col-md-2" id=${product_id}><img class="img-responsive" src="/static/posters/${product_id}.jpg/"/></div>
-                            <div class="col-md-2 text-center"><h5>${title}</h5></div>
+                            <div class="col-md-3 text-center"><h5>${title}</h5></div>
                             <!--<div class="col-md-2 text-center amount"><h5></h5></div>-->
-                            <div class="col-md-2 text-center price"><h5>\$${price} (X${amount})</h5></div>
+                            <div class="col-md-3 text-center price"><h5>\$${price} (X${amount})</h5></div>
                             <!--<div class="col-md-3 text-center"><h5>${subtotal}</h5></div>-->
+                            <div class="col-md-2"><a href="#" remove_id=${product_id} class="del-btn admin-p-remove-item"><span class="glyphicon glyphicon-trash"></span></a></div> 
+                            <div class="col-md-2"><a href="#" update_id=${product_id} class="del-btn admin-p-update"><span class="glyphicon glyphicon-plus"></span></a></div>
                        </div>
                     `;
+
                     $('#cart_product').append(item);
                 }
                     total = total.toFixed(2);
                     var button_item =  `<div class="row top-buffer text-right"><hr>
-                                    <div class="col-md-3"><h5>Total Price: ${total}</h5></div>
+                                    <div class="col-md-9"><h5>Total Price: ${total}</h5></div>
                                     <div class="col-md-3"><button id="co" type="button" style="float:right;" class="btn btn-default">
                                     Checkout</button></div>`
                     $('#cart_product').append(button_item);
@@ -86,6 +89,7 @@ $(document).ready(function () {
             }
         })
     }
+
     function send_checkout(){
         $('#co').click(function(){
             $.ajax({

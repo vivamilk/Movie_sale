@@ -8,7 +8,7 @@ $(document).ready(function () {
     $('body').delegate(".admin-p-update", "click", function (event) {
         alert("Update Successfully!");
     });
-    $("body").delegate(".admin-p-add","click",function(event){
+    $("body").delegate(".admin-p-add","click",function(event) {
         var add = $(this).parent().parent();
         var product_kind_id = add.find(".movieid").val();
         var name = add.find(".name").val();
@@ -42,11 +42,7 @@ $(document).ready(function () {
                 </tr>`
         var total_table = add.parent().parent();
         $(total_table).append(item_info);
-
     })
-    //     $.ajax({
-    //         url    :    "action.php",
-    //         method    :    "POST",
     //         data    :    {adminRemoveOrderDetail:1,rid:remove_id},
     //         success    :    function(data){
     //            $("#admin_msg").html(data);
