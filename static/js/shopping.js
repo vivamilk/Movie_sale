@@ -1,7 +1,8 @@
 function get_all_button() {
     return $(".movie-list").find("button")
 }
-
+var ajax_count = 0;
+var cart_count = 0;
 function StandardPost(args)
     {   if ( "error" in args)
         {
@@ -55,12 +56,16 @@ $(document).ready(function () {
             }
         });
     }
-    get_cart_item()
+
+    get_cart_item();
     function get_cart_item() {
+        cart_count += 1;
+        console.log(cart_count);
         $.ajax({
             url: '/shopping/get_items',
             type: "POST",
             success: function (data) {
+                console.log(data);
                 $('#cart_product').empty();
                 let total = 0;
                 for (var keys in data) {
@@ -96,15 +101,32 @@ $(document).ready(function () {
     }
 
     function bind_update_function(){
-        $('#cart_product').delegate('.admin-p-add-item', 'click', function (event) {
-            var item_id = this.id;
-            $.ajax({
+        $('#cart_product .admin-p-add-item').unbind();
+        $('#cart_product .admin-p-remove-item').unbind();
+        $('#cart_product .admin-p-add-item').click(function() {
+              var item_id = this.id;
+              $.ajax({
                 url: '/shopping/' + item_id,
                 contentType: "application/json; charset=utf-8",
                 type: "POST",
                 data: JSON.stringify({'number': 1}),
                 success: function (response) {
-                    console.log(response);
+                    count_item();
+                    get_cart_item();
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        });
+        $('#cart_product .admin-p-remove-item').click(function() {
+              var item_id = this.id;
+              $.ajax({
+                url: '/shopping/remove/' + item_id,
+                contentType: "application/json; charset=utf-8",
+                type: "POST",
+                data: JSON.stringify({'number': 1}),
+                success: function (response) {
                     count_item();
                     get_cart_item();
                 },
@@ -114,23 +136,25 @@ $(document).ready(function () {
             });
         });
 
-        $('#cart_product').delegate('.admin-p-remove-item', 'click', function (event) {
-            var item_id = this.id;
-            $.ajax({
-                url: '/shopping/remove/' + item_id,
-                contentType: "application/json; charset=utf-8",
-                type: "POST",
-                data: JSON.stringify({'number': -1}),
-                success: function (response) {
-                    console.log(response);
-                    count_item();
-                    get_cart_item();
-                },
-                error: function (error) {
-                    console.log(error);
-                }
-            });
-        });
+        // $('#cart_product').delegate('.admin-p-remove-item', 'click', function (event) {
+        //     var item_id = this.id;
+        //     $.ajax({
+        //
+        //         url: '/shopping/remove/' + item_id,
+        //         contentType: "application/json; charset=utf-8",
+        //         type: "POST",
+        //         data: JSON.stringify({'number': -1}),
+        //         success: function (response){
+        //             ajax_count += 1;
+        //             console.log(ajax_count);
+        //             // count_item();
+        //             get_cart_item();
+        //         },
+        //         error: function (error) {
+        //             console.log(error);
+        //         }
+        //     });
+        // });
     }
 
     function send_checkout(){
