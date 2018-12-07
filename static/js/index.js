@@ -12,3 +12,15 @@ async function popupYear() {
         data.map(x=>$(`<p>${x}</p>`))
     )
 }
+
+function change_store_id() {
+    var e = document.getElementById("ddlViewBy").value;
+    $.ajax({
+        url: '/store_id_listener',
+        type: 'POST',
+        success: function (data) {
+            console.log(data);
+            $('.badge').html(data);
+        }
+    });
+}

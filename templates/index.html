@@ -14,9 +14,8 @@
                         <li class="active"><a href="shopping">VIEW POST</a></li>
                     {% endif %}
                 </ul>
-                    <div class="nav navbar-nav navbar-default running-nav-right" style="width:50%">
                     {% if search_bar %}
-                        <div class="col-sm-8">
+                        <div class="nav navbar-nav">
                             <form class="navbar-form">
                                 <div class="input-group">
                                     <select class="form-control" name="sort_by" id="sort_by">
@@ -48,17 +47,18 @@
                             </form>
                         </div>
                     {% endif %}
-                    </div>
-                    <ul class="nav navbar-nav navbar-right running-nav-right" style="width:30%">
+                    <ul class="nav navbar-nav navbar-right running-nav-right">
                         {% if current_user.is_anonymous %}
                             <li><a href="register"><span class="glyphicon glyphicon-user"></span> Sign Up </a></li>
                             <li><a href="login"><span class="glyphicon glyphicon-log-in"></span> Login </a></li>
                         {% else %}
-                            <li><a href="manage_customer"><span class="glyphicon glyphicon-user"></span> Hi, {{ current_user.username }} </a>
-                            </li>
-                            <li><a href="{{ url_for('logout') }}"><span class="glyphicon glyphicon-log-out"></span>
-                                Logout
-                            </a></li>
+                            <li><select class="form-control" id="store_id">
+                                {% for store in stores %}
+                                    <option value="{{ store[0] }}" {% if store_id == store[0] %}selected{% endif %}>{{ store[1] }}</option>
+                                {% endfor %}
+                            </select></li>
+                            <li><a href="manage_customer"><span class="glyphicon glyphicon-user"></span> Hi, {{ current_user.username }} </a></li>
+                            <li><a href="{{ url_for('logout') }}"><span class="glyphicon glyphicon-log-out"></span>Logout</a></li>
 
                             {% if current_user.type == 'customer' %}
                                 <li>
