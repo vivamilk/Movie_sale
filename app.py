@@ -389,8 +389,37 @@ def update_info():
 
 @app.route('/show_history')
 def show_history():
-    data = []
-    return render_template('show_history.html', history_data=data)
+    data = [
+        {"paypal_id": "1234",
+        "item_list":[
+        {
+        "customerID": "12",
+        "movieID": "123",
+        "storeID": "123",
+        "amount": "123"
+        },
+        {
+            "customerID": "12",
+            "movieID": "123",
+            "storeID": "123",
+            "amount": "123"
+        }]},
+        {"paypal_id": "1234",
+         "item_list": [
+             {
+                 "customerID": "12",
+                 "movieID": "123",
+                 "storeID": "123",
+                 "amount": "123"
+             },
+             {
+                 "customerID": "12",
+                 "movieID": "123",
+                 "storeID": "123",
+                 "amount": "123"
+             }]}
+    ]
+    return render_template('show_history.html', history=data)
 
 
 @app.route('/manage_customer')
