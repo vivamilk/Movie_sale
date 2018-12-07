@@ -55,7 +55,7 @@
                             {% if stores %}
                                 <li><select class="form-control" id="store_id_select" onchange="change_store_id()">
                                     {% for store in stores %}
-                                        <option value="{{ store.id }}" {% if store_id == store.id %}selected{% endif %}>{{ store.name }}</option>
+                                        <option value="{{ store.id }}" {% if session.store_id == store.id %}selected{% endif %}>{{ store.name }}</option>
                                     {% endfor %}
                                 </select></li>
                             {% endif %}

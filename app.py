@@ -1,6 +1,6 @@
 import random
 import sqlite3
-from flask import Flask, render_template, redirect, url_for, flash, jsonify, request
+from flask import Flask, render_template, redirect, url_for, flash, jsonify, request, session
 from werkzeug.urls import url_parse
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import current_user, login_user, logout_user, login_required, LoginManager, UserMixin
@@ -23,7 +23,6 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
 context_base = {'current_year': datetime.date.today().year}
-store_id = 1
 
 
 # -----------------------------------
@@ -247,6 +246,7 @@ def get_movies_with_params(movie_columns):
     search_term = request.args.get('search_term')
     sort_by = request.args.get('sort_by')
     is_descent = request.args.get('order') == 'True'
+    store_id = int(session['store_id'])
 
     if is_descent:
         ordered = 'DESC'
@@ -289,7 +289,6 @@ def get_movies_with_params(movie_columns):
     content['search_term'] = search_term
     content['search_bar'] = True
     content['stores'] = stores
-    content['store_id'] = str(store_id)
     return data, content
 
 
@@ -300,9 +299,8 @@ def store_id_listener():
     if 'store_id' not in response:
         return redirect(url_for('index'))
     else:
-        global store_id
-        store_id = int(response['store_id'])
-        return jsonify(store_id)
+        session['store_id'] = str(response['store_id'])
+        return jsonify(session['store_id'])
 
 
 # -----------------------------------
@@ -312,11 +310,58 @@ def store_id_listener():
 @app.route('/stat')
 @roles_accepted('senior_manager')
 def get_stat_data():
+    content = copy(context_base)
+
+    customer_id = request.args.get('customer_id')
+    month_from = request.args.get('month_from')
+    month_to = request.args.get('month_to')
+    genre = request.args.get('movie_type')
+    options = request.args.get('result')
+    product_id = request.args.get('product_id')
+
     # 销量成本利润
     # 选择电影类型
     # 按照时间
     #
-    return render_template('stat.html')
+    conn, cur = connect2db(Config.database_path)
+    if customer_id:
+        content['customer'] = True
+        if not genre:
+            if not product_id:
+                pass
+
+    if options == 'Cost':
+        pass
+    elif options == 'Profit':
+        pass
+    elif options == 'Sales-Number':
+        # get count
+        cur.execute('''
+        select COUNT(*)
+        from transactions T
+        where T.customerID=? and T.movieID=? and T.purchaseDate>? and T.purchaseDate<?
+        ''', (customer_id, product_id, month_from, month_to))
+        data = cur.fetchone()
+    else:
+        raise ValueError
+
+
+    data = cur.fetchall()
+
+    cur.execute('select storeID, region from store')
+    store_data = cur.fetchall()
+
+
+    content['genre'] = True
+    content['product'] = True
+    content['compare_store'] = True
+    content['compare_type'] = True
+
+    content['stats'] = [
+        {'customer_id': 1, 'customer_name': 'tom', 'product_id': 1, 'number': 5},
+    ]
+
+    return render_template('stat.html', **content)
 
 
 # -----------------------------------
@@ -338,6 +383,7 @@ def login():
             return redirect(url_for('login'))
         else:
             login_user(user, remember=form.remember_me.data)
+            session['store_id'] = '1'
             next_page = request.args.get('next')
             if not next_page or url_parse(next_page).netloc != '':
                 if current_user.type == "customer":
@@ -355,6 +401,7 @@ def login():
 @login_required
 def logout():
     logout_user()
+    session.pop('store_id')
     flash("Logout Successfully!")
     return redirect(url_for('index'))
 
@@ -416,6 +463,7 @@ def manage_all_customer():
 
 def get_items():
     """Inner function to get items in cart."""
+    store_id = int(session['store_id'])
     conn, cur = connect2db(Config.database_path)
 
     cur.execute('select customerID from customer where userID=?', (current_user.id,))
@@ -447,6 +495,7 @@ def get_items_in_cart():
 @app.route('/shopping/remove_items', methods=['POST'])
 @roles_accepted('customer')
 def remove_items_in_cart():
+    store_id = int(session['store_id'])
     conn, cur = connect2db(Config.database_path)
 
     cur.execute('select customerID from customer where userID=?', (current_user.id,))
@@ -474,7 +523,7 @@ def remove_items_in_cart():
 @roles_accepted('customer')
 def add_item_to_cart(movie_id):
     amount = 1
-
+    store_id = int(session['store_id'])
     conn, cur = connect2db(Config.database_path)
 
     cur.execute('select customerID from customer where userID=?', (current_user.id,))
@@ -506,7 +555,7 @@ def add_item_to_cart(movie_id):
 def remove_item_in_cart(movie_id):
     # TODO add or delete 1
     amount = -1
-
+    store_id = int(session['store_id'])
     conn, cur = connect2db(Config.database_path)
 
     cur.execute('select customerID from customer where userID=?', (current_user.id,))
@@ -537,7 +586,7 @@ def remove_item_in_cart(movie_id):
 def update_item_in_cart(movie_id):
     response = request.get_json()
     amount = response['number']
-
+    store_id = int(session['store_id'])
     conn, cur = connect2db(Config.database_path)
 
     cur.execute('select customerID from customer where userID=?', (current_user.id,))
@@ -567,6 +616,7 @@ def update_item_in_cart(movie_id):
 @app.route('/shopping/count_items', methods=['POST'])
 @roles_accepted('customer')
 def count_items_in_cart():
+    store_id = int(session['store_id'])
     conn, cur = connect2db(Config.database_path)
 
     cur.execute('select customerID from customer where userID=?', (current_user.id,))
@@ -634,7 +684,7 @@ def listener():
     response = requests.post(
         "https://www.sandbox.paypal.com/cgi-bin/webscr", data=data).text
     if response.startswith('SUCCESS'):
-        record_transaction()
+        record_transaction(transaction_id)
         flash("Success!")
         return redirect('/receipt/{}&{}'.format(transaction_id, 'success'))
     else:
@@ -643,7 +693,9 @@ def listener():
 
 
 @roles_accepted('customer')
-def record_transaction():
+def record_transaction(paypal_id):
+    store_id = int(session['store_id'])
+    purchase_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     conn, cur = connect2db(Config.database_path)
 
     cur.execute('select customerID from customer where userID=?', (current_user.id,))
@@ -656,16 +708,17 @@ def record_transaction():
     # remove records from database.shopping_cart
     cur.execute('delete from shopping_cart where customerID=? and storeID=?', (customer_id, store_id))
 
-    # update database.stock
+    # update database.stock & database.transaction
     for amount, movie_id in records:
         cur.execute('select amount from stock where movieID=? and storeID=?', (movie_id, store_id))
         amount_all = cur.fetchone()[0]
         cur.execute('update stock set amount=? where movieID=? and storeID=?', (amount_all-amount, movie_id, store_id))
-
+        cur.execute('insert into transactions values (?,?,?,?,?,?,?)',
+                    (None, amount, purchase_time, paypal_id, customer_id, movie_id, store_id))
     conn.commit()
     conn.close()
     return jsonify({"operation": "record transaction"})
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
