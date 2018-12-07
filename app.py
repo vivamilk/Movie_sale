@@ -11,7 +11,6 @@ import datetime
 import requests
 from copy import copy
 
-
 # -----------------------------------
 # global settings
 # -----------------------------------
@@ -128,6 +127,7 @@ def roles_accepted(*roles):
     order to view the page.
     :param roles: The possible roles.
     """
+
     def wrapper(func):
         @wraps(func)
         def decorated_view(*args, **kwargs):
@@ -137,7 +137,9 @@ def roles_accepted(*roles):
                 flash("Sorry, You do not have the permission to view this page. Return to homepage.")
                 return redirect(url_for('index'))
             return func(*args, **kwargs)
+
         return decorated_view
+
     return wrapper
 
 
@@ -368,7 +370,8 @@ def register():
 
     form = RegistrationForm()
     if form.validate_on_submit():
-        User().new_user(form.username.data, form.name.data, form.password.data, 'customer', form.email.data, form.phone_number.data)
+        User().new_user(form.username.data, form.name.data, form.password.data, 'customer', form.email.data,
+                        form.phone_number.data)
         flash('Congratulations, you are now a registered user!')
         return redirect(url_for('login'))
 
@@ -390,34 +393,36 @@ def update_info():
 @app.route('/show_history')
 def show_history():
     data = [
-        {"paypal_id": "1234",
-        "item_list":[
         {
-        "customerID": "12",
-        "movieID": "123",
-        "storeID": "123",
-        "amount": "123"
-        },
+            "paypal_id": "1234",
+            "item_list": [
+                {
+                    "customerID": "12",
+                    "movieID": "123",
+                    "storeID": "123",
+                    "amount": "123"
+                },
+                {
+                    "customerID": "12",
+                    "movieID": "123",
+                    "storeID": "123",
+                    "amount": "123"
+                }]},
         {
-            "customerID": "12",
-            "movieID": "123",
-            "storeID": "123",
-            "amount": "123"
-        }]},
-        {"paypal_id": "1234",
-         "item_list": [
-             {
-                 "customerID": "12",
-                 "movieID": "123",
-                 "storeID": "123",
-                 "amount": "123"
-             },
-             {
-                 "customerID": "12",
-                 "movieID": "123",
-                 "storeID": "123",
-                 "amount": "123"
-             }]}
+            "paypal_id": "1234",
+            "item_list": [
+                {
+                    "customerID": "12",
+                    "movieID": "123",
+                    "storeID": "123",
+                    "amount": "123"
+                },
+                {
+                    "customerID": "12",
+                    "movieID": "123",
+                    "storeID": "123",
+                    "amount": "123"
+                }]}
     ]
     return render_template('show_history.html', history=data)
 
@@ -492,7 +497,8 @@ def remove_items_in_cart():
     for amount, movie_id in records:
         cur.execute('select amountTemp from stock where movieID=? and storeID=?', (movie_id, store_id))
         temp_amount_all = cur.fetchone()[0]
-        cur.execute('update stock set amountTemp=? where movieID=? and storeID=?', (temp_amount_all+amount, movie_id, store_id))
+        cur.execute('update stock set amountTemp=? where movieID=? and storeID=?',
+                    (temp_amount_all + amount, movie_id, store_id))
 
     conn.commit()
     conn.close()
@@ -509,7 +515,8 @@ def add_item_to_cart(movie_id):
     cur.execute('select customerID from customer where userID=?', (current_user.id,))
     customer_id = cur.fetchone()[0]
 
-    cur.execute('select amount from shopping_cart where customerID=? and movieID=? and storeID=?', (customer_id, movie_id, store_id))
+    cur.execute('select amount from shopping_cart where customerID=? and movieID=? and storeID=?',
+                (customer_id, movie_id, store_id))
     current_amount = cur.fetchone()
 
     # insert or update record into database.shopping_cart
@@ -523,7 +530,8 @@ def add_item_to_cart(movie_id):
     # update amountTemp in database.stock
     cur.execute('select amountTemp from stock where movieID=? and storeID=?', (movie_id, store_id))
     temp_amount_all = cur.fetchone()[0]
-    cur.execute('update stock set amountTemp=? where movieID=? and storeID=?', (temp_amount_all-amount, movie_id, store_id))
+    cur.execute('update stock set amountTemp=? where movieID=? and storeID=?',
+                (temp_amount_all - amount, movie_id, store_id))
 
     conn.commit()
     conn.close()
@@ -541,12 +549,14 @@ def remove_item_in_cart(movie_id):
     cur.execute('select customerID from customer where userID=?', (current_user.id,))
     customer_id = cur.fetchone()[0]
 
-    cur.execute('select amount from shopping_cart where customerID=? and movieID=? and storeID=?', (customer_id, movie_id, store_id))
+    cur.execute('select amount from shopping_cart where customerID=? and movieID=? and storeID=?',
+                (customer_id, movie_id, store_id))
     current_amount = cur.fetchone()[0]
 
     # delete or update record into database.shopping_cart
     if current_amount + amount <= 0:
-        cur.execute('delete from shopping_cart where customerID=? and movieID=? and storeID=?', (customer_id, movie_id, store_id))
+        cur.execute('delete from shopping_cart where customerID=? and movieID=? and storeID=?',
+                    (customer_id, movie_id, store_id))
     else:
         cur.execute('update shopping_cart set amount=? where customerID=? and movieID=? and storeID=?',
                     (current_amount + amount, customer_id, movie_id, store_id))
@@ -554,7 +564,8 @@ def remove_item_in_cart(movie_id):
     # update amountTemp in database.stock
     cur.execute('select amountTemp from stock where movieID=? and storeID=?', (movie_id, store_id))
     temp_amount_all = cur.fetchone()[0]
-    cur.execute('update stock set amountTemp=? where movieID=? and storeID=?', (temp_amount_all-amount, movie_id, store_id))
+    cur.execute('update stock set amountTemp=? where movieID=? and storeID=?',
+                (temp_amount_all - amount, movie_id, store_id))
 
     conn.commit()
     conn.close()
@@ -572,13 +583,15 @@ def update_item_in_cart(movie_id):
     cur.execute('select customerID from customer where userID=?', (current_user.id,))
     customer_id = cur.fetchone()[0]
 
-    cur.execute('select amount from shopping_cart where customerID=? and movieID=? and storeID=?', (customer_id, movie_id, store_id))
+    cur.execute('select amount from shopping_cart where customerID=? and movieID=? and storeID=?',
+                (customer_id, movie_id, store_id))
     current_amount = cur.fetchone()[0]
 
     # remove or update record into database.shopping_cart
     if amount <= 0:
         amount = 0
-        cur.execute('delete from shopping_cart where customerID=? and movieID=? and storeID=?', (customer_id, movie_id, store_id))
+        cur.execute('delete from shopping_cart where customerID=? and movieID=? and storeID=?',
+                    (customer_id, movie_id, store_id))
     else:
         cur.execute('update shopping_cart set amount=? where customerID=? and movieID=? and storeID=?',
                     (amount, customer_id, movie_id, store_id))
@@ -586,7 +599,8 @@ def update_item_in_cart(movie_id):
     # update amountTemp in database.stock
     cur.execute('select amountTemp from stock where movieID=? and storeID=?', (movie_id, store_id))
     temp_amount_all = cur.fetchone()[0]
-    cur.execute('update stock set amountTemp=? where movieID=? and storeID=?', (temp_amount_all-amount+current_amount, movie_id, store_id))
+    cur.execute('update stock set amountTemp=? where movieID=? and storeID=?',
+                (temp_amount_all - amount + current_amount, movie_id, store_id))
 
     conn.commit()
     conn.close()
@@ -626,10 +640,10 @@ def checkout_for_cart():
     }
     for idx, record in enumerate(records):
         data_append = {
-            'item_number_%d' % (idx+1): record[1],
-            'item_name_%d' % (idx+1): record[2],
-            'amount_%d' % (idx+1): record[3],
-            'quantity_%d' % (idx+1): record[0],
+            'item_number_%d' % (idx + 1): record[1],
+            'item_name_%d' % (idx + 1): record[2],
+            'amount_%d' % (idx + 1): record[3],
+            'quantity_%d' % (idx + 1): record[0],
             'tax_rate_%d' % (idx + 1): 7}
         data = {**data, **data_append}
     return jsonify(data)
@@ -689,7 +703,8 @@ def record_transaction():
     for amount, movie_id in records:
         cur.execute('select amount from stock where movieID=? and storeID=?', (movie_id, store_id))
         amount_all = cur.fetchone()[0]
-        cur.execute('update stock set amount=? where movieID=? and storeID=?', (amount_all-amount, movie_id, store_id))
+        cur.execute('update stock set amount=? where movieID=? and storeID=?',
+                    (amount_all - amount, movie_id, store_id))
 
     conn.commit()
     conn.close()
