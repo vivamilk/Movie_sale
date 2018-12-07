@@ -1,0 +1,27 @@
+{% extends "index.html" %}
+{% block cssfile %}
+{% endblock %}
+{% block content %}
+    <div class="container">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th><h5>PaypalId</h5></th>
+                <th><h5>CustomerID</h5></th>
+                <th><h5>MovieID</h5></th>
+                <th><h5>StoreID</h5></th>
+            </tr>
+            </thead>
+            {#            Manage the movie#}
+
+            {% for history in history_data %}
+                <tr>
+                    <td>{{ history.customerID }}</td>
+                    <td><h5>{{ history.movieID }}</h5></td>
+                    <td><h5>{{ history.storeID }}</h5></td>
+                    <td><h5>{{ history.Price}}</h5></td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+{% endblock %}

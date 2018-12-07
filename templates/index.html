@@ -54,14 +54,18 @@
                         {% else %}
                             {% if stores %}
                                 <li><select class="form-control" id="store_id_select" onchange="change_store_id()">
-                                    {% for store_item in stores %}
-                                        {{ store_item.id }} {{ store_id }} {{ store_id == store_item.id }}
-                                        <option value="{{ store_item.id }}" {% if store_id == store_item.id %}selected{% endif %}>{{ store_item.name }}</option>
+                                    {% for store in stores %}
+                                        <option value="{{ store.id }}" {% if store_id == store.id %}selected{% endif %}>{{ store.name }}</option>
                                     {% endfor %}
                                 </select></li>
                             {% endif %}
 
-                            <li><a href="manage_customer"><span class="glyphicon glyphicon-user"></span> Hi, {{ current_user.username }} </a></li>
+                            {% if current_user.type == 'customer' %}
+                                <li><a href="show_history"><span class="glyphicon glyphicon-user"></span> Hi, {{ current_user.username }}</a></li>
+                            {% else %}
+                                <li><a href="manage_customer"><span class="glyphicon glyphicon-user"></span> Hi, {{ current_user.username }} </a></li>
+                            {% endif %}
+
                             <li><a href="{{ url_for('logout') }}"><span class="glyphicon glyphicon-log-out"></span>Logout</a></li>
 
                             {% if current_user.type == 'customer' %}
@@ -70,7 +74,7 @@
                                     <span class="glyphicon glyphicon-shopping-cart"></span> CART <span class="badge">0</span></a>
                                     {#                                    <button onclick="popupYear()">test</button>#}
                                     <div id="shoppingcart-content" class="dropdown-menu scrollable-menu" role="menu">
-                                        <div class="container" style="width:600px;color:black !important;">
+                                        <div class="container" style="width:450px;color:black !important;">
                                             <div class="product_list">
                                                 <div id="cart_product"></div>
                                             </div>

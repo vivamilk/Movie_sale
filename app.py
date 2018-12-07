@@ -387,6 +387,12 @@ def update_info():
     return render_template('user_info_update.html')
 
 
+@app.route('/show_history')
+def show_history():
+    data = []
+    return render_template('show_history.html', history_data=data)
+
+
 @app.route('/manage_customer')
 @roles_accepted('senior_manager', 'manager')
 def manage_all_customer():
@@ -495,11 +501,41 @@ def add_item_to_cart(movie_id):
     return jsonify({"operation": "add item", "movieID": movie_id, "amount": amount})
 
 
-@app.route('/shopping/update?<int:movie_id>', methods=['POST'])
+@app.route('/shopping/remove/<int:movie_id>', methods=['POST'])
+@roles_accepted('customer')
+def remove_item_in_cart(movie_id):
+    # TODO add or delete 1
+    amount = -1
+
+    conn, cur = connect2db(Config.database_path)
+
+    cur.execute('select customerID from customer where userID=?', (current_user.id,))
+    customer_id = cur.fetchone()[0]
+
+    cur.execute('select amount from shopping_cart where customerID=? and movieID=? and storeID=?', (customer_id, movie_id, store_id))
+    current_amount = cur.fetchone()[0]
+
+    # delete or update record into database.shopping_cart
+    if current_amount + amount <= 0:
+        cur.execute('delete from shopping_cart where customerID=? and movieID=? and storeID=?', (customer_id, movie_id, store_id))
+    else:
+        cur.execute('update shopping_cart set amount=? where customerID=? and movieID=? and storeID=?',
+                    (current_amount + amount, customer_id, movie_id, store_id))
+
+    # update amountTemp in database.stock
+    cur.execute('select amountTemp from stock where movieID=? and storeID=?', (movie_id, store_id))
+    temp_amount_all = cur.fetchone()[0]
+    cur.execute('update stock set amountTemp=? where movieID=? and storeID=?', (temp_amount_all-amount, movie_id, store_id))
+
+    conn.commit()
+    conn.close()
+    return jsonify({"operation": "reduce item", "movieID": movie_id, "amount": amount})
+
+
+@app.route('/shopping/update/<int:movie_id>', methods=['POST'])
 @roles_accepted('customer')
 def update_item_in_cart(movie_id):
     response = request.get_json()
-    # TODO add or delete 1
     amount = response['number']
 
     conn, cur = connect2db(Config.database_path)
