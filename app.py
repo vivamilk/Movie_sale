@@ -164,6 +164,7 @@ def connect2db(db_path):
 @app.route('/')
 def index():
     content = copy(context_base)
+    content['current_page'] = '/index'
     return render_template('index.html', **content)
 
 
@@ -189,6 +190,7 @@ def shopping():
         movie.append({'id': str(movieID), 'title': title, 'price': price})
 
     content['images'] = movie
+    content['current_page'] = '/shopping'
     return render_template('shopping.html', **content)
 
 
@@ -221,6 +223,7 @@ def manage_data():
         movie.append({'id': str(movie_id), 'name': title, 'price': price, 'cost': cost, 'inventory': stock})
 
     content['movies'] = movie
+    content['current_page'] = '/manager'
     return render_template('admin.html', **content)
 
 
@@ -235,6 +238,7 @@ def list_movie():
         movie.append({'id': movieID, 'imdbid': imdbID, 'title': title, 'year': year,
                       'rating': rating, 'stock': stock, 'price': price})
     content['movies'] = movie
+    content['current_page'] = '/list'
     return render_template('list_metadata.html', **content)
 
 
@@ -362,7 +366,7 @@ def get_stat_data():
     content['stats'] = [
         {'customer_id': 1, 'customer_name': 'tom', 'product_id': 1, 'number': 5},
     ]
-
+    content['current_page'] = '/stat'
     return render_template('stat.html', **content)
 
 
@@ -434,44 +438,51 @@ def register():
 @app.route('/update')
 @login_required
 def update_info():
-    return render_template('user_info_update.html')
+    content = copy(context_base)
+    content['current_page'] = '/update'
+    return render_template('user_info_update.html', **content)
 
 
 @app.route('/show_history')
 def show_history():
-    data = [
-        {
-            "paypal_id": "1234",
-            "item_list": [
-                {
-                    "customerID": "12",
-                    "movieID": "123",
-                    "storeID": "123",
-                    "amount": "123"
-                },
-                {
-                    "customerID": "12",
-                    "movieID": "123",
-                    "storeID": "123",
-                    "amount": "123"
-                }]},
-        {
-            "paypal_id": "1234",
-            "item_list": [
-                {
-                    "customerID": "12",
-                    "movieID": "123",
-                    "storeID": "123",
-                    "amount": "123"
-                },
-                {
-                    "customerID": "12",
-                    "movieID": "123",
-                    "storeID": "123",
-                    "amount": "123"
+    content = copy(context_base)
+    conn, cur = connect2db(Config.database_path)
+
+    cur.execute('select customerID from customer where userID=?', (current_user.id,))
+    customer_id = cur.fetchone()[0]
+
+    # get items in database.transaction
+    # TODO add price field into database.transaction
+    cur.execute('''
+        select T.movieID, title, amount, paypalID, purchaseDate, region
+        from transactions T
+        join movie M on T.movieID = M.movieID
+        join store S on T.storeID = S.storeID
+        where customerID=?
+        ''', (customer_id,))
+    records = cur.fetchall()
+    conn.close()
+
+    history = {}
+    for record in records:
+        if record[3] not in history:
+            history[record[3]] = {
+                'date': record[4],
+                'store': record[5],
+                'item_list': [{
+                    'movieID': str(record[0]),
+                    'title': record[1],
+                    'amount': record[2]
                 }]}
-    ]
-    return render_template('show_history.html', history=data)
+        else:
+            history[record[3]]['item_list'].append({
+                    'movieID': str(record[0]),
+                    'title': record[1],
+                    'amount': record[2]
+                })
+    content['history'] = history
+    content['current_page'] = '/show_history'
+    return render_template('show_history.html', **content)
 
 
 @app.route('/manage_customer')
@@ -488,6 +499,7 @@ def manage_all_customer():
             'name': customer[0], 'email': customer[1], 'tele_number': customer[2]
         })
     content['customers'] = data
+    content['current_page'] = '/manage_customer'
     return render_template('manager_customer.html', **content)
 
 
@@ -707,6 +719,7 @@ def receipt(status):
     transaction_id, status = status.split("&")
     content['transaction_id'] = transaction_id
     content['status'] = status
+    content['current_page'] = '/receipt'
     return render_template("receipt.html", **content)
 
 

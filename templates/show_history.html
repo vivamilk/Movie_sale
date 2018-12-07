@@ -1,30 +1,34 @@
 {% extends "index.html" %}
 {% block cssfile %}
+        <link href="{{ url_for('static', filename='css/show_history.css') }}" rel="stylesheet">
 {% endblock %}
 {% block content %}
     <div class="container">
-        {% for history_datas in history %}
-            <div class="row"><h5>PaypalId:{{ history_datas.paypal_id }}</h5></div>
-            <div class="row">
-                <table class="table table-striped">
-                    <thead>
-                    <tr>
-                        <th><h5>MovieImage</h5></th>
-                        <th><h5>MovieID</h5></th>
-                        <th><h5>StoreID</h5></th>
-                        <th><h5>Amount</h5></th>
-                    </tr>
-                    </thead>
-
-                    {% for history_data in history_datas.item_list %}
+        <div class="row" style="text-align: center"><h2>Your Orders</h2></div>
+        <hr width="80%">
+        {% for paypal_id in history %}
+            <div class="container auto-center">
+                <div class="row"><h4>PayPal Order # {{ paypal_id }}</h4></div>
+                <div class="row"><h4>Order Placed: {{ history[paypal_id].date }} In Store: <b>{{ history[paypal_id].store }}</b></h4></div>
+                <div class="row">
+                    <table class="table table-striped">
                         <tr>
-                            <td><img src="{{url_for('static', filename='posters/' + history_data.movieID + '.jpg')}}" width="45px" height="45px"></td>
-                            <td><h5>{{ history_data.movieID }}</h5></td>
-                            <td><h5>{{ history_data.storeID }}</h5></td>
-                            <td><h5>{{ history_data.amount }}</h5></td>
+                            <th class="col-md-2"><h5>Poster</h5></th>
+                            <th class="col-md-6"><h5>Title</h5></th>
+                            <th class="col-md-2"><h5>Amount</h5></th>
                         </tr>
-                    {% endfor %}
-                </table>
+
+                        {% for history_data in history[paypal_id].item_list %}
+                            <tr>
+                                <td><img src="{{url_for('static', filename='posters/' + history_data.movieID + '.jpg')}}" width="40px" height="60px"></td>
+                                <td><h5>{{ history_data.title }}</h5></td>
+                                <td><h5>{{ history_data.amount }}</h5></td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+                <br>
+                <br>
             </div>
         {% endfor %}
     </div>
