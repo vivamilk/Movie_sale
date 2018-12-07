@@ -5,9 +5,13 @@
     <script src="{{ url_for('static', filename='js/shopping.js') }}"></script>
 {% endblock %}
 {% block content %}
-    <div class="container">
+<div class="container">
+    <div class="row">
         <form>
-            <div class="col-md-2">
+            <div class="col-md-1">
+                <input type="text" class="form-control name" value="Customer_id">
+            </div>
+            <div class="col-md-1">
                 <div class="form-group">
                     <select class="form-control" name="month_from">
                         <option value="January">January</option>
@@ -26,7 +30,7 @@
                 </div>
             </div>
 
-            <div class="col-md-2">
+            <div class="col-md-1">
                 <div class="form-group">
                     <select class="form-control" name="month_from">
                         <option value="January">January</option>
@@ -44,10 +48,10 @@
                     </select>
                 </div>
             </div>
-
             <div class="col-md-3">
                 <div class="form-group">
                     <select class="form-control" name="movie_tpye">
+                        <option value="All" class="option">All</option>
                         <option value="Adventure" class="option">Adventure</option>
                         <option value="Sci-Fi" class="option">Sci-Fi</option>
                         <option value="Comedy" class="option">Comedy</option>
@@ -63,17 +67,156 @@
                 <div class="form-group">
                     <select class="form-control" name="result">
                         <option value="Cost" class="option">Cost</option>
-                        <option value="Profile" class="option">Proifle</option>
+                        <option value="Profit" class="option">Profit</option>
                         <option value="Sales-Number" class="option">Sales Number</option>
                     </select>
                 </div>
             </div>
+
             <div class="col-md-2">
+                <input type="text" class="form-control name" value="Product_id">
+            </div>
+
+            <div class="col-md-1">
                 <div class="input-group-btn">
                     <button class="btn btn-default" type="submit" name="search_btn"><i
                             class="glyphicon glyphicon-search"></i></button>
                 </div>
             </div>
+
+
         </form>
     </div>
+    {#    '''#}
+    {#    What are the aggregate sales and profit of the products.#}
+    {#What are the top product categories.#}
+    {#How do the various regions compare by sales volume?#}
+    {#Which  businesses are buying given products the most?#}
+    {#Other interesting aggregate queries that you will come up with.#}
+    {#    '''#}
+    {#    Genre = False, request all genre info #}
+
+    {# 获取用户购买的数量 #}
+    {% if customer %}
+        {% if not genre %}
+            {% if not product %}
+                <div class="row">
+                    <tr>
+                        <td><h5>Customer</h5></td>
+                        <td><h5>Customer Name</h5></td>
+                        <td><h5>Product Id</h5></td>
+                        <td><h5>Number</h5></td>
+                    </tr>
+                </div>
+                {% for stat in stats %}
+                    <div class="row">
+                        <tr>
+                            <td><h5>stat.customer_id</h5></td>
+                            <td><h5>stat.customer_name</h5></td>
+                            <td><h5>stat.product_id</h5></td>
+                            <td><h5>stat.number</h5></td>
+                        </tr>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endif %}
+    {% endif %}
+
+    {# 获取指定物品用户的购买数量 #}
+    {% if customer %}
+        {% if not genre %}
+            {% if product %}
+                <div class="row">
+                    <tr>
+                        <td><h5>Customer</h5></td>
+                        <td><h5>Customer Name</h5></td>
+                        <td><h5>Product Id</h5></td>
+                        <td><h5>Number</h5></td>
+                    </tr>
+                </div>
+                {% for stat in stats %}
+                    <div class="row">
+                        <tr>
+                            <td><h5>stat.customer_id</h5></td>
+                            <td><h5>stat.customer_name</h5></td>
+                            <td><h5>stat.product_id</h5></td>
+                            <td><h5>stat.number</h5></td>
+                        </tr>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endif %}
+    {% endif %}
+
+    {#    获取指定genre的购买数量 #}
+    {% if customer %}
+        {% if genre %}
+            <div class="row">
+                <tr>
+                    <td><h5>Customer</h5></td>
+                    <td><h5>Customer Name</h5></td>
+                    <td><h5>Genre</h5></td>
+                    <td><h5>Number</h5></td>
+                </tr>
+            </div>
+            {% for stat in stats %}
+                <div class="row">
+                    <tr>
+                        <td><h5>stat.customer_id</h5></td>
+                        <td><h5>stat.customer_name</h5></td>
+                        <td><h5>stat.genre</h5></td>
+                        <td><h5>stat.number</h5></td>
+                    </tr>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endif %}
+
+    {#   获取总商品统计 #}
+    {% if compare_store %}
+        {% if not genre %}
+            <div class="row">
+                <tr>
+                    <td><h5>Region</h5></td>
+                    <td><h5>{{ compare_type }}</h5></td>
+                    <td><h5>Number</h5></td>
+                </tr>
+            </div>
+            {% for stat in stats %}
+                <div class="row">
+                    <tr>
+                        <td><h5>stat.region</h5></td>
+                        <td><h5>stat.compare_type</h5></td>
+                        <td><h5>stat.number</h5></td>
+                    </tr>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endif %}
+    {#   根据商品种类进行统计 #}
+    {% if compare_store %}
+        {% if genre %}
+            <div class="row">
+                <tr>
+                    <td><h5>Region</h5></td>
+                    <td><h5>Genre</h5></td>
+                    <td><h5>{{ compare_type }}</h5></td>
+
+                    <td><h5>Number</h5></td>
+                </tr>
+            </div>
+            {% for stat in stats %}
+                <div class="row">
+                    <tr>
+                        <td><h5>stat.region</h5></td>
+                        <td><h5>stat.genre</h5></td>
+                        <td><h5>stat.compare_type</h5></td>
+                        <td><h5>stat.number</h5></td>
+                    </tr>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endif %}
+
+</div>
 {% endblock %}

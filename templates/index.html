@@ -8,10 +8,10 @@
             <div>
                 <ul class="nav navbar-nav">
                     {% if current_user.type != 'customer' %}
-                        <li class="active"><a href="#">Manage</a></li>
+                        <li class="active"><a href="manager">Manage</a></li>
                     {% else %}
                         <li class="active"><a href="list">VIEW ALL</a></li>
-                        <li class="active"><a href="shopping">VIEW POST</a></li>
+                        <li ><a href="shopping">SHOPPING</a></li>
                     {% endif %}
                 </ul>
                     <div class="nav navbar-nav navbar-default running-nav-right" style="width:50%">

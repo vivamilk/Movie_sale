@@ -93,7 +93,7 @@ def get_stat_data():
     # 销量成本利润
     # 选择电影类型
     # 按照时间
-    #
+    # Genre = True, Customer = True
     return render_template('stat.html')
 
 
