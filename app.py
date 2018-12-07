@@ -299,10 +299,16 @@ def manager_all_customer():
     content['customers'] = data
     return render_template('manager_customer.html', **content)
 
+@app.route('/showhistory')
+def show_history():
+    data = []
+    return render_template('show_history.html', history_data=data)
 
-@app.route('/shopping/update?<int:movie_id>', methods=['POST'])
+
+@app.route('/shopping/update/<int:movie_id>', methods=['POST'])
 @roles_accepted('customer')
 def update_item_in_cart(movie_id):
+    # {id:3, amount: 1}
     response = request.get_json()
     amount = response['number']
     # TODO get store_id
