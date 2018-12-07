@@ -16,7 +16,7 @@
                 </ul>
                     {% if search_bar %}
                         <div class="nav navbar-nav">
-                            <form class="navbar-form">
+                            <form class="navbar-form" id="search_bar">
                                 <div class="input-group">
                                     <select class="form-control" name="sort_by" id="sort_by">
                                         <option value="title" {% if sort_by == 'title' %}selected{% endif %}>Title</option>
@@ -52,11 +52,15 @@
                             <li><a href="register"><span class="glyphicon glyphicon-user"></span> Sign Up </a></li>
                             <li><a href="login"><span class="glyphicon glyphicon-log-in"></span> Login </a></li>
                         {% else %}
-                            <li><select class="form-control" id="store_id">
-                                {% for store in stores %}
-                                    <option value="{{ store[0] }}" {% if store_id == store[0] %}selected{% endif %}>{{ store[1] }}</option>
-                                {% endfor %}
-                            </select></li>
+                            {% if stores %}
+                                <li><select class="form-control" id="store_id_select" onchange="change_store_id()">
+                                    {% for store_item in stores %}
+                                        {{ store_item.id }} {{ store_id }} {{ store_id == store_item.id }}
+                                        <option value="{{ store_item.id }}" {% if store_id == store_item.id %}selected{% endif %}>{{ store_item.name }}</option>
+                                    {% endfor %}
+                                </select></li>
+                            {% endif %}
+
                             <li><a href="manage_customer"><span class="glyphicon glyphicon-user"></span> Hi, {{ current_user.username }} </a></li>
                             <li><a href="{{ url_for('logout') }}"><span class="glyphicon glyphicon-log-out"></span>Logout</a></li>
 

@@ -266,19 +266,21 @@ def get_movies_with_params(movie_columns):
 
     # select movies from db
     conn, cur = connect2db(Config.database_path)
-    # TODO show result from different stores
     cur.execute('''
     select {}
     from movie M
     join stock S
-    where M.movieID=S.movieID {}and S.storeID=1
+    where M.movieID=S.movieID {}and S.storeID={}
     {}
-    '''.format(movie_columns, search_sql, sort_sql))
+    '''.format(movie_columns, search_sql, store_id, sort_sql))
     data = cur.fetchall()
 
     # store info
     cur.execute('select storeID, region from store')
     store_data = cur.fetchall()
+    stores = []
+    for store in store_data:
+        stores.append({'id': str(store[0]), 'name': store[1]})
     conn.close()
 
     content = copy(context_base)
@@ -286,19 +288,21 @@ def get_movies_with_params(movie_columns):
     content['sort_by'] = sort_by
     content['search_term'] = search_term
     content['search_bar'] = True
-    content['stores'] = store_data
+    content['stores'] = stores
+    content['store_id'] = str(store_id)
     return data, content
 
 
 @app.route('/store_id_listener', methods=["POST"])
 @login_required
 def store_id_listener():
-    response = request.args.get('store_id')
-    if not response:
+    response = request.get_json()
+    if 'store_id' not in response:
         return redirect(url_for('index'))
     else:
         global store_id
-        store_id = response[0]
+        store_id = int(response['store_id'])
+        return jsonify(store_id)
 
 
 # -----------------------------------
@@ -306,6 +310,7 @@ def store_id_listener():
 # -----------------------------------
 
 @app.route('/stat')
+@roles_accepted('senior_manager')
 def get_stat_data():
     # 销量成本利润
     # 选择电影类型
@@ -405,11 +410,6 @@ def manage_all_customer():
 
 def get_items():
     """Inner function to get items in cart."""
-    # TODO get store_id
-    # response = request.get_json()
-    # store_id = response['store_id']
-    store_id = 1
-
     conn, cur = connect2db(Config.database_path)
 
     cur.execute('select customerID from customer where userID=?', (current_user.id,))
@@ -441,11 +441,6 @@ def get_items_in_cart():
 @app.route('/shopping/remove_items', methods=['POST'])
 @roles_accepted('customer')
 def remove_items_in_cart():
-    # TODO get store_id
-    # response = request.get_json()
-    # store_id = response['store_id']
-    store_id = 1
-
     conn, cur = connect2db(Config.database_path)
 
     cur.execute('select customerID from customer where userID=?', (current_user.id,))
@@ -472,12 +467,7 @@ def remove_items_in_cart():
 @app.route('/shopping/<int:movie_id>', methods=['POST'])
 @roles_accepted('customer')
 def add_item_to_cart(movie_id):
-    response = request.get_json()
-    # amount = response['number']
     amount = 1
-    # TODO get store_id
-    # store_id = response['store_id']
-    store_id = 1
 
     conn, cur = connect2db(Config.database_path)
 
@@ -509,10 +499,8 @@ def add_item_to_cart(movie_id):
 @roles_accepted('customer')
 def update_item_in_cart(movie_id):
     response = request.get_json()
+    # TODO add or delete 1
     amount = response['number']
-    # TODO get store_id
-    # store_id = response['store_id']
-    store_id = 1
 
     conn, cur = connect2db(Config.database_path)
 
@@ -543,11 +531,6 @@ def update_item_in_cart(movie_id):
 @app.route('/shopping/count_items', methods=['POST'])
 @roles_accepted('customer')
 def count_items_in_cart():
-    # TODO get store_id
-    # response = request.get_json()
-    # store_id = response['store_id']
-    store_id = 1
-
     conn, cur = connect2db(Config.database_path)
 
     cur.execute('select customerID from customer where userID=?', (current_user.id,))
@@ -625,11 +608,6 @@ def listener():
 
 @roles_accepted('customer')
 def record_transaction():
-    # TODO get store_id
-    # response = request.get_json()
-    # store_id = response['store_id']
-    store_id = 1
-
     conn, cur = connect2db(Config.database_path)
 
     cur.execute('select customerID from customer where userID=?', (current_user.id,))
