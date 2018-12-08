@@ -1,44 +1,14 @@
 from copy import copy
-from functools import wraps
 from werkzeug.urls import url_parse
 from flask import render_template, redirect, url_for, flash, request, session
 from flask_login import current_user, login_required, login_fresh, login_user, logout_user
 
-from movie import app, login_manager
-from movie.utils import context_base
+from movie import app
+from movie.utils import context_base, roles_accepted
 from movie.database import get_db
 from movie.form import LoginForm, RegistrationForm
 from movie.models import User
 from movie.api import get_movies_with_params
-
-
-# -----------------------------------
-# utility functions
-# -----------------------------------
-
-def roles_accepted(*roles):
-    """Decorator which specifies that a user must have at least one of the
-    specified roles. Example::
-        @app.route('/create_post')
-        @roles_accepted('editor', 'author')
-        def create_post():
-            return 'Create Post'
-    The current user must have either the `editor` role or `author` role in
-    order to view the page.
-    :param roles: The possible roles.
-    """
-
-    def wrapper(func):
-        @wraps(func)
-        def decorated_view(*args, **kwargs):
-            if not current_user.is_authenticated:
-                return login_manager.unauthorized()
-            elif current_user.type not in roles:
-                flash("Sorry, You do not have the permission to view this page. Return to homepage.")
-                return redirect(url_for('index'))
-            return func(*args, **kwargs)
-        return decorated_view
-    return wrapper
 
 
 # -----------------------------------
