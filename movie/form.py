@@ -21,7 +21,7 @@ class RegistrationForm(FlaskForm):
     submit = SubmitField('Register')
 
     def validate_username(self, username):
-        from app import User
+        from movie.api import User
         user = User().query_by_username(username.data)
         if user is not None:
             raise ValidationError('Please use a different username.')
