@@ -7,7 +7,6 @@ class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
     remember_me = BooleanField('Remember Me')
-    # is_manager = BooleanField('Manager Mode')
     submit = SubmitField('Sign In')
 
 
@@ -21,7 +20,7 @@ class RegistrationForm(FlaskForm):
     submit = SubmitField('Register')
 
     def validate_username(self, username):
-        from movie.api import User
+        from movie.models import User
         user = User().query_by_username(username.data)
         if user is not None:
             raise ValidationError('Please use a different username.')

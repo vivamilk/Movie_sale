@@ -2,10 +2,10 @@ import datetime
 import requests
 from copy import copy
 from flask import redirect, url_for, flash, jsonify, request, session
-from flask_login import current_user
+from flask_login import current_user, login_required
 
 from movie import app
-from movie.utils import context_base
+from movie.utils import context_base, roles_accepted
 from movie.database import get_db
 
 
@@ -25,6 +25,8 @@ def get_movies_with_params(movie_columns):
     is_descent = request.args.get('order') == 'True'
     store_id = int(session['store_id'])
 
+    if request.args.get('change_order') == '':
+        is_descent = not is_descent
     if is_descent:
         ordered = 'DESC'
     else:
@@ -61,27 +63,13 @@ def get_movies_with_params(movie_columns):
         stores.append({'id': str(store[0]), 'name': store[1]})
 
     content = copy(context_base)
-    content['order'] = not is_descent
+    content['order'] = is_descent
     content['sort_by'] = sort_by
     content['search_term'] = search_term
     content['search_bar'] = True
     content['stores'] = stores
     return data, content
 
-
-@app.route('/store_id_listener', methods=["POST"])
-def store_id_listener():
-    response = request.get_json()
-    if 'store_id' not in response:
-        return redirect(url_for('index'))
-    else:
-        session['store_id'] = str(response['store_id'])
-        return jsonify(session['store_id'])
-
-
-# -----------------------------------
-# Shopping Cart Operations
-# -----------------------------------
 
 def get_items():
     """Inner function to get items in cart."""
@@ -103,7 +91,53 @@ def get_items():
     return records
 
 
+def record_transaction(paypal_id):
+    store_id = int(session['store_id'])
+    purchase_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    conn, cur = get_db()
+
+    cur.execute('select customerID from customer where userID=?', (current_user.id,))
+    customer_id = cur.fetchone()[0]
+
+    # get items in the cart
+    cur.execute('select amount, movieID from shopping_cart where customerID=? and storeID=?', (customer_id, store_id))
+    records = cur.fetchall()
+
+    # remove records from database.shopping_cart
+    cur.execute('delete from shopping_cart where customerID=? and storeID=?', (customer_id, store_id))
+
+    # update database.stock & database.transaction
+    for amount, movie_id in records:
+        cur.execute('select amount from stock where movieID=? and storeID=?', (movie_id, store_id))
+        amount_all = cur.fetchone()[0]
+        cur.execute('update stock set amount=? where movieID=? and storeID=?', (amount_all-amount, movie_id, store_id))
+        cur.execute('insert into transactions values (?,?,?,?,?,?,?)',
+                    (None, amount, purchase_time, paypal_id, customer_id, movie_id, store_id))
+    conn.commit()
+    return jsonify({"operation": "record transaction"})
+
+
+# -----------------------------------
+# Store Switch API
+# -----------------------------------
+
+@app.route('/store_id_listener', methods=["POST"])
+@login_required
+def store_id_listener():
+    response = request.get_json()
+    if 'store_id' not in response:
+        return redirect(url_for('index'))
+    else:
+        session['store_id'] = str(response['store_id'])
+        return jsonify(session['store_id'])
+
+
+# -----------------------------------
+# Shopping Cart API
+# -----------------------------------
+
 @app.route('/shopping/get_items', methods=['POST'])
+@roles_accepted('customer')
 def get_items_in_cart():
     records = get_items()
     json_data = []
@@ -113,6 +147,7 @@ def get_items_in_cart():
 
 
 @app.route('/shopping/remove_items', methods=['POST'])
+@roles_accepted('customer')
 def remove_items_in_cart():
     store_id = int(session['store_id'])
     conn, cur = get_db()
@@ -138,6 +173,7 @@ def remove_items_in_cart():
 
 
 @app.route('/shopping/<int:movie_id>', methods=['POST'])
+@roles_accepted('customer')
 def add_item_to_cart(movie_id):
     amount = 1
     store_id = int(session['store_id'])
@@ -169,6 +205,7 @@ def add_item_to_cart(movie_id):
 
 
 @app.route('/shopping/remove/<int:movie_id>', methods=['POST'])
+@roles_accepted('customer')
 def remove_item_in_cart(movie_id):
     amount = -1
     store_id = int(session['store_id'])
@@ -201,6 +238,7 @@ def remove_item_in_cart(movie_id):
 
 
 @app.route('/shopping/update/<int:movie_id>', methods=['POST'])
+@roles_accepted('customer')
 def update_item_in_cart(movie_id):
     response = request.get_json()
     amount = response['number']
@@ -234,6 +272,7 @@ def update_item_in_cart(movie_id):
 
 
 @app.route('/shopping/count_items', methods=['POST'])
+@roles_accepted('customer')
 def count_items_in_cart():
     store_id = int(session['store_id'])
     conn, cur = get_db()
@@ -251,6 +290,7 @@ def count_items_in_cart():
 
 
 @app.route('/checkout', methods=['POST'])
+@roles_accepted('customer')
 def checkout_for_cart():
     records = get_items()
     if not records:
@@ -273,7 +313,12 @@ def checkout_for_cart():
     return jsonify(data)
 
 
+# -----------------------------------
+# Transaction Validation API
+# -----------------------------------
+
 @app.route('/listener')
+@roles_accepted('customer')
 def listener():
     """
     Validate transaction status from PayPal, and insert transaction record into database.
@@ -298,27 +343,42 @@ def listener():
         return redirect('/receipt/{}&{}'.format(transaction_id, 'fail'))
 
 
-def record_transaction(paypal_id):
-    store_id = int(session['store_id'])
-    purchase_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    conn, cur = get_db()
+# -----------------------------------
+# Store Management API
+# -----------------------------------
 
-    cur.execute('select customerID from customer where userID=?', (current_user.id,))
-    customer_id = cur.fetchone()[0]
+@app.route('/manage/delete_movie', methods=['POST'])
+@roles_accepted('senior_manager', 'manager')
+def manage_delete_movie():
+    # TODO
+    response = request.get_json()
+    # response = {'movie_id': remove_id}
+    return NotImplementedError
 
-    # get items in the cart
-    cur.execute('select amount, movieID from shopping_cart where customerID=? and storeID=?', (customer_id, store_id))
-    records = cur.fetchall()
 
-    # remove records from database.shopping_cart
-    cur.execute('delete from shopping_cart where customerID=? and storeID=?', (customer_id, store_id))
+@app.route('/manage/add_movie', methods=['POST'])
+@roles_accepted('senior_manager', 'manager')
+def manage_add_movie():
+    # TODO
+    response = request.get_json()
+    # {'store_id': store_id, 'price': price, 'cost': cost, 'name': name, 'inventory': inventory_amount})
+    print(response)
+    # Below is the exmaple for error message, if the added movie is in the stock, showing the error like this.
+    return jsonify(message="Added movie already in the stock"), 404
 
-    # update database.stock & database.transaction
-    for amount, movie_id in records:
-        cur.execute('select amount from stock where movieID=? and storeID=?', (movie_id, store_id))
-        amount_all = cur.fetchone()[0]
-        cur.execute('update stock set amount=? where movieID=? and storeID=?', (amount_all-amount, movie_id, store_id))
-        cur.execute('insert into transactions values (?,?,?,?,?,?,?)',
-                    (None, amount, purchase_time, paypal_id, customer_id, movie_id, store_id))
-    conn.commit()
-    return jsonify({"operation": "record transaction"})
+
+@app.route('/manage/update_move', methods=['POST'])
+@roles_accepted('senior_manager', 'manager')
+def manage_update_movie():
+    # TODO
+    resposne = request.get_json()
+    # {'store_id': store_id, 'price': price, 'cost': cost, 'name': name, 'inventory': inventory_amount})
+    return NotImplementedError
+
+
+@app.route('/manage/add_store', methods=['POST'])
+@roles_accepted('senior_manager')
+def add_store():
+    # TODO
+    resposne = request.get_json()
+    return NotImplementedError

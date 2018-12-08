@@ -1,13 +1,40 @@
-
 $(document).ready(function () {
+
     $("body").delegate(".admin-p-remove","click",function(event) {
         var remove = $(this).parent().parent();
         var remove_id = remove.find(".admin-p-remove").attr("remove_id");
+        var store_id = $( "#store_id_select option:selected" )[0].value;
         remove.hide();
+        $.ajax({
+            url: '/manage/delete_movie',
+            contentType: "application/json; charset=utf-8",
+            type: "POST",
+            data: JSON.stringify({'movie_id': remove_id, 'store_id':store_id}),
+            success: function(data){
+                alert("Delete Successfully");
+            }
+            })
     });
+
     $('body').delegate(".admin-p-update", "click", function (event) {
-        alert("Update Successfully!");
+        var add = $(this).parent().parent();
+        var product_kind_id = add.find(".movieid").val();
+        var name = add.find(".name").val();
+        var inventory_amount = add.find(".inventory").val();
+        var price = add.find(".sale-price").val();
+        var cost = add.find(".cost").val();
+        var store_id = $( "#store_id_select option:selected" )[0].value;
+        $.ajax({
+            url:'/manage/update_movie',
+            contentType: "application/json; charset=utf-8",
+            type: "POST",
+            data: JSON.stringify({'store_id': store_id, 'price':price, 'cost':cost, 'name':name, 'inventory': inventory_amount}),
+            success: function(data){
+                alert("Add item successfully!");
+            },
+        });
     });
+
     $("body").delegate(".admin-p-add","click",function(event) {
         var add = $(this).parent().parent();
         var product_kind_id = add.find(".movieid").val();
@@ -42,12 +69,18 @@ $(document).ready(function () {
                 </tr>`
         var total_table = add.parent().parent();
         $(total_table).append(item_info);
+        var store_id = $( "#store_id_select option:selected" )[0].value;
+        $.ajax({
+            url:'/manage/add_movie',
+            contentType: "application/json; charset=utf-8",
+            type: "POST",
+            data: JSON.stringify({'store_id': store_id, 'price':price, 'cost':cost, 'name':name, 'inventory': inventory_amount}),
+            success: function(data){
+                alert("Add item successfully!");
+            },
+            error: function(data){
+                alert(data.responseJSON.message);
+            }
+        })
     })
-    //         data    :    {adminRemoveOrderDetail:1,rid:remove_id},
-    //         success    :    function(data){
-    //            $("#admin_msg").html(data);
-    //            admin_order();
-    //         }
-    //     })
-    // })
 });

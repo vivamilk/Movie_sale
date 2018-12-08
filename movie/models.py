@@ -1,22 +1,15 @@
-from movie import login_manager
-from movie.database import get_db
-from flask_login import UserMixin
+from flask_login import UserMixin, AnonymousUserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
+from movie.database import get_db
+from movie import login_manager
 
-# -----------------------------------
-# utility functions
-# -----------------------------------
 
 @login_manager.user_loader
 def load_user(user_id):
     user = User()
     return user.query_by_id(user_id)
 
-
-# -----------------------------------
-# models
-# -----------------------------------
 
 class User(UserMixin):
 

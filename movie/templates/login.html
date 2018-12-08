@@ -1,39 +1,14 @@
-{% extends "base.html" %}
+{% extends "auth.html" %}
 
-{% block cssfile %}<link href="static/css/login.css" rel="stylesheet">{% endblock %}
-
-{% block body %}
-    <nav class="navbar navbar-default login-nav" role="navigation">
-        <div class="container-fluid">
-            <div class="navbar-header">
-                <a class="navbar-brand" href="#">Movie Sales</a>
-            </div>
-            <div>
-                <ul class="nav navbar-nav">
-                    <li ><a href="/index">Manage</a></li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-    <div class="container log">
-        <div class="row">
-            <div class="login-form">
-                <h1>Sign In</h1>
-                <form action="" method="post" novalidate>
-                    {{ form.hidden_tag() }}
-                    <p>
-                        {{ form.username.label }}<br>
-                        {{ form.username(size=32) }}
-                    </p>
-                    <p>
-                        {{ form.password.label }}<br>
-                        {{ form.password(size=32, class='my_passport') }}
-                    </p>
-                    <p>{{ form.remember_me.label }}{{ form.remember_me() }}
-                    </p>
-                    <p><h4>{{ form.submit(class='sub-button') }}</h4></p>
-                </form>
-            </div>
-        </div>
-    </div>
+{% block auth %}
+    <h1>Sign In</h1>
+    <form action="" method="post" novalidate>
+        {{ form.hidden_tag() }}
+        <dl>
+            {{ render_field(form.username) }}
+            {{ render_field(form.password) }}
+        </dl>
+        <div style="text-align: center">{{ form.remember_me.label }}{{ form.remember_me(class="remember_me") }}</div>
+        <h4>{{ form.submit() }}</h4>
+    </form>
 {% endblock %}

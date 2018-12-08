@@ -28,6 +28,7 @@ def index():
 # -----------------------------------
 
 @app.route('/shopping')
+@login_required
 def shopping():
     # get movies from database
     data, content = get_movies_with_params('M.movieID, M.title, S.salePrice')
@@ -57,23 +58,8 @@ def shopping():
 #     return render_template('shopping.html', images=movie, home=True)
 
 
-@app.route('/manager')
-@roles_accepted('manager', 'senior_manager')
-def manage_data():
-    # get movies from database
-    data, content = get_movies_with_params('M.movieID, M.title, S.salePrice, S.cost, S.amount')
-
-    movie = []
-    for select_data in data:
-        movie_id, title, price, cost, stock = select_data
-        movie.append({'id': str(movie_id), 'name': title, 'price': price, 'cost': cost, 'inventory': stock})
-
-    content['movies'] = movie
-    content['current_page'] = '/manager'
-    return render_template('admin.html', **content)
-
-
 @app.route('/list')
+@login_required
 def list_movie():
     # get movies from database
     data, content = get_movies_with_params('M.movieID, M.imdbID, M.title, M.year, M.rating, S.amount, S.salePrice')
@@ -153,6 +139,18 @@ def register():
 # User Info Views
 # -----------------------------------
 
+@app.route("/receipt/<status>")
+@roles_accepted('customer')
+def receipt(status):
+    """Function to display receipt after purchase"""
+    content = copy(context_base)
+    transaction_id, status = status.split("&")
+    content['transaction_id'] = transaction_id
+    content['status'] = status
+    content['current_page'] = '/receipt'
+    return render_template("receipt.html", **content)
+
+
 @app.route('/update')
 @login_required
 def update_info():
@@ -162,6 +160,7 @@ def update_info():
 
 
 @app.route('/show_history')
+@roles_accepted('customer')
 def show_history():
     content = copy(context_base)
     conn, cur = get_db()
@@ -203,6 +202,10 @@ def show_history():
     return render_template('show_history.html', **content)
 
 
+# -----------------------------------
+# Management Views
+# -----------------------------------
+
 @app.route('/manage_customer')
 @roles_accepted('senior_manager', 'manager')
 def manage_all_customer():
@@ -221,16 +224,27 @@ def manage_all_customer():
     return render_template('manager_customer.html', **content)
 
 
-@app.route("/receipt/<status>")
-@roles_accepted('customer')
-def receipt(status):
-    """Function to display receipt after purchase"""
-    content = copy(context_base)
-    transaction_id, status = status.split("&")
-    content['transaction_id'] = transaction_id
-    content['status'] = status
-    content['current_page'] = '/receipt'
-    return render_template("receipt.html", **content)
+@app.route('/manager')
+@roles_accepted('manager', 'senior_manager')
+def manage_data():
+    # get movies from database
+    data, content = get_movies_with_params('M.movieID, M.title, S.salePrice, S.cost, S.amount')
+
+    movie = []
+    for select_data in data:
+        movie_id, title, price, cost, stock = select_data
+        movie.append({'id': str(movie_id), 'name': title, 'price': price, 'cost': cost, 'inventory': stock})
+
+    content['movies'] = movie
+    content['current_page'] = '/manager'
+    return render_template('admin.html', **content)
+
+
+@app.route('/manage/store', methods = ['GET'])
+@roles_accepted('senior_manager')
+def manage_store():
+    # TODO
+    return render_template('manage_stores.html')
 
 
 # -----------------------------------
@@ -249,9 +263,9 @@ def get_stat_data():
     options = request.args.get('result')
     product_id = request.args.get('product_id')
 
-    # 销量成本利润
-    # 选择电影类型
-    # 按照时间
+    # amount cost profit
+    # select genres
+    # by time
     #
     conn, cur = get_db()
     if customer_id:

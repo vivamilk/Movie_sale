@@ -1,7 +1,3 @@
-function get_all_button() {
-    return $(".movie-list").find("button")
-}
-
 function count_item() {
     $.ajax({
         url: '/shopping/count_items',
@@ -86,31 +82,9 @@ function bind_update_function(){
             }
         });
     });
-
-    // $('#cart_product').delegate('.admin-p-remove-item', 'click', function (event) {
-    //     var item_id = this.id;
-    //     $.ajax({
-    //
-    //         url: '/shopping/remove/' + item_id,
-    //         contentType: "application/json; charset=utf-8",
-    //         type: "POST",
-    //         data: JSON.stringify({'number': -1}),
-    //         success: function (response){
-    //             ajax_count += 1;
-    //             console.log(ajax_count);
-    //             // count_item();
-    //             get_cart_item();
-    //         },
-    //         error: function (error) {
-    //             console.log(error);
-    //         }
-    //     });
-    // });
 }
 
 function get_cart_item() {
-    cart_count += 1;
-    console.log(cart_count);
     $.ajax({
         url: '/shopping/get_items',
         type: "POST",
@@ -150,10 +124,24 @@ function get_cart_item() {
     })
 }
 
-var ajax_count = 0;
-var cart_count = 0;
-
 $(document).ready(function () {
+    $('.movie-list').delegate('button', "click", function (event) {
+        var movie_id = this.id;
+        $.ajax({
+            url: '/shopping/' + movie_id,
+            contentType: "application/json; charset=utf-8",
+            type: "POST",
+            data: JSON.stringify({'number': 1}),
+            success: function (response) {
+                console.log(response);
+                count_item();
+                get_cart_item();
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+    });
     count_item();
     get_cart_item();
 });
