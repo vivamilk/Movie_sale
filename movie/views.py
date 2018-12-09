@@ -20,7 +20,7 @@ from movie.api import get_movies_with_params
 def index():
     content = copy(context_base)
     content['current_page'] = '/index'
-    return render_template('index.html', **content)
+    return render_template('base.html', **content)
 
 
 @app.route('/test', methods=["GET", "POST"])
