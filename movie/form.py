@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, IntegerField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, IntegerField, SelectField, HiddenField
 from wtforms.validators import DataRequired, EqualTo, ValidationError, Email
+import re
 
 
 class LoginForm(FlaskForm):
@@ -24,3 +25,42 @@ class RegistrationForm(FlaskForm):
         user = User().query_by_username(username.data)
         if user is not None:
             raise ValidationError('Please use a different username.')
+
+
+class SearchBarForm(FlaskForm):
+    choice = SelectField('Filter', choices=[('un-choose', ' -- Filter By -- '), ('year', 'Year'), ('genres', 'Genre'), ('content_rating', 'Content Rating')])
+    year = SelectField('year', coerce=int, choices=[(0, '-- Year --')])
+    genres = SelectField('genres', choices=[('None', '-- Genres --')])
+    content_rating = SelectField('content_rating', choices=[('None', '-- Certificate --')])
+
+    sort_by = SelectField('Sort By', choices=[('None', '-- Sort By --'), ('title', 'title'), ('year', 'year'), ('rating', 'rating'), ('price', 'price')])
+    order = HiddenField('Order')
+    search_term = StringField()
+
+    submit = SubmitField()
+
+    def init_options(self, range_sql):
+        """Dynamically load filter options"""
+        from movie.database import get_db
+        conn, cur = get_db()
+
+        # remove "order by ..." if exist
+        order_filter_pattern = re.compile(r'order by .*')
+        range_sql = order_filter_pattern.sub('', range_sql)
+
+        cur.execute('select distinct year {} order by year desc'.format(range_sql))
+        years = cur.fetchall()
+        self.year.choices.extend([(year[0], year[0]) for year in years])
+
+        # join genres if not
+        if 'join genres G' not in range_sql:
+            idx = range_sql.index("where")
+            range_sql = range_sql[:idx] + 'join genres G on M.movieID = G.movieID\n' + range_sql[idx:]
+        cur.execute('select distinct genre {} order by genre'.format(range_sql))
+        genres = cur.fetchall()
+        self.genres.choices.extend([(genre[0], genre[0]) for genre in genres])
+
+        cur.execute('select distinct contentRating {} order by contentRating'.format(range_sql))
+        content_ratings = cur.fetchall()
+        self.content_rating.choices.extend(
+            [(content_rating[0], content_rating[0]) for content_rating in content_ratings])

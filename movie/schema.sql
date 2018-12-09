@@ -1,3 +1,11 @@
+create table users
+(
+  userID      INTEGER primary key,
+  username    VARCHAR(20) unique not null,
+  password    VARCHAR(100) not null,
+  is_manager  BOOLEAN
+);
+
 create table customer
 (
   customerID   INTEGER primary key autoincrement,
@@ -15,6 +23,20 @@ create table manager
   name          VARCHAR(20) not null,
   emailAddress  VARCHAR(30),
   salary        NUMERIC
+);
+
+create table store
+(
+  storeID        INTEGER primary key autoincrement,
+  emailAddress   VARCHAR(30) not null,
+  region         VARCHAR(30)not null
+);
+
+create table management
+(
+  managerID INTEGER references manager,
+  storeID   INTEGER references store,
+  primary key (storeID, managerID)
 );
 
 create table movie
@@ -45,18 +67,13 @@ create table stock
   primary key (storeID, movieID)
 );
 
-create table store
+create table shopping_cart
 (
-  storeID        INTEGER primary key autoincrement,
-  emailAddress   VARCHAR(30) not null,
-  region         VARCHAR(30)not null
-);
-
-create table management
-(
-  managerID INTEGER references manager,
-  storeID   INTEGER references store,
-  primary key (storeID, managerID)
+  amount      INTEGER(10) not null,
+  customerID  INTEGER not null references customer,
+  movieID     INTEGER not null references movie,
+  storeID     INTEGER not null references store,
+  primary key (customerID, movieID, storeID)
 );
 
 create table transactions
@@ -69,20 +86,26 @@ create table transactions
   movieID      INTEGER references movie,
   storeID      INTEGER references store
 );
-
-create table users
-(
-  userID      INTEGER primary key,
-  username    VARCHAR(20) unique not null,
-  password    VARCHAR(100) not null,
-  is_manager  BOOLEAN
-);
-
-create table shopping_cart
-(
-  amount      INTEGER(10) not null,
-  customerID  INTEGER not null references customer,
-  movieID     INTEGER not null references movie,
-  storeID     INTEGER not null references store,
-  primary key (customerID, movieID, storeID)
-);
+-- TODO change transaction to 2 tables below
+-- create table transaction_detail
+-- (
+--   paypalID     VARCHAR(20) references transaction_total,
+--   movieID      INTEGER references movie,
+--   amount       INTEGER(10) not null,
+--   price        INTEGER(10) not null,
+--   primary key (paypalID, movieID)
+-- );
+--
+-- create table transaction_info
+-- (
+--   paypalID        VARCHAR(20) primary key,
+--   purchaseDate    datetime not null,
+--   customerID      INTEGER references customer,
+--   storeID         INTEGER references store,
+--   totalPrice      INTEGER(10) not null,
+--   shippingAddress VARCHAR(200) not null,
+--   -- 0: preparing, 1: shipping, 2: delivered
+--   status          INTEGER(1) not null,
+--   notes           VARCHAR(100),
+--   check (status>=0 and status<=2)
+-- );

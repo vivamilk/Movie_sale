@@ -6,7 +6,7 @@ from flask_login import current_user, login_required, login_fresh, login_user, l
 from movie import app
 from movie.utils import context_base, roles_accepted
 from movie.database import get_db
-from movie.form import LoginForm, RegistrationForm
+from movie.form import LoginForm, RegistrationForm, SearchBarForm
 from movie.models import User
 from movie.api import get_movies_with_params
 
@@ -15,7 +15,7 @@ from movie.api import get_movies_with_params
 # Main Views
 # -----------------------------------
 
-@app.route('/index')
+@app.route('/index', methods=["GET", "POST"])
 @app.route('/')
 def index():
     content = copy(context_base)
@@ -23,11 +23,35 @@ def index():
     return render_template('index.html', **content)
 
 
+@app.route('/test', methods=["GET", "POST"])
+def test():
+    content = copy(context_base)
+
+    form = SearchBarForm()
+
+    if form.submit():
+        choice = form.choice.data
+        if choice == 'year' and form.year.data:
+            flash("{}".format(form.year.data))
+        elif choice == 'genres' and form.genres.data != 'None':
+            flash("{}".format(form.genres.data))
+        elif choice == 'content_rating' and form.content_rating.data != 'None':
+            flash("{}".format(form.content_rating.data))
+
+    print('1', form.search_term.data)
+    print('2', form.sort_by.data)
+    print('3', form.order.data)
+
+    content['form'] = form
+    content['current_page'] = '/test'
+    return render_template('test.html', **content)
+
+
 # -----------------------------------
 # Movie List Views
 # -----------------------------------
 
-@app.route('/shopping')
+@app.route('/shopping', methods=["POST", "GET"])
 @login_required
 def shopping():
     # get movies from database
@@ -58,7 +82,7 @@ def shopping():
 #     return render_template('shopping.html', images=movie, home=True)
 
 
-@app.route('/list')
+@app.route('/list', methods=["POST", "GET"])
 @login_required
 def list_movie():
     # get movies from database
@@ -176,6 +200,7 @@ def show_history():
         join movie M on T.movieID = M.movieID
         join store S on T.storeID = S.storeID
         where customerID=?
+        order by purchaseDate desc
         ''', (customer_id,))
     records = cur.fetchall()
     conn.close()
@@ -224,7 +249,7 @@ def manage_all_customer():
     return render_template('manager_customer.html', **content)
 
 
-@app.route('/manager')
+@app.route('/manager', methods=["GET", "POST"])
 @roles_accepted('manager', 'senior_manager')
 def manage_data():
     # get movies from database
