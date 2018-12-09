@@ -22,7 +22,7 @@ class User(UserMixin):
         self.phone_number = phone_numer
         self.salary = salary
         # connect to database
-        db, cur = get_db()
+        conn, cur = get_db()
         cur.execute('select max(userID) from users')
         current_max_id = cur.fetchone()[0]
         if current_max_id is not None:
@@ -40,11 +40,11 @@ class User(UserMixin):
                         (self.id, self.username, self.password, True))
             cur.execute('insert into manager values (?,?,?,?,?,?)',
                         (None, self.id, False, self.name, self.email, self.salary))
-        cur.commit()
+        conn.commit()
 
     def query_by_id(self, user_id):
         # connect to database
-        db, cur = get_db()
+        conn, cur = get_db()
         cur.execute('select username, password, is_manager from users where userID=?', (user_id,))
         result = cur.fetchone()
         if result is None:
@@ -54,7 +54,7 @@ class User(UserMixin):
 
     def query_by_username(self, username):
         # connect to database
-        db, cur = get_db()
+        conn, cur = get_db()
         cur.execute('select userID, password, is_manager from users where username=?', (username,))
         result = cur.fetchone()
         if result is None:
@@ -70,7 +70,7 @@ class User(UserMixin):
         self.password = password
         if is_manager:
             # connect to database
-            db, cur = get_db()
+            conn, cur = get_db()
             cur.execute('select * from manager where userID=?', (user_id,))
             item = cur.fetchone()
             self.id = item[1]
@@ -83,7 +83,7 @@ class User(UserMixin):
             self.salary = item[5]
         else:
             # connect to database
-            db, cur = get_db()
+            conn, cur = get_db()
             cur.execute('select * from customer where userID=?', (user_id,))
             item = cur.fetchone()
             self.id = item[1]

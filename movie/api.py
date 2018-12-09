@@ -1,10 +1,12 @@
 import datetime
 import requests
+from urllib.parse import unquote_plus
 from copy import copy
 from flask import redirect, url_for, flash, jsonify, request, session
 from flask_login import current_user, login_required
 
 from movie import app
+from movie.form import SearchBarForm
 from movie.utils import context_base, roles_accepted
 from movie.database import get_db
 
@@ -19,56 +21,98 @@ def get_movies_with_params(movie_columns):
     :param movie_columns: which columns are needed (a string)
     :return:
     """
-    # get keywords
-    search_term = request.args.get('search_term')
-    sort_by = request.args.get('sort_by')
-    is_descent = request.args.get('order') == 'True'
-    store_id = int(session['store_id'])
+    # initialize form
+    form = SearchBarForm()
 
-    if request.args.get('change_order') == '':
-        is_descent = not is_descent
-    if is_descent:
-        ordered = 'DESC'
-    else:
-        ordered = ''
-    if not search_term:
-        search_term = ""
-        search_sql = ""
-    else:
-        search_sql = "and title like '%{}%' ".format(search_term)
-    if sort_by == 'price':
-        sort_sql = "order by S.salePrice {}".format(ordered)
-    elif sort_by:
-        sort_sql = "order by M.{} {}".format(sort_by, ordered)
-    else:
-        sort_sql = ""
-
-    # select movies from db
+    # connect to database
     conn, cur = get_db()
     cur = conn.cursor()
-    cur.execute('''
-    select {}
-    from movie M
-    join stock S
-    where M.movieID=S.movieID {}and S.storeID={}
-    {}
-    '''.format(movie_columns, search_sql, store_id, sort_sql))
-    data = cur.fetchall()
 
     # store info
+    store_id = int(session['store_id'])
     cur.execute('select storeID, region from store')
     store_data = cur.fetchall()
     stores = []
     for store in store_data:
         stores.append({'id': str(store[0]), 'name': store[1]})
 
+    # retrieve movie info
+    range_sql, form = get_range_sql(form, store_id)
+    cur.execute("select {}".format(movie_columns) + range_sql)
+    data = cur.fetchall()
+
+    # init filter options
+    form.init_options(range_sql)
+
     content = copy(context_base)
-    content['order'] = is_descent
-    content['sort_by'] = sort_by
-    content['search_term'] = search_term
     content['search_bar'] = True
     content['stores'] = stores
+    content['form'] = form
     return data, content
+
+
+def get_range_sql(form: SearchBarForm, store_id: int):
+    """Generate specific SQL to retrieve movie info by given form"""
+    # get keywords
+    if form.is_submitted():
+        search_term = form.search_term.data
+        if not search_term or search_term == 'None':
+            search_sql = ""
+        else:
+            search_sql = "and title like '%{}%'".format(search_term)
+
+        order = form.order.data
+        if order == '' or order == 'None':
+            order = 'asc'
+        if request.form.get('submit1') == 'order':
+            if order == 'asc':
+                order = 'desc'
+                form.order.data = order
+            elif order == 'desc':
+                order = 'asc'
+                form.order.data = order
+
+        sort_by = form.sort_by.data
+        if sort_by == 'None':
+            sort_sql = ""
+        elif sort_by == 'price':
+            sort_sql = "order by S.salePrice {}".format(order)
+        else:
+            sort_sql = "order by M.{} {}".format(sort_by, order)
+
+        # filter settings
+        choice = form.choice.data
+        if choice == 'genres' and form.genres.data != 'None':
+            # select movies from db
+            range_sql = '''
+            from movie M
+            join stock S on M.movieID = S.movieID
+            join genres G on M.movieID = G.movieID
+            where S.storeID={} and genre='{}' {}
+            {}
+            '''.format(store_id, form.genres.data, search_sql, sort_sql)
+        else:
+            if choice == 'year' and form.year.data:
+                filter_sql = "and year={}".format(form.year.data)
+            elif choice == 'content_rating' and form.content_rating.data != 'None':
+                filter_sql = "and contentRating='{}'".format(form.content_rating.data)
+            else:
+                filter_sql = ""
+            # select movies from db
+            range_sql = '''
+            from movie M
+            join stock S on M.movieID = S.movieID
+            where S.storeID={} {} {}
+            {}
+            '''.format(store_id, search_sql, filter_sql, sort_sql)
+    else:
+        # select movies from db
+        range_sql = ('''
+        from movie M
+        join stock S on M.movieID = S.movieID
+        where S.storeID={}
+        '''.format(store_id))
+    return range_sql, form
 
 
 def get_items():
@@ -91,28 +135,48 @@ def get_items():
     return records
 
 
-def record_transaction(paypal_id):
+def record_transaction(response_dict: dict):
     store_id = int(session['store_id'])
     purchase_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    shipping_address = "\n".join([response_dict['address_name'],
+                                  response_dict['address_street'],
+                                  response_dict['address_city'],
+                                  response_dict['address_state'],
+                                  response_dict['address_zip'],
+                                  response_dict['address_country_code']])
+    paypal_id = response_dict['txn_id']
+    total_payment = response_dict['mc_gross']
+
     conn, cur = get_db()
 
     cur.execute('select customerID from customer where userID=?', (current_user.id,))
     customer_id = cur.fetchone()[0]
 
     # get items in the cart
-    cur.execute('select amount, movieID from shopping_cart where customerID=? and storeID=?', (customer_id, store_id))
+    cur.execute('''
+    select SC.amount, SC.movieID, salePrice
+    from shopping_cart SC
+    join stock S on S.movieID=SC.movieID and S.storeID=SC.storeID
+    where customerID=? and SC.storeID=?
+    ''', (customer_id, store_id))
     records = cur.fetchall()
 
     # remove records from database.shopping_cart
     cur.execute('delete from shopping_cart where customerID=? and storeID=?', (customer_id, store_id))
 
-    # update database.stock & database.transaction
-    for amount, movie_id in records:
+    # insert into database.transaction_info
+    cur.execute('insert into transactions_info values (?,?,?,?,?,?,?)',
+                (paypal_id, purchase_time, customer_id, store_id, total_payment, shipping_address, 0))
+
+    for amount, movie_id, price in records:
+        # update database.stock
         cur.execute('select amount from stock where movieID=? and storeID=?', (movie_id, store_id))
         amount_all = cur.fetchone()[0]
         cur.execute('update stock set amount=? where movieID=? and storeID=?', (amount_all-amount, movie_id, store_id))
-        cur.execute('insert into transactions values (?,?,?,?,?,?,?)',
-                    (None, amount, purchase_time, paypal_id, customer_id, movie_id, store_id))
+        # insert into database.transaction_detail
+        cur.execute('insert into transactions_detail values (?,?,?,?)',
+                    (paypal_id, movie_id, amount, price))
     conn.commit()
     return jsonify({"operation": "record transaction"})
 
@@ -299,7 +363,7 @@ def checkout_for_cart():
         'business': '9AK39BT347LLA',
         'cmd': '_cart',
         'upload': 1,
-        'no_shipping': 1,
+        # 'no_shipping': 1,
         'currency_code': 'USD',
     }
     for idx, record in enumerate(records):
@@ -335,7 +399,14 @@ def listener():
     response = requests.post(
         "https://www.sandbox.paypal.com/cgi-bin/webscr", data=data).text
     if response.startswith('SUCCESS'):
-        record_transaction(transaction_id)
+        # decode response
+        response_decode = unquote_plus(response).splitlines()
+        response_dict = {}
+        for line in response_decode[1:]:
+            key, value = line.split('=')
+            response_dict[key] = value
+
+        record_transaction(response_dict)
         flash("Success!")
         return redirect('/receipt/{}&{}'.format(transaction_id, 'success'))
     else:

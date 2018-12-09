@@ -11,3 +11,26 @@
   {% endif %}
   </dd>
 {% endmacro %}
+
+<!-- use for shipping status button in user history-->
+{% macro shipping_status(order_info) %}
+    {% if order_info.status == 0 %}
+        <button type="button" class="btn btn-warning" title="Shipping Status"
+                data-container="body" data-toggle="hover" data-placement="right"
+                data-content="Shipping Address: {{ order_info.shipping }}<br>Shipping Status: <b>Preparing your order</b>">
+            Status
+        </button>
+    {% elif order_info.status == 1 %}
+        <button type="button" class="btn btn-primary" title="Shipping Status"
+                data-container="body" data-toggle="hover" data-placement="right"
+                data-content="Shipping Address: {{ order_info.shipping }}<br>Shipping Status: <b>Shipping</b>">
+            Status
+        </button>
+    {% else %}
+        <button type="button" class="btn btn-success" title="Shipping Status"
+                data-container="body" data-toggle="hover" data-placement="right"
+                data-content="Shipping Address: {{ order_info.shipping }}<br>Shipping Status: <b>Delivered</b>">
+            Status
+        </button>
+    {% endif %}
+{% endmacro %}
