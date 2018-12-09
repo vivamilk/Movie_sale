@@ -1,26 +1,66 @@
 {% extends "index.html" %}
 {% block cssfile %}
-    {{ super() }}
-    <link href="{{ url_for('static', filename='css/shopping.css') }}" rel="stylesheet">
+{{ super() }}
+<link href="{{ url_for('static', filename='css/shopping.css') }}" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
-    <div class="container">
-        {% if not images %}
-            <p>No Result Found!</p>
-            <button type="button" class="btn btn-default" onclick="location='/shopping'">Show All</button>
-        {% endif %}
-        <div class="row movie-list">
-            {% for img in images %}
-                <div class="col-md-3 text-center">
-                    <div class="wrapper">
-                        <img src="{{url_for('static', filename='posters/' + img.id + '.jpg')}}">
-                        <span class="highlight-price"><h5>${{ img.price }}</h5></span>
-                        <h5>{{ img.title }}</h5>
-                        <button type="button" class="btn btn-primary" id={{ img.id }}>ADD TO CART</button>
-                    </div>
+<div class="container">
+    <div class="row justify-content-between" style="margin:30px;">
+        <div class="md-6">
+            <form class="form-inline my-2 my-lg-0">
+                <div style="margin-right:8px;">
+                    <select class="form-control" name="sort_by" id="sort_by">
+                        <option value="title" {% if sort_by=='title' %}selected{% endif %}>Title</option>
+                        <option value="year" {% if sort_by=='year' %}selected{% endif %}>Year</option>
+                        <option value="rating" {% if sort_by=='rating' %}selected{% endif %}>Rating</option>
+                        <option value="contentRating" {% if sort_by=='contentRating' %}selected{% endif %}>Content
+                            Rating</option>
+                        <option value="price" {% if sort_by=='price' %}selected{% endif %}>Price</option>
+                    </select>
                 </div>
-            {% endfor %}
+                <input class="form-control mr-sm-2" id="search_term" type="search" placeholder="Search" name="search_term"
+                    value="{{ search_term }}" aria-label="Search">
+                <button class="btn btn-secondary my-2 my-sm-0" name="search_btn" type="submit"><span class="fas fa-search"></span></button>
+            
+            </form>
+        </div>
+        <div class="md-3 ">
+            {% if stores %}
+            <select class="form-control" id="store_id_select" onchange="change_store_id()">
+                    {% for store in stores %}
+                    <option value="{{ store.id }}" {% if session.store_id==store.id %}selected{% endif %}>
+                        {{ store.name}}
+                    </option>
+                    {% endfor %}
+                </select>
+            {% endif %}
         </div>
     </div>
+    <hr>
+    {% if not images %}
+    <div class="row">
+        <br>
+        <h4>No Result Found!</h4>
+    </div>
+    <div class="row">
+        <br>
+        <button type="button" class="btn btn-outline-dark" onclick="location='/shopping'">Show All</button>
+    </div>
+    {% endif %}
+    <div class="row movie-list">
+        {% for img in images %}
+        <div class="col-md-3 text-center">
+            <div class="wrapper">
+                <img src="{{url_for('static', filename='posters/' + img.id + '.jpg')}}">
+                <span class="highlight-price">
+                    <h5>${{ img.price }}</h5>
+                </span>
+                <h5>{{ img.title }}</h5>
+                <button type="button" class="btn btn-outline-dark" id={{ img.id }}>ADD TO CART</button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
 {% endblock %}
