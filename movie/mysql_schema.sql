@@ -1,3 +1,15 @@
+drop table if exists users;
+drop table if exists customer;
+drop table if exists manager;
+drop table if exists store;
+drop table if exists management;
+drop table if exists movie;
+drop table if exists genres;
+drop table if exists stock;
+drop table if exists shopping_cart;
+drop table if exists transaction_detail;
+drop table if exists transaction_info;
+
 create table users
 (
   userID      INTEGER primary key,
@@ -8,7 +20,7 @@ create table users
 
 create table customer
 (
-  customerID   INTEGER primary key autoincrement,
+  customerID   INTEGER primary key AUTO_INCREMENT,
   userID       INTEGER references users,
   name         VARCHAR(20) not null,
   emailAddress VARCHAR(30),
@@ -17,7 +29,7 @@ create table customer
 
 create table manager
 (
-  managerID     INTEGER primary key autoincrement,
+  managerID     INTEGER primary key AUTO_INCREMENT,
   userID        INTEGER references users,
   managerLevel  BOOLEAN not null,
   name          VARCHAR(20) not null,
@@ -27,7 +39,7 @@ create table manager
 
 create table store
 (
-  storeID        INTEGER primary key autoincrement,
+  storeID        INTEGER primary key AUTO_INCREMENT,
   emailAddress   VARCHAR(30) not null,
   region         VARCHAR(30)not null
 );
@@ -41,7 +53,7 @@ create table management
 
 create table movie
 (
-  movieID       INTEGER primary key autoincrement,
+  movieID       INTEGER primary key AUTO_INCREMENT,
   title         VARCHAR(80) not null,
   summary       VARCHAR(1000) not null,
   year          INTEGER(4) not null,
