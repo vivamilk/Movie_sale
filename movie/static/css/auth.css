@@ -1,5 +1,5 @@
 body {
-    background-color:#20303B;
+    background-color:lightslategray;
 }
 input{
     border-radius:3px;
@@ -8,11 +8,16 @@ input{
 .auth{
     text-shadow: 0 2px 4px rgba(0,0,0,.1);
     width: 500px;
-    height: 600px;
-    background-color: #ffffff;
+    height: 400px;
+    background-color: lightgrey;
 }
 .auth-form{
     margin: 30px 30px 20px;
+    
+}
+
+.remember_me{
+    width:20px;
 }
 
 .auth-nav{
@@ -20,7 +25,4 @@ input{
 }
 .navbar{
     border-color:#20303B;
-}
-.remember_me{
-    width:20px;
 }
