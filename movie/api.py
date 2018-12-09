@@ -1,5 +1,6 @@
 import datetime
 import requests
+from urllib.parse import unquote_plus
 from copy import copy
 from flask import redirect, url_for, flash, jsonify, request, session
 from flask_login import current_user, login_required
@@ -134,28 +135,48 @@ def get_items():
     return records
 
 
-def record_transaction(paypal_id):
+def record_transaction(response_dict: dict):
     store_id = int(session['store_id'])
     purchase_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    shipping_address = "\n".join([response_dict['address_name'],
+                                  response_dict['address_street'],
+                                  response_dict['address_city'],
+                                  response_dict['address_state'],
+                                  response_dict['address_zip'],
+                                  response_dict['address_country_code']])
+    paypal_id = response_dict['txn_id']
+    total_payment = response_dict['mc_gross']
+
     conn, cur = get_db()
 
     cur.execute('select customerID from customer where userID=?', (current_user.id,))
     customer_id = cur.fetchone()[0]
 
     # get items in the cart
-    cur.execute('select amount, movieID from shopping_cart where customerID=? and storeID=?', (customer_id, store_id))
+    cur.execute('''
+    select SC.amount, SC.movieID, salePrice
+    from shopping_cart SC
+    join stock S on S.movieID=SC.movieID and S.storeID=SC.storeID
+    where customerID=? and SC.storeID=?
+    ''', (customer_id, store_id))
     records = cur.fetchall()
 
     # remove records from database.shopping_cart
     cur.execute('delete from shopping_cart where customerID=? and storeID=?', (customer_id, store_id))
 
-    # update database.stock & database.transaction
-    for amount, movie_id in records:
+    # insert into database.transaction_info
+    cur.execute('insert into transactions_info values (?,?,?,?,?,?,?)',
+                (paypal_id, purchase_time, customer_id, store_id, total_payment, shipping_address, 0))
+
+    for amount, movie_id, price in records:
+        # update database.stock
         cur.execute('select amount from stock where movieID=? and storeID=?', (movie_id, store_id))
         amount_all = cur.fetchone()[0]
         cur.execute('update stock set amount=? where movieID=? and storeID=?', (amount_all-amount, movie_id, store_id))
-        cur.execute('insert into transactions values (?,?,?,?,?,?,?)',
-                    (None, amount, purchase_time, paypal_id, customer_id, movie_id, store_id))
+        # insert into database.transaction_detail
+        cur.execute('insert into transactions_detail values (?,?,?,?)',
+                    (paypal_id, movie_id, amount, price))
     conn.commit()
     return jsonify({"operation": "record transaction"})
 
@@ -342,7 +363,7 @@ def checkout_for_cart():
         'business': '9AK39BT347LLA',
         'cmd': '_cart',
         'upload': 1,
-        'no_shipping': 1,
+        # 'no_shipping': 1,
         'currency_code': 'USD',
     }
     for idx, record in enumerate(records):
@@ -378,7 +399,14 @@ def listener():
     response = requests.post(
         "https://www.sandbox.paypal.com/cgi-bin/webscr", data=data).text
     if response.startswith('SUCCESS'):
-        record_transaction(transaction_id)
+        # decode response
+        response_decode = unquote_plus(response).splitlines()
+        response_dict = {}
+        for line in response_decode[1:]:
+            key, value = line.split('=')
+            response_dict[key] = value
+
+        record_transaction(response_dict)
         flash("Success!")
         return redirect('/receipt/{}&{}'.format(transaction_id, 'success'))
     else:

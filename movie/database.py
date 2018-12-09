@@ -79,10 +79,10 @@ def init_db_sqlite():
     if os.path.isfile(current_app.config['DATABASE_SQLITE']):
         os.remove(current_app.config['DATABASE_SQLITE'])
 
-    db, cur = get_db()
+    conn, cur = get_db()
 
     with current_app.open_resource('schema.sql') as f:
-        db.executescript(f.read().decode('utf8'))
+        conn.executescript(f.read().decode('utf8'))
 
     # sample customer data
     cur.execute('insert into users values (?,?,?,?)',
@@ -141,19 +141,34 @@ def init_db_sqlite():
 
     # sample transactions
     dt = datetime.datetime.now() + datetime.timedelta(-100)
-    cur.execute('insert into transactions values (?,?,?,?,?,?,?)',
-                (None, 1, dt.strftime("%Y-%m-%d %H:%M:%S"), '89U78003ES8880109', 1, 4, 1))
-    dt = datetime.datetime.now() + datetime.timedelta(-90)
-    cur.execute('insert into transactions values (?,?,?,?,?,?,?)',
-                (None, 2, dt.strftime("%Y-%m-%d %H:%M:%S"), '89U78003ES8880109', 1, 5, 1))
-    dt = datetime.datetime.now() + datetime.timedelta(-80)
-    cur.execute('insert into transactions values (?,?,?,?,?,?,?)',
-                (None, 2, dt.strftime("%Y-%m-%d %H:%M:%S"), '45U78043ES4578010', 1, 6, 2))
-    dt = datetime.datetime.now() + datetime.timedelta(-70)
-    cur.execute('insert into transactions values (?,?,?,?,?,?,?)',
-                (None, 1, dt.strftime("%Y-%m-%d %H:%M:%S"), '15U34504ES4546097', 1, 7, 2))
-    db.commit()
-    db.close()
+    cur.execute('insert into transaction_info values (?,?,?,?,?,?,?)',
+                ('89U78003ES8880109', dt.strftime("%Y-%m-%d %H:%M:%S"), 1, 1, 36.77, 'test buyer\n1 Main St\nSan Jose\nCA\n95131\nUS', 2))
+    cur.execute('insert into transaction_detail values (?,?,?,?)',
+                ('89U78003ES8880109', 5, 1, 18.06))
+    cur.execute('insert into transaction_detail values (?,?,?,?)',
+                ('89U78003ES8880109', 6, 1, 16.31))
+
+    dt = datetime.datetime.now() + datetime.timedelta(-20)
+    cur.execute('insert into transaction_info values (?,?,?,?,?,?,?)',
+                ('6E178263NT5976051', dt.strftime("%Y-%m-%d %H:%M:%S"), 1, 2, 82.22, 'test buyer\n1 Main St\nSan Jose\nCA\n95131\nUS', 1))
+    cur.execute('insert into transaction_detail values (?,?,?,?)',
+                ('6E178263NT5976051', 4, 1, 15.99))
+    cur.execute('insert into transaction_detail values (?,?,?,?)',
+                ('6E178263NT5976051', 5, 1, 18.06))
+    cur.execute('insert into transaction_detail values (?,?,?,?)',
+                ('6E178263NT5976051', 6, 1, 16.31))
+    cur.execute('insert into transaction_detail values (?,?,?,?)',
+                ('6E178263NT5976051', 10, 1, 14.81))
+    cur.execute('insert into transaction_detail values (?,?,?,?)',
+                ('6E178263NT5976051', 14, 1, 11.67))
+
+    dt = datetime.datetime.now() + datetime.timedelta(-1)
+    cur.execute('insert into transaction_info values (?,?,?,?,?,?,?)',
+                ('4XX45928SF3991535', dt.strftime("%Y-%m-%d %H:%M:%S"), 1, 1, 7.80, 'test buyer\n1 Main St\nSan Jose\nCA\n95131\nUS', 0))
+    cur.execute('insert into transaction_detail values (?,?,?,?)',
+                ('4XX45928SF3991535', 5136, 1, 7.29))
+
+    conn.commit()
 
 
 if __name__ == '__main__':

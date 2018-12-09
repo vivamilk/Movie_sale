@@ -192,36 +192,42 @@ def show_history():
     cur.execute('select customerID from customer where userID=?', (current_user.id,))
     customer_id = cur.fetchone()[0]
 
-    # get items in database.transaction
-    # TODO add price field into database.transaction
+    # get order history in database.transaction_info
     cur.execute('''
-        select T.movieID, title, amount, paypalID, purchaseDate, region
-        from transactions T
-        join movie M on T.movieID = M.movieID
-        join store S on T.storeID = S.storeID
-        where customerID=?
-        order by purchaseDate desc
-        ''', (customer_id,))
+    select paypalID, purchaseDate, region, totalPrice, shippingAddress, status
+    from transaction_info
+    join store on transaction_info.storeID = store.storeID
+    where customerID=?
+    order by purchaseDate desc
+    ''', (customer_id,))
     records = cur.fetchall()
-    conn.close()
 
-    history = {}
+    history = []
     for record in records:
-        if record[3] not in history:
-            history[record[3]] = {
-                'date': record[4],
-                'store': record[5],
-                'item_list': [{
-                    'movieID': str(record[0]),
-                    'title': record[1],
-                    'amount': record[2]
-                }]}
-        else:
-            history[record[3]]['item_list'].append({
-                    'movieID': str(record[0]),
-                    'title': record[1],
-                    'amount': record[2]
-                })
+        order = {
+            'paypal_id': record[0],
+            'date': record[1],
+            'store': record[2],
+            'total_price': record[3],
+            'shipping': record[4],
+            'status': record[5],
+            'item_list': []}
+
+        cur.execute('''
+        select T.movieID, M.title, T.amount, T.unitPrice
+        from transaction_detail T
+        join movie M on T.movieID = M.movieID
+        where paypalID=?
+        ''', (record[0],))
+        item_list = cur.fetchall()
+        for item in item_list:
+            order['item_list'].append({
+                'movieID': str(item[0]),
+                'title': item[1],
+                'amount': item[2],
+                'price': item[3]})
+        history.append(order)
+
     content['history'] = history
     content['current_page'] = '/show_history'
     return render_template('show_history.html', **content)
@@ -276,58 +282,58 @@ def manage_store():
 # Info Views
 # -----------------------------------
 
-@app.route('/stat')
-@roles_accepted('senior_manager')
-def get_stat_data():
-    content = copy(context_base)
-
-    customer_id = request.args.get('customer_id')
-    month_from = request.args.get('month_from')
-    month_to = request.args.get('month_to')
-    genre = request.args.get('movie_type')
-    options = request.args.get('result')
-    product_id = request.args.get('product_id')
-
-    # amount cost profit
-    # select genres
-    # by time
-    #
-    conn, cur = get_db()
-    if customer_id:
-        content['customer'] = True
-        if not genre:
-            if not product_id:
-                pass
-
-    if options == 'Cost':
-        pass
-    elif options == 'Profit':
-        pass
-    elif options == 'Sales-Number':
-        # get count
-        cur.execute('''
-        select COUNT(*)
-        from transactions T
-        where T.customerID=? and T.movieID=? and T.purchaseDate>? and T.purchaseDate<?
-        ''', (customer_id, product_id, month_from, month_to))
-        data = cur.fetchone()
-    else:
-        raise ValueError
-
-
-    data = cur.fetchall()
-
-    cur.execute('select storeID, region from store')
-    store_data = cur.fetchall()
-
-
-    content['genre'] = True
-    content['product'] = True
-    content['compare_store'] = True
-    content['compare_type'] = True
-
-    content['stats'] = [
-        {'customer_id': 1, 'customer_name': 'tom', 'product_id': 1, 'number': 5},
-    ]
-    content['current_page'] = '/stat'
-    return render_template('stat.html', **content)
+# @app.route('/stat')
+# @roles_accepted('senior_manager')
+# def get_stat_data():
+#     content = copy(context_base)
+#
+#     customer_id = request.args.get('customer_id')
+#     month_from = request.args.get('month_from')
+#     month_to = request.args.get('month_to')
+#     genre = request.args.get('movie_type')
+#     options = request.args.get('result')
+#     product_id = request.args.get('product_id')
+#
+#     # amount cost profit
+#     # select genres
+#     # by time
+#     #
+#     conn, cur = get_db()
+#     if customer_id:
+#         content['customer'] = True
+#         if not genre:
+#             if not product_id:
+#                 pass
+#
+#     if options == 'Cost':
+#         pass
+#     elif options == 'Profit':
+#         pass
+#     elif options == 'Sales-Number':
+#         # get count
+#         cur.execute('''
+#         select COUNT(*)
+#         from transactions T
+#         where T.customerID=? and T.movieID=? and T.purchaseDate>? and T.purchaseDate<?
+#         ''', (customer_id, product_id, month_from, month_to))
+#         data = cur.fetchone()
+#     else:
+#         raise ValueError
+#
+#
+#     data = cur.fetchall()
+#
+#     cur.execute('select storeID, region from store')
+#     store_data = cur.fetchall()
+#
+#
+#     content['genre'] = True
+#     content['product'] = True
+#     content['compare_store'] = True
+#     content['compare_type'] = True
+#
+#     content['stats'] = [
+#         {'customer_id': 1, 'customer_name': 'tom', 'product_id': 1, 'number': 5},
+#     ]
+#     content['current_page'] = '/stat'
+#     return render_template('stat.html', **content)

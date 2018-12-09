@@ -76,36 +76,35 @@ create table shopping_cart
   primary key (customerID, movieID, storeID)
 );
 
-create table transactions
-(
-  purchaseID   INTEGER primary key autoincrement,
-  amount       INTEGER(10) not null,
-  purchaseDate datetime not null,
-  paypalID     VARCHAR(20) not null,
-  customerID   INTEGER references customer,
-  movieID      INTEGER references movie,
-  storeID      INTEGER references store
-);
--- TODO change transaction to 2 tables below
--- create table transaction_detail
+-- create table transactions
 -- (
---   paypalID     VARCHAR(20) references transaction_total,
---   movieID      INTEGER references movie,
+--   purchaseID   INTEGER primary key autoincrement,
 --   amount       INTEGER(10) not null,
---   price        INTEGER(10) not null,
---   primary key (paypalID, movieID)
+--   purchaseDate datetime not null,
+--   paypalID     VARCHAR(20) not null,
+--   customerID   INTEGER references customer,
+--   movieID      INTEGER references movie,
+--   storeID      INTEGER references store
 -- );
---
--- create table transaction_info
--- (
---   paypalID        VARCHAR(20) primary key,
---   purchaseDate    datetime not null,
---   customerID      INTEGER references customer,
---   storeID         INTEGER references store,
---   totalPrice      INTEGER(10) not null,
---   shippingAddress VARCHAR(200) not null,
---   -- 0: preparing, 1: shipping, 2: delivered
---   status          INTEGER(1) not null,
---   notes           VARCHAR(100),
---   check (status>=0 and status<=2)
--- );
+
+create table transaction_detail
+(
+  paypalID     VARCHAR(20) references transaction_info,
+  movieID      INTEGER references movie,
+  amount       INTEGER(10) not null,
+  unitPrice        INTEGER(10) not null,
+  primary key (paypalID, movieID)
+);
+
+create table transaction_info
+(
+  paypalID        VARCHAR(20) primary key,
+  purchaseDate    datetime not null,
+  customerID      INTEGER references customer,
+  storeID         INTEGER references store,
+  totalPrice      INTEGER(10) not null,
+  shippingAddress VARCHAR(200) not null,
+  -- 0: preparing, 1: shipping, 2: delivered
+  status          INTEGER(1) not null,
+  check (status>=0 and status<=2)
+);

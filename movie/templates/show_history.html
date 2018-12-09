@@ -1,4 +1,5 @@
 {% extends "index.html" %}
+{% from "_helpers.html" import shipping_status %}
 {% block cssfile %}
     {{ super() }}
     <link href="{{ url_for('static', filename='css/show_history.css') }}" rel="stylesheet">
@@ -7,30 +8,47 @@
     <div class="container">
         <div class="row" style="text-align: center"><h2>Your Orders</h2></div>
         <hr width="80%">
-        {% for paypal_id in history %}
-            <div class="container auto-center">
-                <div class="row"><h4>PayPal Order # {{ paypal_id }}</h4></div>
-                <div class="row"><h4>Order Placed: {{ history[paypal_id].date }} In Store: <b>{{ history[paypal_id].store }}</b></h4></div>
-                <div class="row">
-                    <table class="table table-striped">
+        {% for order_info in history %}
+            <div class="container auto-center" style="border: 2px solid; border-color: rgb(231, 231, 231)">
+                <div class="row" style="text-align: center;background-color: rgb(231, 231, 231)">
+                    <div class="col-md-3"><h4>Order Placed</h4></div>
+                    <div class="col-md-3"><h4>Total (with tax)</h4></div>
+                    <div class="col-md-3"></div>
+                    <div class="col-md-3"><h4>PayPal Order #</h4></div>
+                    <div class="w-100"></div>
+                    <div class="col-md-3"><h4>{{ order_info.date }}<br>In Store: <b>{{ order_info.store }}</b></h4></div>
+                    <div class="col-md-3"><h4>$ {{ order_info.total_price }}</h4></div>
+                    <div class="col-md-3"></div>
+                    <div class="col-md-3"><h4>{{ order_info.paypal_id }}</h4></div>
+                </div>
+                <br>
+                {{ shipping_status(order_info) }}
+                <br>
+                <br>
+                    <table class="table table-striped auto-center">
                         <tr>
                             <th class="col-md-2"><h5>Poster</h5></th>
                             <th class="col-md-6"><h5>Title</h5></th>
                             <th class="col-md-2"><h5>Amount</h5></th>
+                            <th class="col-md-2"><h5>Unit Price</h5></th>
                         </tr>
-
-                        {% for history_data in history[paypal_id].item_list %}
+                        {% for movie_detail in order_info.item_list %}
                             <tr>
-                                <td><img src="{{url_for('static', filename='posters/' + history_data.movieID + '.jpg')}}" width="40px" height="60px"></td>
-                                <td><h5>{{ history_data.title }}</h5></td>
-                                <td><h5>{{ history_data.amount }}</h5></td>
+                                <td><img src="{{url_for('static', filename='posters/' + movie_detail.movieID + '.jpg')}}" width="40px" height="60px"></td>
+                                <td><h5>{{ movie_detail.title }}</h5></td>
+                                <td><h5>{{ movie_detail.amount }}</h5></td>
+                                <td><h5>{{ movie_detail.price }}</h5></td>
                             </tr>
                         {% endfor %}
                     </table>
-                </div>
-                <br>
                 <br>
             </div>
+            <br>
         {% endfor %}
     </div>
+    <script>
+    $(function () {
+        $("[data-toggle='hover']").popover({html:true, trigger:'hover'});
+    });
+    </script>
 {% endblock %}
