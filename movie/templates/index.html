@@ -1,98 +1,61 @@
-{% extends "base.html" %}
-{% block cssfile %}
-    <link href="{{ url_for('static', filename='css/index.css') }}" rel="stylesheet">
-    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
-    {% if current_user.type == 'customer' %}
-        <script src="{{ url_for('static', filename='js/cart.js') }}"></script>
-    {% endif %}
-{% endblock %}
-
+{% extends "template.html" %}
+{% block cssfile %}<link rel="stylesheet" href="/static/css/cart.css">{% endblock %}
 {% block body %}
-    <nav class="navbar navbar-default running-nav" role="navigation">
-        <div class="container-fluid">
-            <div class="navbar-header">
-                <a class="navbar-brand" href="/">Movie World</a>
-            </div>
-            <div>
-                <ul class="nav navbar-nav">
-                    {% if current_user.type != 'customer' %}
-                        <li{% if current_page == '/manager' %} class="active"{% endif %}><a href="/manager">Manage</a></li>
-                    {% else %}
-                        <li{% if current_page == '/list' %} class="active"{% endif %}><a href="/list">VIEW ALL</a></li>
-                        <li{% if current_page == '/shopping' %} class="active"{% endif %}><a href="/shopping">SHOPPING</a></li>
-                    {% endif %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="#"><span class="fas fa-video"></span> Movie World</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+            {% if current_user.type != 'customer' %}
+            <li {% if current_page=='/manager' %} class="nav-item active" {% endif %}><a class="nav-link" href="/manager"> 
+                Manage</a></li>
+            {% else %}
+            <li {% if current_page=='/list' %} class="nav-item active" {% endif %}><a class="nav-link" href="/list">   
+                View
+                    All </a></li>
+            <li {% if current_page=='/shopping' %} class="nav-item active" {% endif %}><a class="nav-link" href="/shopping"> 
+                Shopping</a></li>
+            {% endif %}
+        </ul>
+
+        <ul class="nav navbar-nav navbar-right running-nav-right">
+            {% if current_user.is_anonymous %}
+            <li><a class="nav-link" href="/register"><span class="glyphicon glyphicon-user"></span> Sign Up </a></li>
+            <li><a class="nav-link" href="/login"><span class="glyphicon glyphicon-log-in"></span> Login </a></li>
+            {% else %}
+        
+
+            {% if current_user.type == 'customer' %}
+            <li><a class="nav-link" href="/show_history"><span class="fas fa-user"></span> Hi, {{
+                    current_user.username }}</a></li>
+            {% else %}
+            <li><a class="nav-link" href="/manage_customer"><span class="fas fa-user"></span> Hi, {{
+                    current_user.username
+                    }} </a></li>
+            {% endif %}
+
+            <li><a class="nav-link" href="{{ url_for('logout') }}"><span class="fas fa-sign-out-alt"></span>Logout</a></li>
+
+            {% if current_user.type == 'customer' %}
+            <li class="dropdown">
+                <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown" role="button" aria-expanded="false">
+                    <span class="fas fa-shopping-cart"></span>
+                    Cart
+                    <span class="badge">0</span>
+                    <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-right dropdown-cart" id="cart_product" role="menu">
+                    
                 </ul>
-                    {% if search_bar %}
-                        <div class="nav navbar-nav">
-                            <form class="navbar-form" id="search_bar">
-                                <div class="input-group">
-                                    <select class="form-control" name="sort_by" id="sort_by">
-                                        <option value="title" {% if sort_by == 'title' %}selected{% endif %}>Title</option>
-                                        <option value="year" {% if sort_by == 'year' %}selected{% endif %}>Year</option>
-                                        <option value="rating" {% if sort_by == 'rating' %}selected{% endif %}>Rating</option>
-                                        <option value="contentRating" {% if sort_by == 'contentRating' %}selected{% endif %}>Content Rating</option>
-                                        <option value="price" {% if sort_by == 'price' %}selected{% endif %}>Price</option>
-                                    </select>
-                                    <div class="input-group-btn">
-                                        <input type="hidden" id="order" name="order" value="{{ order }}">
-                                        <button class="btn btn-default" type="submit" name="change_order">
-                                            {% if order %}
-                                                <i class="glyphicon glyphicon-sort-by-attributes"></i>
-                                            {% else %}
-                                                <i class="glyphicon glyphicon-sort-by-attributes-alt"></i>
-                                            {% endif %}
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="input-group">
-                                    <input type="text" class="form-control" placeholder="Search" name="search_term" value="{{ search_term }}"
-                                           id="search_term">
-                                    <div class="input-group-btn">
-                                        <button class="btn btn-default" type="submit"><i class="glyphicon glyphicon-search"></i></button>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    {% endif %}
-                    <ul class="nav navbar-nav navbar-right running-nav-right">
-                        {% if current_user.is_anonymous %}
-                            <li><a href="/register"><span class="glyphicon glyphicon-user"></span> Sign Up </a></li>
-                            <li><a href="/login"><span class="glyphicon glyphicon-log-in"></span> Login </a></li>
-                        {% else %}
-                            {% if stores %}
-                                <li><a><select class="form-control" id="store_id_select" onchange="change_store_id()" style="height: 20px">
-                                    {% for store in stores %}
-                                        <option value="{{ store.id }}" {% if session.store_id == store.id %}selected{% endif %}>{{ store.name }}</option>
-                                    {% endfor %}
-                                </select></a></li>
-                            {% endif %}
+            </li>
+            {% endif %}
+            {% endif %}
+        </ul>
+    </div>
+</nav>
 
-                            {% if current_user.type == 'customer' %}
-                                <li><a href="/show_history"><span class="glyphicon glyphicon-user"></span> Hi, {{ current_user.username }}</a></li>
-                            {% else %}
-                                <li><a href="/manage_customer"><span class="glyphicon glyphicon-user"></span> Hi, {{ current_user.username }} </a></li>
-                            {% endif %}
-
-                            <li><a href="{{ url_for('logout') }}"><span class="glyphicon glyphicon-log-out"></span>Logout</a></li>
-
-                            {% if current_user.type == 'customer' %}
-                                <li>
-                                    <a class="dropdown-toggle" data-toggle="dropdown">
-                                    <span class="glyphicon glyphicon-shopping-cart"></span> CART <span class="badge">0</span></a>
-                                    {#                                    <button onclick="popupYear()">test</button>#}
-                                    <div id="shoppingcart-content" class="dropdown-menu scrollable-menu" role="menu">
-                                        <div class="container" style="width:450px;color:black !important;">
-                                            <div class="product_list">
-                                                <div id="cart_product"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </li>
-                            {% endif %}
-                        {% endif %}
-                    </ul>
-            </div>
-        </div>
-    </nav>
-    {% block content %}{% endblock %}
+{% block content %}{% endblock %}
 {% endblock %}

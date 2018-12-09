@@ -1,8 +1,40 @@
 {% extends "index.html" %}
 {% block content %}
-    <div class="container">
-        <table class="table table-striped movie-list">
-            <thead>
+<div class="container">
+    <div class="row justify-content-between" style="margin:15px;">
+        <div class="md-6">
+            <form class="form-inline my-2 my-lg-0">
+                <div style="margin-right:8px;">
+                    <select class="form-control" name="sort_by" id="sort_by">
+                        <option value="title" {% if sort_by=='title' %}selected{% endif %}>Title</option>
+                        <option value="year" {% if sort_by=='year' %}selected{% endif %}>Year</option>
+                        <option value="rating" {% if sort_by=='rating' %}selected{% endif %}>Rating</option>
+                        <option value="contentRating" {% if sort_by=='contentRating' %}selected{% endif %}>Content
+                            Rating</option>
+                        <option value="price" {% if sort_by=='price' %}selected{% endif %}>Price</option>
+                    </select>
+                </div>
+                <input class="form-control mr-sm-2" id="search_term" type="search" placeholder="Search" name="search_term"
+                    value="{{ search_term }}" aria-label="Search">
+                <button class="btn btn-secondary my-2 my-sm-0" name="search_btn" type="submit"><span class="fas fa-search"></span></button>
+
+            </form>
+        </div>
+        <div class="md-3 ">
+            {% if stores %}
+            <select class="form-control" id="store_id_select" onchange="change_store_id()">
+                {% for store in stores %}
+                <option value="{{ store.id }}" {% if session.store_id==store.id %}selected{% endif %}>
+                    {{ store.name}}
+                </option>
+                {% endfor %}
+            </select>
+            {% endif %}
+        </div>
+    </div>
+
+    <table class="table table-striped movie-list">
+        <thead>
             <tr>
                 <th>Id</th>
                 <th>ImdbId</th>
@@ -10,24 +42,36 @@
                 <th>YEAR</th>
                 <th>Stock</th>
                 <th>Price</th>
+                <th> </th>
             </tr>
-            </thead>
-            {#            Manage the movie#}
-            {% for movie in movies %}
-                <tr>
-                    <td>{{ movie.id }}</td>
-                    <td><h5>{{ movie.imdbid }}</h5></td>
-                    <td><h5>{{ movie.title }}</h5></td>
-                    <td><h5>{{ movie.year }}</h5></td>
-                    <th><h5>{{ movie.stock }}</h5></th>
-                    <td><span class="price"><h5>{{ movie.price }}</h5></span></td>
-                    <td>
-                        <button type="button" class="glyphicon glyphicon-plus" id={{ movie.id }}></button>
-{#                        <a href="#" add_id={{ movie.id }} class="del-btn admin-p-add"><span#}
-{#                            class="glyphicon glyphicon-plus"></span></a>#}
-                    </td>
-                </tr>
-            {% endfor %}
-        </table>
-    </div>
+        </thead>
+        {# Manage the movie#}
+        {% for movie in movies %}
+        <tr>
+            <td>{{ movie.id }}</td>
+            <td>
+                <h5>{{ movie.imdbid }}</h5>
+            </td>
+            <td>
+                <h5>{{ movie.title }}</h5>
+            </td>
+            <td>
+                <h5>{{ movie.year }}</h5>
+            </td>
+            <th>
+                <h5>{{ movie.stock }}</h5>
+            </th>
+            <td><span class="price">
+                    <h5>{{ movie.price }}</h5>
+                </span></td>
+            <td>
+                <button type="button" class="fas fa-plus" id={{ movie.id }}></button>
+                {# <a href="#" add_id={{ movie.id }} class="del-btn admin-p-add">
+                    <span#} {# class="glyphicon glyphicon-plus"></span>
+                </a>#}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
 {% endblock %}
