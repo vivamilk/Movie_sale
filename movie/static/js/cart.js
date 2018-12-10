@@ -126,7 +126,7 @@ function get_cart_item() {
             var button_item = `
             <div class="dropdown-divider"></div>
             <li><p class="text-center">Total Price: ${total}</p></li>
-            <li id="co" style="text-align:center;"><a class="dropdown-item"><b>Check Out</b></a></li>
+            <li id="co" style="text-align:center;"><a class="btn btn-warning"><b>Check Out</b></a></li>
             `;
             $('#cart_product').append(button_item);
             bind_update_function();

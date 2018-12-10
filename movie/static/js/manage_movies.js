@@ -18,7 +18,8 @@ $(document).ready(function () {
 
     $('body').delegate(".admin-p-update", "click", function (event) {
         var add = $(this).parent().parent();
-        var product_kind_id = add.find(".movieid").val();
+        var movid_id = add.find(".movieid").val();
+        var imdb_id = add.find(".imdbid").val();
         var name = add.find(".name").val();
         var inventory_amount = add.find(".inventory").val();
         var price = add.find(".sale-price").val();
@@ -37,14 +38,16 @@ $(document).ready(function () {
 
     $("body").delegate(".admin-p-add","click",function(event) {
         var add = $(this).parent().parent();
-        var product_kind_id = add.find(".movieid").val();
+        var movid_id = add.find(".movieid").val();
+        var imdb_id = add.find(".imdbid").val();
         var name = add.find(".name").val();
         var inventory_amount = add.find(".inventory").val();
         var price = add.find(".sale-price").val();
         var cost = add.find(".cost").val();
         var item_info = `<tr>
-                    <td>${product_kind_id}</td>
-                    <td>
+                    <!--<td>${movid_id}</td>-->
+                    <td><input type="text" class="form-control movieid" value=${movid_id} readonly></td>
+                    <td><input type="text" class="form-control imdbid" value=${imdb_id}></td>
                         <div class="img-container">
                             <img class="picture" height="42" width="42" alt="select a picture" title="select a picture"
                                  src="static/posters/0.jpg"/>
@@ -61,12 +64,12 @@ $(document).ready(function () {
                     <td><input type="text" class="form-control price" value=${price}></td>
                     <td><input type="text" class="form-control cost" value=${cost}></td>
                     <td>
-                        <a href="#" remove_id=${product_kind_id} class="del-btn admin-p-remove"><span
-                            class="glyphicon glyphicon-trash"></span></a>
-                        <a href="#" update_id=${product_kind_id} class="del-btn admin-p-update"><span
-                            class="glyphicon glyphicon-refresh"></span></a>
+                        <a href="#" remove_id=${movid_id} class="del-btn admin-p-remove"><span
+                            class="fas fa-trash-alt"></span></a>
+                        <a href="#" update_id=${movid_id} class="del-btn admin-p-update"><span
+                            class="fas fa-redo-alt"></span></a>
                     </td>
-                </tr>`
+                </tr>`;
         var total_table = add.parent().parent();
         $(total_table).append(item_info);
         var store_id = $( "#store_id_select option:selected" )[0].value;
@@ -74,7 +77,7 @@ $(document).ready(function () {
             url:'/manage/add_movie',
             contentType: "application/json; charset=utf-8",
             type: "POST",
-            data: JSON.stringify({'store_id': store_id, 'price':price, 'cost':cost, 'name':name, 'inventory': inventory_amount}),
+            data: JSON.stringify({'movie_id': movid_id, 'imdb_id': imdb_id,'store_id': store_id, 'price':price, 'cost':cost, 'name':name, 'inventory': inventory_amount}),
             success: function(data){
                 alert("Add item successfully!");
             },

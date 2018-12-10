@@ -7,9 +7,9 @@
         {{ render_field(field) }}
     {% endfor %}
 
-    <div class="form-group" style="text-align: left">
-        {{ form.remember_me(class="remember_me") }}
-        {{ form.remember_me.label }}
+    <div class="form-check">
+        {{ form.remember_me(class="form-check-input") }}
+        {{ form.remember_me.label(class="form-check-label") }}
     </div>
     <h4>{{ form.submit(class="btn btn-primary btn-block btn-lg") }}</h4>
     <div>

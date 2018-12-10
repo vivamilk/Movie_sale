@@ -1,7 +1,7 @@
 {% extends "index_with_search_bar.html" %}
 {% block cssfile %}
     {{ super() }}
-    <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/manage_movies.js') }}"></script>
 {% endblock %}
 {% block movie_list %}
     <div class="container">
@@ -17,13 +17,13 @@
                 <th>Cost</th>
             </tr>
             <tr>
-                <td><input type="text" class="form-control movieid" value=""></td>
+                <td><input type="text" class="form-control movieid" value="{{ max_id + 1 }}" readonly></td>
                 <td><input type="text" class="form-control imdbid" value=""></td>
                 <td>
                     <div class="img-container">
                         <img class="picture" height="42" width="42" alt="select a picture" title="select a picture"
-                             src="static/posters/0.jpg">
-                        <input class="image" id="my-file-selector" type="file" style="display:none;"
+                             src="../static/posters/0.jpg">
+                        <input class="image custom-file-input" id="my-file-selector" type="file" style="display:none;"
                                accept="image/x-png,image/gif,image/jpeg">
                     </div>
                 <td><input type="text" class="form-control name" value=""></td>
@@ -41,7 +41,7 @@
                     <td>{{ movie.imdb_id }}</td>
                     <td>
                         <div class="img-container">
-                            <img class="picture" height="42" width="42" alt="select a picture" title="select a picture"
+                            <img class="picture" height="45" width="30" alt="select a picture" title="select a picture"
                                  src={{ url_for('static', filename='posters/' + movie.id + '.jpg') }}/>
                             <div class="img-centered">
                                 <label class="img-label" for="my-file-selector'.$product_id.'">
@@ -57,9 +57,9 @@
                     <td><input type="text" class="form-control price" value={{ movie.price }}></td>
                     <td><input type="text" class="form-control cost" value={{ movie.cost }}></td>
                     <td>
-                        <a href="#" remove_id={{ movie.id }} class="del-btn admin-p-remove"><span
+                        <a href="#" remove_id="{{ movie.id }}" class="del-btn admin-p-remove"><span
                             class="fas fa-trash-alt"></span></a>
-                        <a href="#" update_id={{ movie.id }} class="del-btn admin-p-update"><span
+                        <a href="#" update_id="{{ movie.id }}" class="del-btn admin-p-update"><span
                             class="fas fa-redo-alt"></span></a>
                     </td>
                 </tr>

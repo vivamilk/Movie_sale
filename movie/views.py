@@ -4,11 +4,11 @@ from flask import render_template, redirect, url_for, flash, request, session
 from flask_login import current_user, login_required, login_fresh, login_user, logout_user
 
 from movie import app
-from movie.utils import context_base, roles_accepted
+from movie.utils import context_base, roles_accepted, imdb_id_to_imdb_link
 from movie.database import get_db, sql_translator
 from movie.form import LoginForm, RegistrationForm, SearchBarForm
 from movie.models import User
-from movie.api import get_movies_with_params
+from movie.api import get_movies_with_params, get_max_movie_id
 
 
 # -----------------------------------
@@ -123,7 +123,7 @@ def login():
                 if current_user.type == "customer":
                     next_page = url_for('shopping')
                 else:
-                    next_page = '/manager'
+                    next_page = '/manage/movies'
             return redirect(next_page)
 
     content['title'] = 'Sign In'
@@ -237,7 +237,7 @@ def show_history():
 # Management Views
 # -----------------------------------
 
-@app.route('/manage_customer')
+@app.route('/manage/customers')
 @roles_accepted('senior_manager', 'manager')
 def manage_all_customer():
     content = copy(context_base)
@@ -251,13 +251,13 @@ def manage_all_customer():
             'name': customer[0], 'email': customer[1], 'tele_number': customer[2]
         })
     content['customers'] = data
-    content['current_page'] = '/manage_customer'
-    return render_template('manager_customer.html', **content)
+    content['current_page'] = '/manage/customers'
+    return render_template('manage_customers.html', **content)
 
 
-@app.route('/manager', methods=["GET", "POST"])
+@app.route('/manage/movies', methods=["GET", "POST"])
 @roles_accepted('manager', 'senior_manager')
-def manage_data():
+def manage_movies():
     # get movies from database
     data, content = get_movies_with_params('M.movieID, M.imdbID, M.title, S.salePrice, S.cost, S.amount')
 
@@ -267,8 +267,9 @@ def manage_data():
         movie.append({'id': str(movie_id), 'imdb_id':imdb_id, 'name': title, 'price': price, 'cost': cost, 'inventory': stock})
 
     content['movies'] = movie
-    content['current_page'] = '/manager'
-    return render_template('admin.html', **content)
+    content['max_id'] = get_max_movie_id()
+    content['current_page'] = '/manage/movies'
+    return render_template('manage_movies.html', **content)
 
 
 @app.route('/manage/store', methods=['GET'])
@@ -281,6 +282,33 @@ def manage_store():
 # -----------------------------------
 # Info Views
 # -----------------------------------
+
+@app.route('/movie--<int:movie_id>')
+@login_required
+def get_stat_data(movie_id):
+    content = copy(context_base)
+    conn, cur = get_db()
+    # get movie info
+    cur.execute(sql_translator('select * from movie where movieID=?'), (movie_id,))
+    movie_info = cur.fetchone()
+
+    if movie_info is None:
+        flash("Movie Not Found! Return to Shopping Page.")
+        return redirect(url_for('shopping'))
+
+    content['movie_info'] = {
+        'movie_id': str(movie_info[0]),
+        'title': movie_info[1],
+        'summary': movie_info[2],
+        'year': movie_info[3],
+        'certificate': movie_info[4],
+        'rating': movie_info[5],
+        'imdbID': movie_info[6],
+        'imdb_link': imdb_id_to_imdb_link(movie_info[6])
+    }
+    content['title'] = movie_info[1]
+    return render_template('movie_detail.html', **content)
+
 
 # @app.route('/stat')
 # @roles_accepted('senior_manager')
