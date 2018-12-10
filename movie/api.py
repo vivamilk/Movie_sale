@@ -166,7 +166,7 @@ def record_transaction(response_dict: dict):
     cur.execute('delete from shopping_cart where customerID=? and storeID=?', (customer_id, store_id))
 
     # insert into database.transaction_info
-    cur.execute('insert into transactions_info values (?,?,?,?,?,?,?)',
+    cur.execute('insert into transaction_info values (?,?,?,?,?,?,?)',
                 (paypal_id, purchase_time, customer_id, store_id, total_payment, shipping_address, 0))
 
     for amount, movie_id, price in records:
@@ -175,7 +175,7 @@ def record_transaction(response_dict: dict):
         amount_all = cur.fetchone()[0]
         cur.execute('update stock set amount=? where movieID=? and storeID=?', (amount_all-amount, movie_id, store_id))
         # insert into database.transaction_detail
-        cur.execute('insert into transactions_detail values (?,?,?,?)',
+        cur.execute('insert into transaction_detail values (?,?,?,?)',
                     (paypal_id, movie_id, amount, price))
     conn.commit()
     return jsonify({"operation": "record transaction"})

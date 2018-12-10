@@ -1,42 +1,10 @@
-{% extends "index.html" %}
+{% extends "index_with_search_bar.html" %}
 {% block cssfile %}
-{{ super() }}
-<link href="{{ url_for('static', filename='css/shopping.css') }}" rel="stylesheet">
+    {{ super() }}
+    <link href="{{ url_for('static', filename='css/shopping.css') }}" rel="stylesheet">
 {% endblock %}
 
-{% block content %}
-<div class="container">
-    <div class="row justify-content-between" style="margin:30px;">
-        <div class="md-6">
-            <form class="form-inline my-2 my-lg-0">
-                <div style="margin-right:8px;">
-                    <select class="form-control" name="sort_by" id="sort_by">
-                        <option value="title" {% if sort_by=='title' %}selected{% endif %}>Title</option>
-                        <option value="year" {% if sort_by=='year' %}selected{% endif %}>Year</option>
-                        <option value="rating" {% if sort_by=='rating' %}selected{% endif %}>Rating</option>
-                        <option value="contentRating" {% if sort_by=='contentRating' %}selected{% endif %}>Content
-                            Rating</option>
-                        <option value="price" {% if sort_by=='price' %}selected{% endif %}>Price</option>
-                    </select>
-                </div>
-                <input class="form-control mr-sm-2" id="search_term" type="search" placeholder="Search" name="search_term"
-                    value="{{ search_term }}" aria-label="Search">
-                <button class="btn btn-secondary my-2 my-sm-0" name="search_btn" type="submit"><span class="fas fa-search"></span></button>
-            
-            </form>
-        </div>
-        <div class="md-3 ">
-            {% if stores %}
-            <select class="form-control" id="store_id_select" onchange="change_store_id()">
-                    {% for store in stores %}
-                    <option value="{{ store.id }}" {% if session.store_id==store.id %}selected{% endif %}>
-                        {{ store.name}}
-                    </option>
-                    {% endfor %}
-                </select>
-            {% endif %}
-        </div>
-    </div>
+{% block movie_list %}
     <hr>
     {% if not images %}
     <div class="row">
@@ -62,5 +30,4 @@
         </div>
         {% endfor %}
     </div>
-</div>
 {% endblock %}

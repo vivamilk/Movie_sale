@@ -1,0 +1,48 @@
+{% extends "index.html" %}
+{% block content %}
+    <div class="container">
+        <div class="row justify-content-between" style="margin:15px;">
+            <div class="md-6">
+                <form class="form-inline my-2 my-lg-0" method="post" id="search_bar" novalidate>
+                    {{ form.hidden_tag() }}
+                    <div style="margin-right:8px;">
+                        {{ form.choice(class="form-control", onchange="this.form.submit()") }}
+
+                        {% if form.choice.data == 'year' %}
+                            {{ form.year(class="form-control", onchange="this.form.submit()") }}
+                        {% elif form.choice.data == 'genres' %}
+                            {{ form.genres(class="form-control", onchange="this.form.submit()") }}
+                        {% elif form.choice.data == 'content_rating' %}
+                            {{ form.content_rating(class="form-control", onchange="this.form.submit()") }}
+                        {% endif %}
+
+                        {{ form.sort_by(class="form-control", onchange="this.form.submit()") }}
+                        {{ form.order() }}
+                        {% if form.sort_by.data != 'None' %}
+                            <button class="btn btn-default my-2 my-sm-0" type="submit" name="submit1" value="order">
+                                {% if form.order.data == 'desc' %}
+                                    <i class="fas fa-sort-amount-down"></i>
+                                {% else %}
+                                    <i class="fas fa-sort-amount-up"></i>
+                                {% endif %}
+                            </button>
+                        {% endif %}
+                    </div>
+
+                    {{ form.search_term(class="form-control mr-sm-2", placeholder="Search") }}
+                    <button class="btn btn-secondary my-2 my-sm-0" type="submit" name="submit1" value="search"><span class="fas fa-search"></span></button>
+                </form>
+            </div>
+            <div class="md-3 ">
+                {% if stores %}
+                    <select class="form-control" id="store_id_select" onchange="change_store_id()">
+                        {% for store in stores %}
+                            <option value="{{ store.id }}" {% if session.store_id==store.id %}selected{% endif %}>{{ store.name}}</option>
+                        {% endfor %}
+                    </select>
+                {% endif %}
+            </div>
+        </div>
+        {% block  movie_list %}{% endblock %}
+    </div>
+{% endblock %}
