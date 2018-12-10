@@ -1,5 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, IntegerField, SelectField, HiddenField
+from flask_wtf.file import FileField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, IntegerField, SelectField, HiddenField, TextAreaField, FloatField
 from wtforms.validators import DataRequired, EqualTo, ValidationError, Email
 import re
 from movie.database import sql_translator
@@ -65,3 +66,18 @@ class SearchBarForm(FlaskForm):
         content_ratings = cur.fetchall()
         self.content_rating.choices.extend(
             [(content_rating[0], content_rating[0]) for content_rating in content_ratings])
+
+
+class MovieDetailForm(FlaskForm):
+    title = StringField(validators=[DataRequired()])
+    summary = TextAreaField(validators=[DataRequired()])
+    year = IntegerField(validators=[DataRequired()])
+    content_rating = StringField(validators=[DataRequired()])
+    rating = FloatField(validators=[DataRequired()])
+    stock = IntegerField(validators=[DataRequired()])
+    price = FloatField(validators=[DataRequired()])
+    cost = FloatField(validators=[DataRequired()])
+    imdb_id = StringField()
+    genres = StringField()
+    image = FileField()
+    submit = SubmitField()

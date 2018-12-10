@@ -1,12 +1,13 @@
+import os
 from copy import copy
 from werkzeug.urls import url_parse
-from flask import render_template, redirect, url_for, flash, request, session
+from flask import render_template, redirect, url_for, flash, request, session, jsonify
 from flask_login import current_user, login_required, login_fresh, login_user, logout_user
 
 from movie import app
 from movie.utils import context_base, roles_accepted, imdb_id_to_imdb_link
 from movie.database import get_db, sql_translator
-from movie.form import LoginForm, RegistrationForm, SearchBarForm
+from movie.form import LoginForm, RegistrationForm, MovieDetailForm
 from movie.models import User
 from movie.api import get_movies_with_params, get_max_movie_id
 
@@ -21,30 +22,6 @@ def index():
     content = copy(context_base)
     content['current_page'] = '/index'
     return render_template('base.html', **content)
-
-
-@app.route('/test', methods=["GET", "POST"])
-def test():
-    content = copy(context_base)
-
-    form = SearchBarForm()
-
-    if form.submit():
-        choice = form.choice.data
-        if choice == 'year' and form.year.data:
-            flash("{}".format(form.year.data))
-        elif choice == 'genres' and form.genres.data != 'None':
-            flash("{}".format(form.genres.data))
-        elif choice == 'content_rating' and form.content_rating.data != 'None':
-            flash("{}".format(form.content_rating.data))
-
-    print('1', form.search_term.data)
-    print('2', form.sort_by.data)
-    print('3', form.order.data)
-
-    content['form'] = form
-    content['current_page'] = '/test'
-    return render_template('test.html', **content)
 
 
 # -----------------------------------
@@ -267,7 +244,6 @@ def manage_movies():
         movie.append({'id': str(movie_id), 'imdb_id':imdb_id, 'name': title, 'price': price, 'cost': cost, 'inventory': stock})
 
     content['movies'] = movie
-    content['max_id'] = get_max_movie_id()
     content['current_page'] = '/manage/movies'
     return render_template('manage_movies.html', **content)
 
@@ -279,11 +255,103 @@ def manage_store():
     return render_template('manage_stores.html')
 
 
+@app.route('/manage/movie/<int:movie_id>', methods=["GET", "POST"])
+@roles_accepted('manager', 'senior_manager')
+def manage_movie_detail(movie_id):
+    form = MovieDetailForm()
+    content = copy(context_base)
+    conn, cur = get_db()
+    # get movie info
+    cur.execute(sql_translator('select * from movie where movieID=?'), (movie_id,))
+    movie_info = cur.fetchone()
+
+    if movie_info is None:
+        flash("Movie Not Found! Return to Shopping Page.")
+        return redirect(url_for('shopping'))
+
+    # get genres
+    cur.execute(sql_translator('select genre from genres where movieID=?'), (movie_id,))
+    genres = cur.fetchall()
+
+    content['movie_info'] = {
+        'movie_id': str(movie_info[0]),
+        'title': movie_info[1],
+        'summary': movie_info[2],
+        'year': movie_info[3],
+        'certificate': movie_info[4],
+        'rating': movie_info[5],
+        'imdb_link': imdb_id_to_imdb_link(movie_info[6]),
+        'genres': ", ".join(map(lambda x: x[0], genres))
+    }
+
+    if form.is_submitted():
+        form.summary.data = request.form.get('summary')
+        cur.execute(sql_translator('update movie set title=?, summary=?, year=?, contentRating=?, rating=? where movieID=?'), (
+            form.title.data, form.summary.data, int(form.year.data), form.content_rating.data, float(form.rating.data), movie_id
+        ))
+        conn.commit()
+        flash("Changes Saved.")
+
+    content['form'] = form
+    content['title'] = movie_info[1]
+    return render_template('manage_movie_detail.html', **content)
+
+
+@app.route('/manage/movie/new', methods=["GET", "POST"])
+@roles_accepted('manager', 'senior_manager')
+def manage_add_movie():
+    form = MovieDetailForm()
+    content = copy(context_base)
+    conn, cur = get_db()
+
+    new_id = str(get_max_movie_id() + 1)
+    store_id = int(session['store_id'])
+
+    # check upload file
+    if 'img' in request.files:
+        img = request.files['img']
+        img.save(os.path.join("movie/static/posters", "{}.{}".format(new_id, img.filename.split('.')[-1])))
+
+    if form.validate_on_submit():
+        # check if movie existed in movie table
+        cur.execute(sql_translator('select movieID from movie where imdbID=? or title=?'), (form.imdb_id.data, form.title.data))
+        exist_movie_id = cur.fetchall()
+
+        if exist_movie_id != []:
+            # Below is the exmaple for error message, if the added movie is in the stock, showing the error like this.
+            return jsonify(message="Added movie already in the stock, current movieID is {}".format(";".join(map(lambda x: str(x[0]), exist_movie_id)))), 500
+        else:
+            form.summary.data = request.form.get('summary')
+            try:
+                cur.execute(sql_translator(
+                    'insert into movie values (?,?,?,?,?,?,?)'), (
+                    new_id, form.title.data, form.summary.data, int(form.year.data), form.content_rating.data,
+                    float(form.rating.data), form.imdb_id.data))
+
+                cur.execute(sql_translator(
+                    'insert into stock values (?,?,?,?,?,?)'), (
+                    store_id, new_id, int(form.stock.data), int(form.stock.data), float(form.price.data), float(form.cost.data)))
+
+                for genre in form.genres.data.split(";"):
+                    cur.execute(sql_translator('insert into genres values (?,?)'), (new_id, genre))
+
+                conn.commit()
+                flash("New Movie Added.")
+                return render_template(url_for('manage_movies'))
+            except:
+                raise ValueError
+
+    content['form'] = form
+    content['max_id'] = new_id
+    content['title'] = 'Add New Movie'
+    return render_template('manage_add_movie.html', **content)
+
+
 # -----------------------------------
 # Info Views
 # -----------------------------------
 
-@app.route('/movie--<int:movie_id>')
+@app.route('/movie/<int:movie_id>')
 @login_required
 def movie_details(movie_id):
     content = copy(context_base)

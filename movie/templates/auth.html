@@ -1,6 +1,7 @@
 {% extends "template.html" %}
 {% from "_helpers.html" import render_field %}
-{% block cssfile %}  <link rel="stylesheet" href="/static/css/auth.css">
+{% block cssfile %}
+        <link href="{{ url_for('static', filename='css/auth.css') }}" rel="stylesheet">
 {% endblock %}
 
 {% block body %}

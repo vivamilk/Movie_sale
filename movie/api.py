@@ -448,15 +448,11 @@ def manage_delete_movie():
     return NotImplementedError
 
 
-@app.route('/manage/add_movie', methods=['POST'])
-@roles_accepted('senior_manager', 'manager')
-def manage_add_movie():
-    response = request.get_json()
-
-    conn, cur = get_db()
-    # check if movie existed in movie table
-    cur.execute(sql_translator('select movieID from movie where imdbID=? or title=?'), (response['imdb_id'], response['name']))
-    exist_movie_id = cur.fetchall()
+# @app.route('/manage/add_movie', methods=['POST'])
+# @roles_accepted('senior_manager', 'manager')
+# def manage_add_movie():
+#     response = request.get_json()
+#
     # TODO
     # if exist_movie_id is None:
     #     # add movie into database
@@ -473,13 +469,10 @@ def manage_add_movie():
     #     '''), (int(response['store_id']), response['imdb_id'], response['name']))
     #     exist_movie_id = cur.fetchall()[0]
     #
-    if exist_movie_id is not []:
-        # Below is the exmaple for error message, if the added movie is in the stock, showing the error like this.
-        return jsonify(message="Added movie already in the stock, current movieID is {}".format(";".join(list(exist_movie_id)))), 404
     # else:
     #     # add movie into database
     #     cur.execute(sql_translator('insert into movie'), (,))
-    return jsonify({'operation': 'add movie'})
+    # return jsonify({'operation': 'add movie'})
 
 
 @app.route('/manage/update_move', methods=['POST'])

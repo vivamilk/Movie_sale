@@ -1,7 +1,7 @@
 {% extends "index.html" %}
 {% block cssfile %}
     {{ super() }}
-    <link rel="stylesheet" href="/static/css/movie_detail.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/movie_detail.css') }}">
     <script src="{{ url_for('static', filename='js/movie_detail.js') }}"></script>
 {% endblock %}
 {% block content %}

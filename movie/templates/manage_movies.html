@@ -15,29 +15,14 @@
                 <th>Inventory</th>
                 <th>Sale Price</th>
                 <th>Cost</th>
-            </tr>
-            <tr>
-                <td><input type="text" class="form-control movieid" value="{{ max_id + 1 }}" readonly></td>
-                <td><input type="text" class="form-control imdbid" value=""></td>
                 <td>
-                    <div class="img-container">
-                        <img class="picture" height="42" width="42" alt="select a picture" title="select a picture"
-                             src="../static/posters/0.jpg">
-                        <input class="image custom-file-input" id="my-file-selector" type="file" style="display:none;"
-                               accept="image/x-png,image/gif,image/jpeg">
-                    </div>
-                <td><input type="text" class="form-control name" value=""></td>
-                <td><input type="text" class="form-control amount" value=""></td>
-                <td><input type="text" class="form-control sale-price" value=""></td>
-                <td><input type="text" class="form-control cost" value=""></td>
-                <td>
-                    <a href="#" class="del-btn admin-p-add"><span class="glyphicon glyphicon-plus"> Add</span></a>
+                    <a href="/manage/movie/new" class="del-btn admin-p-add"><span class="glyphicon glyphicon-plus"> Add</span></a>
                 </td>
             </tr>
             </thead>
             {% for movie in movies %}
                 <tr>
-                    <td>{{ movie.id }}</td>
+                    <td><a href="/manage/movie/{{ movie.id }}">{{ movie.id }}</a></td>
                     <td>{{ movie.imdb_id }}</td>
                     <td>
                         <div class="img-container">
@@ -51,7 +36,7 @@
                             </div>
                         </div>
                     </td>
-                    <td><input type="text" class="form-control name" value="{{ movie.name }}"></td>
+                    <td>{{ movie.name }}</td>
                     <td><input type="text" class="form-control inventory" value={{ movie.inventory }}></td>
                     {#            <td><input type="text" class="form-control keywords" value="'.$keywords.'"></td>#}
                     <td><input type="text" class="form-control price" value={{ movie.price }}></td>
