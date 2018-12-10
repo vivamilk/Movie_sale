@@ -13,22 +13,22 @@
 <!-- use for shipping status button in user history-->
 {% macro shipping_status(order_info) %}
     {% if order_info.status == 0 %}
-        <button type="button" class="btn btn-warning" title="Shipping Status"
+        <button type="button" class="btn btn-info" title="<b>Preparing</b>"
                 data-container="body" data-toggle="hover" data-placement="right"
-                data-content="Shipping Address: {{ order_info.shipping }}<br>Shipping Status: <b>Preparing your order</b>">
-            Status
+                data-content="<div style='white-space: pre-line'>Shipping Address:<br>{{ order_info.shipping }}</div>">
+            Processing
         </button>
     {% elif order_info.status == 1 %}
-        <button type="button" class="btn btn-primary" title="Shipping Status"
+        <button type="button" class="btn btn-success" title="<b>In Transit</b>"
                 data-container="body" data-toggle="hover" data-placement="right"
-                data-content="Shipping Address: {{ order_info.shipping }}<br>Shipping Status: <b>Shipping</b>">
-            Status
+                data-content="<div style='white-space: pre-line'>Shipping Address:<br>{{ order_info.shipping }}">
+            Shipped
         </button>
     {% else %}
-        <button type="button" class="btn btn-success" title="Shipping Status"
+        <button type="button" class="btn btn-primary" title="<b>Delivered</b>"
                 data-container="body" data-toggle="hover" data-placement="right"
-                data-content="Shipping Address: {{ order_info.shipping }}<br>Shipping Status: <b>Delivered</b>">
-            Status
+                data-content="<div style='white-space: pre-line'>Shipping Address:<br>{{ order_info.shipping }}">
+            Completed
         </button>
     {% endif %}
 {% endmacro %}

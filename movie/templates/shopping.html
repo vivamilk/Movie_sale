@@ -20,7 +20,7 @@
         {% for img in images %}
         <div class="col-md-3 text-center">
             <div class="wrapper">
-                <img src="{{url_for('static', filename='posters/' + img.id + '.jpg')}}">
+                <a href="/movie/{{ img.id }}"><img src="{{url_for('static', filename='posters/' + img.id + '.jpg')}}" height="300"></a>
                 <span class="highlight-price">
                     <h5>${{ img.price }}</h5>
                 </span>

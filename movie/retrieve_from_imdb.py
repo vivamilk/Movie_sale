@@ -18,9 +18,8 @@ def imdb_retrieve_movie_by_id(movie_id: str):
     rating = movie['rating']
     imdb_id = movie_id
     poster_url = movie['full-size cover url']
-    return {
 
-    }
+    return title, summary, year, content_rating, rating, imdb_id, ";".join(genres), poster_url
 
 
 def imdb_search_movie_by_name(movie_name: str, num_results=5):
@@ -37,6 +36,6 @@ def find_US_certificate(certificate_list: list):
 
 
 if __name__ == '__main__':
-    imdb_search_movie_by_name('star war')
-    # imdb_retrieve_movie_by_id('0062622')
+    # imdb_search_movie_by_name('star war')
+    imdb_retrieve_movie_by_id('0062622')
     print()

@@ -34,7 +34,7 @@ create table manager
   managerLevel  BOOLEAN not null,
   name          VARCHAR(20) not null,
   emailAddress  VARCHAR(30),
-  salary        NUMERIC
+  salary        FLOAT
 );
 
 create table store
@@ -58,7 +58,7 @@ create table movie
   summary       VARCHAR(1000) not null,
   year          INTEGER(4) not null,
   contentRating VARCHAR(10) not null,
-  rating        NUMERIC not null,
+  rating        FLOAT not null,
   imdbID        VARCHAR(10) unique not null
 );
 
@@ -74,8 +74,8 @@ create table stock
   movieID     INTEGER references movie,
   amount      INTEGER(10) not null,
   amountTemp  INTEGER(10) not null,
-  salePrice   NUMERIC not null,
-  cost        NUMERIC not null,
+  salePrice   FLOAT not null,
+  cost        FLOAT not null,
   primary key (storeID, movieID)
 );
 
@@ -88,23 +88,12 @@ create table shopping_cart
   primary key (customerID, movieID, storeID)
 );
 
--- create table transactions
--- (
---   purchaseID   INTEGER primary key autoincrement,
---   amount       INTEGER(10) not null,
---   purchaseDate datetime not null,
---   paypalID     VARCHAR(20) not null,
---   customerID   INTEGER references customer,
---   movieID      INTEGER references movie,
---   storeID      INTEGER references store
--- );
-
 create table transaction_detail
 (
   paypalID     VARCHAR(20) references transaction_info,
   movieID      INTEGER references movie,
   amount       INTEGER(10) not null,
-  unitPrice        INTEGER(10) not null,
+  unitPrice    FLOAT not null,
   primary key (paypalID, movieID)
 );
 
@@ -114,7 +103,7 @@ create table transaction_info
   purchaseDate    datetime not null,
   customerID      INTEGER references customer,
   storeID         INTEGER references store,
-  totalPrice      INTEGER(10) not null,
+  totalPrice      FLOAT not null,
   shippingAddress VARCHAR(200) not null,
   -- 0: preparing, 1: shipping, 2: delivered
   status          INTEGER(1) not null,
