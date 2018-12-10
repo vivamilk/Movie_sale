@@ -8,8 +8,8 @@ SECRET_KEY = "SECRET"
 # SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 # choose whether to use MySQL or SQLite
-DATABASE_OPTION = 'SQLite'
-# DATABASE_OPTION = 'MySQL'
+# DATABASE_OPTION = 'SQLite'
+DATABASE_OPTION = 'MySQL'
 
 DATABASE_SQLITE = os.path.abspath(os.path.dirname(__file__)) + '/database.db'
 

@@ -8,7 +8,7 @@ from flask_login import current_user, login_required
 from movie import app
 from movie.form import SearchBarForm
 from movie.utils import context_base, roles_accepted
-from movie.database import get_db
+from movie.database import get_db, sql_translator
 
 
 # -----------------------------------
@@ -30,7 +30,7 @@ def get_movies_with_params(movie_columns):
 
     # store info
     store_id = int(session['store_id'])
-    cur.execute('select storeID, region from store')
+    cur.execute(sql_translator('select storeID, region from store'))
     store_data = cur.fetchall()
     stores = []
     for store in store_data:
@@ -135,17 +135,17 @@ def get_items():
     store_id = int(session['store_id'])
     conn, cur = get_db()
 
-    cur.execute('select customerID from customer where userID=?', (current_user.id,))
+    cur.execute(sql_translator('select customerID from customer where userID=?'), (current_user.id,))
     customer_id = cur.fetchone()[0]
 
     # get items in the cart with their price
-    cur.execute('''
+    cur.execute(sql_translator('''
         select Shop.amount, Shop.movieID, M.title, S.salePrice
         from shopping_cart Shop
         join stock S on Shop.movieID=S.movieID and Shop.storeID=S.storeID
         join movie M on S.movieID = M.movieID
         where customerID=? and Shop.storeID=?
-        ''', (customer_id, store_id))
+        '''), (customer_id, store_id))
     records = cur.fetchall()
     return records
 
@@ -154,43 +154,43 @@ def record_transaction(response_dict: dict):
     store_id = int(session['store_id'])
     purchase_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    shipping_address = "\n".join([response_dict['address_name'],
-                                  response_dict['address_street'],
-                                  response_dict['address_city'],
-                                  response_dict['address_state'],
-                                  response_dict['address_zip'],
-                                  response_dict['address_country_code']])
+    shipping_address = "\n".join([
+        response_dict['address_name'],
+        response_dict['address_street'],
+        response_dict['address_city'],
+        ", ".join([response_dict['address_state'], response_dict['address_zip'], response_dict['address_country_code']])
+    ])
     paypal_id = response_dict['txn_id']
     total_payment = response_dict['mc_gross']
 
     conn, cur = get_db()
 
-    cur.execute('select customerID from customer where userID=?', (current_user.id,))
+    cur.execute(sql_translator('select customerID from customer where userID=?'), (current_user.id,))
     customer_id = cur.fetchone()[0]
 
     # get items in the cart
-    cur.execute('''
+    cur.execute(sql_translator('''
     select SC.amount, SC.movieID, salePrice
     from shopping_cart SC
     join stock S on S.movieID=SC.movieID and S.storeID=SC.storeID
     where customerID=? and SC.storeID=?
-    ''', (customer_id, store_id))
+    '''), (customer_id, store_id))
     records = cur.fetchall()
 
     # remove records from database.shopping_cart
-    cur.execute('delete from shopping_cart where customerID=? and storeID=?', (customer_id, store_id))
+    cur.execute(sql_translator('delete from shopping_cart where customerID=? and storeID=?'), (customer_id, store_id))
 
     # insert into database.transaction_info
-    cur.execute('insert into transaction_info values (?,?,?,?,?,?,?)',
+    cur.execute(sql_translator('insert into transaction_info values (?,?,?,?,?,?,?)'),
                 (paypal_id, purchase_time, customer_id, store_id, total_payment, shipping_address, 0))
 
     for amount, movie_id, price in records:
         # update database.stock
-        cur.execute('select amount from stock where movieID=? and storeID=?', (movie_id, store_id))
+        cur.execute(sql_translator('select amount from stock where movieID=? and storeID=?'), (movie_id, store_id))
         amount_all = cur.fetchone()[0]
-        cur.execute('update stock set amount=? where movieID=? and storeID=?', (amount_all-amount, movie_id, store_id))
+        cur.execute(sql_translator('update stock set amount=? where movieID=? and storeID=?'), (amount_all-amount, movie_id, store_id))
         # insert into database.transaction_detail
-        cur.execute('insert into transaction_detail values (?,?,?,?)',
+        cur.execute(sql_translator('insert into transaction_detail values (?,?,?,?)'),
                     (paypal_id, movie_id, amount, price))
     conn.commit()
     return jsonify({"operation": "record transaction"})
@@ -231,21 +231,21 @@ def remove_items_in_cart():
     store_id = int(session['store_id'])
     conn, cur = get_db()
 
-    cur.execute('select customerID from customer where userID=?', (current_user.id,))
+    cur.execute(sql_translator('select customerID from customer where userID=?'), (current_user.id,))
     customer_id = cur.fetchone()[0]
 
     # get items in the cart
-    cur.execute('select amount, movieID from shopping_cart where customerID=? and storeID=?', (customer_id, store_id))
+    cur.execute(sql_translator('select amount, movieID from shopping_cart where customerID=? and storeID=?'), (customer_id, store_id))
     records = cur.fetchall()
 
     # remove records from database.shopping_cart
-    cur.execute('delete from shopping_cart where customerID=? and storeID=?', (customer_id, store_id))
+    cur.execute(sql_translator('delete from shopping_cart where customerID=? and storeID=?'), (customer_id, store_id))
 
     # update database.stock
     for amount, movie_id in records:
-        cur.execute('select amountTemp from stock where movieID=? and storeID=?', (movie_id, store_id))
+        cur.execute(sql_translator('select amountTemp from stock where movieID=? and storeID=?'), (movie_id, store_id))
         temp_amount_all = cur.fetchone()[0]
-        cur.execute('update stock set amountTemp=? where movieID=? and storeID=?',
+        cur.execute(sql_translator('update stock set amountTemp=? where movieID=? and storeID=?'),
                     (temp_amount_all + amount, movie_id, store_id))
     conn.commit()
     return jsonify({"operation": "remove all items"})
@@ -258,25 +258,25 @@ def add_item_to_cart(movie_id):
     store_id = int(session['store_id'])
     conn, cur = get_db()
 
-    cur.execute('select customerID from customer where userID=?', (current_user.id,))
+    cur.execute(sql_translator('select customerID from customer where userID=?'), (current_user.id,))
     customer_id = cur.fetchone()[0]
 
-    cur.execute('select amount from shopping_cart where customerID=? and movieID=? and storeID=?',
+    cur.execute(sql_translator('select amount from shopping_cart where customerID=? and movieID=? and storeID=?'),
                 (customer_id, movie_id, store_id))
     current_amount = cur.fetchone()
 
     # insert or update record into database.shopping_cart
     if current_amount is None:
-        cur.execute('insert into shopping_cart values (?,?,?,?)',
+        cur.execute(sql_translator('insert into shopping_cart values (?,?,?,?)'),
                     (amount, customer_id, movie_id, store_id))
     else:
-        cur.execute('update shopping_cart set amount=? where customerID=? and movieID=? and storeID=?',
+        cur.execute(sql_translator('update shopping_cart set amount=? where customerID=? and movieID=? and storeID=?'),
                     (current_amount[0] + amount, customer_id, movie_id, store_id))
 
     # update amountTemp in database.stock
-    cur.execute('select amountTemp from stock where movieID=? and storeID=?', (movie_id, store_id))
+    cur.execute(sql_translator('select amountTemp from stock where movieID=? and storeID=?'), (movie_id, store_id))
     temp_amount_all = cur.fetchone()[0]
-    cur.execute('update stock set amountTemp=? where movieID=? and storeID=?',
+    cur.execute(sql_translator('update stock set amountTemp=? where movieID=? and storeID=?'),
                 (temp_amount_all - amount, movie_id, store_id))
 
     conn.commit()
@@ -290,25 +290,25 @@ def remove_item_in_cart(movie_id):
     store_id = int(session['store_id'])
     conn, cur = get_db()
 
-    cur.execute('select customerID from customer where userID=?', (current_user.id,))
+    cur.execute(sql_translator('select customerID from customer where userID=?'), (current_user.id,))
     customer_id = cur.fetchone()[0]
 
-    cur.execute('select amount from shopping_cart where customerID=? and movieID=? and storeID=?',
+    cur.execute(sql_translator('select amount from shopping_cart where customerID=? and movieID=? and storeID=?'),
                 (customer_id, movie_id, store_id))
     current_amount = cur.fetchone()[0]
 
     # delete or update record into database.shopping_cart
     if current_amount + amount <= 0:
-        cur.execute('delete from shopping_cart where customerID=? and movieID=? and storeID=?',
+        cur.execute(sql_translator('delete from shopping_cart where customerID=? and movieID=? and storeID=?'),
                     (customer_id, movie_id, store_id))
     else:
-        cur.execute('update shopping_cart set amount=? where customerID=? and movieID=? and storeID=?',
+        cur.execute(sql_translator('update shopping_cart set amount=? where customerID=? and movieID=? and storeID=?'),
                     (current_amount + amount, customer_id, movie_id, store_id))
 
     # update amountTemp in database.stock
-    cur.execute('select amountTemp from stock where movieID=? and storeID=?', (movie_id, store_id))
+    cur.execute(sql_translator('select amountTemp from stock where movieID=? and storeID=?'), (movie_id, store_id))
     temp_amount_all = cur.fetchone()[0]
-    cur.execute('update stock set amountTemp=? where movieID=? and storeID=?',
+    cur.execute(sql_translator('update stock set amountTemp=? where movieID=? and storeID=?'),
                 (temp_amount_all - amount, movie_id, store_id))
 
     conn.commit()
@@ -324,26 +324,26 @@ def update_item_in_cart(movie_id):
     store_id = int(session['store_id'])
     conn, cur = get_db()
 
-    cur.execute('select customerID from customer where userID=?', (current_user.id,))
+    cur.execute(sql_translator('select customerID from customer where userID=?'), (current_user.id,))
     customer_id = cur.fetchone()[0]
 
-    cur.execute('select amount from shopping_cart where customerID=? and movieID=? and storeID=?',
+    cur.execute(sql_translator('select amount from shopping_cart where customerID=? and movieID=? and storeID=?'),
                 (customer_id, movie_id, store_id))
     current_amount = cur.fetchone()[0]
 
     # remove or update record into database.shopping_cart
     if amount <= 0:
         amount = 0
-        cur.execute('delete from shopping_cart where customerID=? and movieID=? and storeID=?',
+        cur.execute(sql_translator('delete from shopping_cart where customerID=? and movieID=? and storeID=?'),
                     (customer_id, movie_id, store_id))
     else:
-        cur.execute('update shopping_cart set amount=? where customerID=? and movieID=? and storeID=?',
+        cur.execute(sql_translator('update shopping_cart set amount=? where customerID=? and movieID=? and storeID=?'),
                     (amount, customer_id, movie_id, store_id))
 
     # update amountTemp in database.stock
-    cur.execute('select amountTemp from stock where movieID=? and storeID=?', (movie_id, store_id))
+    cur.execute(sql_translator('select amountTemp from stock where movieID=? and storeID=?'), (movie_id, store_id))
     temp_amount_all = cur.fetchone()[0]
-    cur.execute('update stock set amountTemp=? where movieID=? and storeID=?',
+    cur.execute(sql_translator('update stock set amountTemp=? where movieID=? and storeID=?'),
                 (temp_amount_all - amount + current_amount, movie_id, store_id))
 
     conn.commit()
@@ -356,14 +356,14 @@ def count_items_in_cart():
     store_id = int(session['store_id'])
     conn, cur = get_db()
 
-    cur.execute('select customerID from customer where userID=?', (current_user.id,))
+    cur.execute(sql_translator('select customerID from customer where userID=?'), (current_user.id,))
     customer_id = cur.fetchone()[0]
 
-    cur.execute('''
+    cur.execute(sql_translator('''
         select COUNT(*)
         from shopping_cart Shop
         where customerID=? and Shop.storeID=?
-        ''', (customer_id, store_id))
+        '''), (customer_id, store_id))
     count = cur.fetchone()
     return jsonify(count)
 

@@ -6,44 +6,44 @@
 {% endblock %}
 {% block content %}
     <div class="container">
-        <div class="row" style="text-align: center"><h2>Your Orders</h2></div>
+        <br>
+        <div class="row"><h2  style="text-align: center; width: 100%">Your Orders</h2></div>
         <hr width="80%">
         {% for order_info in history %}
             <div class="container auto-center" style="border: 2px solid; border-color: rgb(231, 231, 231)">
                 <div class="row" style="text-align: center;background-color: rgb(231, 231, 231)">
-                    <div class="col-md-3"><h4>Order Placed</h4></div>
-                    <div class="col-md-3"><h4>Total (with tax)</h4></div>
+                    <div class="col-md-3">Order Placed</div>
+                    <div class="col-md-3">Total (with tax)</div>
                     <div class="col-md-3"></div>
-                    <div class="col-md-3"><h4>PayPal Order #</h4></div>
+                    <div class="col-md-3">PayPal Order #</div>
                     <div class="w-100"></div>
-                    <div class="col-md-3"><h4>{{ order_info.date }}<br>In Store: <b>{{ order_info.store }}</b></h4></div>
-                    <div class="col-md-3"><h4>$ {{ order_info.total_price }}</h4></div>
+                    <div class="col-md-3">{{ order_info.date }}<br>In Store: <b>{{ order_info.store }}</b></div>
+                    <div class="col-md-3">$ {{ order_info.total_price }}</div>
                     <div class="col-md-3"></div>
-                    <div class="col-md-3"><h4>{{ order_info.paypal_id }}</h4></div>
+                    <div class="col-md-3">{{ order_info.paypal_id }}</div>
                 </div>
-                <br>
-                {{ shipping_status(order_info) }}
-                <br>
-                <br>
-                    <table class="table table-striped auto-center">
-                        <tr>
-                            <th class="col-md-2"><h5>Poster</h5></th>
-                            <th class="col-md-6"><h5>Title</h5></th>
-                            <th class="col-md-2"><h5>Amount</h5></th>
-                            <th class="col-md-2"><h5>Unit Price</h5></th>
-                        </tr>
-                        {% for movie_detail in order_info.item_list %}
+                <div class="row">
+                    <div class="col-md-10" style="padding: 0">
+                        <table class="table table-hover">
                             <tr>
-                                <td><img src="{{url_for('static', filename='posters/' + movie_detail.movieID + '.jpg')}}" width="40px" height="60px"></td>
-                                <td><h5>{{ movie_detail.title }}</h5></td>
-                                <td><h5>{{ movie_detail.amount }}</h5></td>
-                                <td><h5>{{ movie_detail.price }}</h5></td>
+                                <th scope="col"><b>Poster</b></th>
+                                <th scope="col"><b>Title</b></th>
+                                <th scope="col"><b>Amount</b></th>
+                                <th scope="col"><b>Unit Price</b></th>
                             </tr>
-                        {% endfor %}
-                    </table>
-                <br>
+                            {% for movie_detail in order_info.item_list %}
+                                <tr>
+                                    <td><img src="{{url_for('static', filename='posters/' + movie_detail.movieID + '.jpg')}}" width="40px" height="60px"></td>
+                                    <td>{{ movie_detail.title }}</td>
+                                    <td>{{ movie_detail.amount }}</td>
+                                    <td>{{ movie_detail.price }}</td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                    <div class="col-md-2" style="margin:0 auto; padding: 0">{{ shipping_status(order_info) }}</div>
+                </div>
             </div>
-            <br>
         {% endfor %}
     </div>
     <script>

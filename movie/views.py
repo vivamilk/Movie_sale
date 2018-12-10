@@ -5,7 +5,7 @@ from flask_login import current_user, login_required, login_fresh, login_user, l
 
 from movie import app
 from movie.utils import context_base, roles_accepted
-from movie.database import get_db
+from movie.database import get_db, sql_translator
 from movie.form import LoginForm, RegistrationForm, SearchBarForm
 from movie.models import User
 from movie.api import get_movies_with_params
@@ -70,7 +70,7 @@ def shopping():
 # def get_new_item(page_id):
 #     movie = []
 #     conn, cur = get_db()
-#     cur.execute('select movieID, title from movie limit 20')
+#     cur.execute(sql_translator('select movieID, title from movie limit 20'))
 #     data = cur.fetchall()
 #     conn.close()
 #
@@ -136,7 +136,7 @@ def login():
 def logout():
     logout_user()
     session.pop('store_id')
-    flash("Logout Successfully!")
+    # flash("Logout Successfully!")
     return redirect(url_for('index'))
 
 
@@ -189,17 +189,17 @@ def show_history():
     content = copy(context_base)
     conn, cur = get_db()
 
-    cur.execute('select customerID from customer where userID=?', (current_user.id,))
+    cur.execute(sql_translator('select customerID from customer where userID=?'), (current_user.id,))
     customer_id = cur.fetchone()[0]
 
     # get order history in database.transaction_info
-    cur.execute('''
+    cur.execute(sql_translator('''
     select paypalID, purchaseDate, region, totalPrice, shippingAddress, status
     from transaction_info
     join store on transaction_info.storeID = store.storeID
     where customerID=?
     order by purchaseDate desc
-    ''', (customer_id,))
+    '''), (customer_id,))
     records = cur.fetchall()
 
     history = []
@@ -213,12 +213,12 @@ def show_history():
             'status': record[5],
             'item_list': []}
 
-        cur.execute('''
+        cur.execute(sql_translator('''
         select T.movieID, M.title, T.amount, T.unitPrice
         from transaction_detail T
         join movie M on T.movieID = M.movieID
         where paypalID=?
-        ''', (record[0],))
+        '''), (record[0],))
         item_list = cur.fetchall()
         for item in item_list:
             order['item_list'].append({
@@ -242,7 +242,7 @@ def show_history():
 def manage_all_customer():
     content = copy(context_base)
     conn, cur = get_db()
-    cur.execute('select name, emailAddress, phoneNumber from customer')
+    cur.execute(sql_translator('select name, emailAddress, phoneNumber from customer'))
     customers = cur.fetchall()
     conn.close()
     data = []
@@ -271,7 +271,7 @@ def manage_data():
     return render_template('admin.html', **content)
 
 
-@app.route('/manage/store', methods = ['GET'])
+@app.route('/manage/store', methods=['GET'])
 @roles_accepted('senior_manager')
 def manage_store():
     # TODO
@@ -311,7 +311,7 @@ def manage_store():
 #         pass
 #     elif options == 'Sales-Number':
 #         # get count
-#         cur.execute('''
+#         cur.execute(sql_translator(''')
 #         select COUNT(*)
 #         from transactions T
 #         where T.customerID=? and T.movieID=? and T.purchaseDate>? and T.purchaseDate<?
@@ -323,7 +323,7 @@ def manage_store():
 #
 #     data = cur.fetchall()
 #
-#     cur.execute('select storeID, region from store')
+#     cur.execute(sql_translator('select storeID, region from store'))
 #     store_data = cur.fetchall()
 #
 #

@@ -11,6 +11,33 @@ from flask.cli import with_appcontext
 from movie.utils import imdb_link_to_imdb_id, check_null, genres_to_list
 
 
+def setup_sql_placeholder():
+    db_option = current_app.config['DATABASE_OPTION']
+    if db_option == 'MySQL':
+        paramstyle = connector.paramstyle
+    elif db_option == 'SQLite':
+        paramstyle = sqlite3.paramstyle
+    else:
+        raise NotImplementedError
+
+    if paramstyle == 'qmark':
+        placeholder = "?"
+    elif paramstyle == 'pyformat':
+        placeholder = "%s"
+    else:
+        raise Exception("Unexpected paramstyle: %s" % paramstyle)
+    return placeholder
+
+
+def sql_translator(sql_query: str, ph_from="?"):
+    """Translate placeholder in SQL query if the format is wrong"""
+    placeholder = g.placeholder
+    if placeholder in sql_query:
+        return sql_query
+    else:
+        return sql_query.replace(ph_from, placeholder)
+
+
 def get_db():
     """Connect to the application's configured database. The connection
     is unique for each request and will be reused if this is called
@@ -18,12 +45,8 @@ def get_db():
     """
     if 'db' not in g:
         if current_app.config['DATABASE_OPTION'] == 'MySQL':
-            g.db = connector.connect(
-                host="127.0.0.1",
-                user="luozm",
-                password="luo123123",
-                database="web_movie"
-            )
+            from config import DATABASE_MYSQL_CONFIG
+            g.db = connector.connect(**DATABASE_MYSQL_CONFIG)
         elif current_app.config['DATABASE_OPTION'] == 'SQLite':
             g.db = sqlite3.connect(
                 current_app.config['DATABASE_SQLITE'],
@@ -33,6 +56,8 @@ def get_db():
             g.db.execute('PRAGMA foreign_keys = ON')
         else:
             raise NotImplementedError
+        g.placeholder = setup_sql_placeholder()
+
     return g.db, g.db.cursor()
 
 
@@ -103,12 +128,12 @@ def init_sample_data(conn, cur):
     cur.execute('insert into users values (?,?,?,?)',
                 (2, 'admin1', 'pbkdf2:sha256:50000$Eh6bXq9p$f1d73e42b410a6ab463cc597ecaece0ed2de5253f9a87835416c732b0a74981e', True))
     cur.execute('insert into manager values (?,?,?,?,?,?)',
-                (None, 2, True, 'manager1', 'manager1@gamil.com', 6000))
+                (None, 2, False, 'manager1', 'manager1@gamil.com', 6000))
 
     cur.execute('insert into users values (?,?,?,?)',
                 (3, 'admin2', 'pbkdf2:sha256:50000$Eh6bXq9p$f1d73e42b410a6ab463cc597ecaece0ed2de5253f9a87835416c732b0a74981e', True))
     cur.execute('insert into manager values (?,?,?,?,?,?)',
-                (None, 3, False, 'senior_manager1', 's_manager1@gamil.com', 9000))
+                (None, 3, True, 'senior_manager1', 's_manager1@gamil.com', 9000))
 
     cur.execute('insert into store values (?,?,?)',
                 (None, 'us_store@gmail.com', 'US'))
@@ -152,7 +177,7 @@ def init_sample_data(conn, cur):
     # sample transactions
     dt = datetime.datetime.now() + datetime.timedelta(-100)
     cur.execute('insert into transaction_info values (?,?,?,?,?,?,?)',
-                ('89U78003ES8880109', dt.strftime("%Y-%m-%d %H:%M:%S"), 1, 1, 36.77, 'test buyer\n1 Main St\nSan Jose\nCA\n95131\nUS', 2))
+                ('89U78003ES8880109', dt.strftime("%Y-%m-%d %H:%M:%S"), 1, 1, 36.77, 'test buyer\n1 Main St\nSan Jose\nCA, 95131, US', 2))
     cur.execute('insert into transaction_detail values (?,?,?,?)',
                 ('89U78003ES8880109', 5, 1, 18.06))
     cur.execute('insert into transaction_detail values (?,?,?,?)',
@@ -160,7 +185,7 @@ def init_sample_data(conn, cur):
 
     dt = datetime.datetime.now() + datetime.timedelta(-20)
     cur.execute('insert into transaction_info values (?,?,?,?,?,?,?)',
-                ('6E178263NT5976051', dt.strftime("%Y-%m-%d %H:%M:%S"), 1, 2, 82.22, 'test buyer\n1 Main St\nSan Jose\nCA\n95131\nUS', 1))
+                ('6E178263NT5976051', dt.strftime("%Y-%m-%d %H:%M:%S"), 1, 2, 82.22, 'test buyer\n1 Main St\nSan Jose\nCA, 95131, US', 1))
     cur.execute('insert into transaction_detail values (?,?,?,?)',
                 ('6E178263NT5976051', 4, 1, 15.99))
     cur.execute('insert into transaction_detail values (?,?,?,?)',
@@ -174,7 +199,7 @@ def init_sample_data(conn, cur):
 
     dt = datetime.datetime.now() + datetime.timedelta(-1)
     cur.execute('insert into transaction_info values (?,?,?,?,?,?,?)',
-                ('4XX45928SF3991535', dt.strftime("%Y-%m-%d %H:%M:%S"), 1, 1, 7.80, 'test buyer\n1 Main St\nSan Jose\nCA\n95131\nUS', 0))
+                ('4XX45928SF3991535', dt.strftime("%Y-%m-%d %H:%M:%S"), 1, 1, 7.80, 'test buyer\n1 Main St\nSan Jose\nCA, 95131, US', 0))
     cur.execute('insert into transaction_detail values (?,?,?,?)',
                 ('4XX45928SF3991535', 5136, 1, 7.29))
 
@@ -243,7 +268,7 @@ def init_mysql_sample_data(conn, cur):
     # sample transactions
     dt = datetime.datetime.now() + datetime.timedelta(-100)
     cur.execute('insert into transaction_info (paypalID, purchaseDate, customerID, storeID, totalPrice, shippingAddress, status) values (%s, %s, %s, %s, %s, %s, %s)',
-                ('89U78003ES8880109', dt.strftime("%Y-%m-%d %H:%M:%S"), 1, 1, 36.77, 'test buyer\n1 Main St\nSan Jose\nCA\n95131\nUS', 2))
+                ('89U78003ES8880109', dt.strftime("%Y-%m-%d %H:%M:%S"), 1, 1, 36.77, 'test buyer\n1 Main St\nSan Jose\nCA, 95131, US', 2))
     cur.execute('insert into transaction_detail (paypalID, movieID, amount, unitPrice) values (%s, %s, %s, %s)',
                 ('89U78003ES8880109', 5, 1, 18.06))
     cur.execute('insert into transaction_detail (paypalID, movieID, amount, unitPrice) values (%s, %s, %s, %s)',
@@ -251,7 +276,7 @@ def init_mysql_sample_data(conn, cur):
 
     dt = datetime.datetime.now() + datetime.timedelta(-20)
     cur.execute('insert into transaction_info (paypalID, purchaseDate, customerID, storeID, totalPrice, shippingAddress, status) values (%s, %s, %s, %s, %s, %s, %s)',
-                ('6E178263NT5976051', dt.strftime("%Y-%m-%d %H:%M:%S"), 1, 2, 82.22, 'test buyer\n1 Main St\nSan Jose\nCA\n95131\nUS', 1))
+                ('6E178263NT5976051', dt.strftime("%Y-%m-%d %H:%M:%S"), 1, 2, 82.22, 'test buyer\n1 Main St\nSan Jose\nCA, 95131, US', 1))
     cur.execute('insert into transaction_detail (paypalID, movieID, amount, unitPrice) values (%s, %s, %s, %s)',
                 ('6E178263NT5976051', 4, 1, 15.99))
     cur.execute('insert into transaction_detail (paypalID, movieID, amount, unitPrice) values (%s, %s, %s, %s)',
@@ -265,7 +290,7 @@ def init_mysql_sample_data(conn, cur):
 
     dt = datetime.datetime.now() + datetime.timedelta(-1)
     cur.execute('insert into transaction_info (paypalID, purchaseDate, customerID, storeID, totalPrice, shippingAddress, status) values (%s, %s, %s, %s, %s, %s, %s)',
-                ('4XX45928SF3991535', dt.strftime("%Y-%m-%d %H:%M:%S"), 1, 1, 7.80, 'test buyer\n1 Main St\nSan Jose\nCA\n95131\nUS', 0))
+                ('4XX45928SF3991535', dt.strftime("%Y-%m-%d %H:%M:%S"), 1, 1, 7.80, 'test buyer\n1 Main St\nSan Jose\nCA, 95131, US', 0))
     cur.execute('insert into transaction_detail (paypalID, movieID, amount, unitPrice) values (%s, %s, %s, %s)',
                 ('4XX45928SF3991535', 5136, 1, 7.29))
 

@@ -34,7 +34,7 @@ create table manager
   managerLevel  BOOLEAN not null,
   name          VARCHAR(20) not null,
   emailAddress  VARCHAR(30),
-  salary        NUMERIC
+  salary        FLOAT
 );
 
 create table store
@@ -58,7 +58,7 @@ create table movie
   summary       VARCHAR(1000) not null,
   year          INTEGER(4) not null,
   contentRating VARCHAR(10) not null,
-  rating        NUMERIC not null,
+  rating        FLOAT not null,
   imdbID        VARCHAR(10) unique not null
 );
 
@@ -74,8 +74,8 @@ create table stock
   movieID     INTEGER references movie,
   amount      INTEGER(10) not null,
   amountTemp  INTEGER(10) not null,
-  salePrice   NUMERIC not null,
-  cost        NUMERIC not null,
+  salePrice   FLOAT not null,
+  cost        FLOAT not null,
   primary key (storeID, movieID)
 );
 
