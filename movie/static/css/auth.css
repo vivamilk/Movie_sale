@@ -1,19 +1,37 @@
 body {
-    background-color:lightslategray;
+    background: url(../auth_bg.jpg) no-repeat center center fixed;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
 }
-input{
-    border-radius:3px;
-    width:100%;
+.form-control {
+    position: relative;
+    font-size: 16px;
+    height: auto;
+    padding: 10px;
+        @include box-sizing(border-box);
+}
+form input, form button {
+    font-size: 18px;
+    margin: 16px 0;
+}
+
+.auth-header{
+    text-align: center;
 }
 .auth{
+    margin-top: 30px;
+    color: #5d5d5d;
+    padding: 26px;
     text-shadow: 0 2px 4px rgba(0,0,0,.1);
-    width: 500px;
-    height: 400px;
-    background-color: lightgrey;
+    background-color: #f2f2f2;
+    border-radius: 10px;
+	-moz-border-radius: 10px;
+	-webkit-border-radius: 10px;
 }
 .auth-form{
-    margin: 30px 30px 20px;
-    
+    margin-top: 60px;
 }
 
 .remember_me{

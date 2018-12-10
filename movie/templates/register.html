@@ -1,17 +1,10 @@
 {% extends "auth.html" %}
 
 {% block auth %}
-    <h1>Sign Up</h1>
-    <form action="" method="post" novalidate>
+    <div class="auth-header"><h1>Sign Up</h1></div>
         {{ form.hidden_tag() }}
-        <dl>
-            {{ render_field(form.username) }}
-            {{ render_field(form.password) }}
-            {{ render_field(form.password2) }}
-            {{ render_field(form.name) }}
-            {{ render_field(form.email) }}
-            {{ render_field(form.phone_number) }}
-        </dl>
-        <h4>{{ form.submit() }}</h4>
-    </form>
+        {% for field in [form.username, form.password, form.password2, form.name, form.email, form.phone_number] %}
+            {{ render_field(field) }}
+        {% endfor %}
+        <h4>{{ form.submit(class="btn btn-primary btn-block btn-lg") }}</h4>
 {% endblock %}
