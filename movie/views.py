@@ -285,7 +285,7 @@ def manage_store():
 
 @app.route('/movie--<int:movie_id>')
 @login_required
-def get_stat_data(movie_id):
+def movie_details(movie_id):
     content = copy(context_base)
     conn, cur = get_db()
     # get movie info
@@ -296,6 +296,10 @@ def get_stat_data(movie_id):
         flash("Movie Not Found! Return to Shopping Page.")
         return redirect(url_for('shopping'))
 
+    # get genres
+    cur.execute(sql_translator('select genre from genres where movieID=?'), (movie_id,))
+    genres = cur.fetchall()
+
     content['movie_info'] = {
         'movie_id': str(movie_info[0]),
         'title': movie_info[1],
@@ -303,8 +307,8 @@ def get_stat_data(movie_id):
         'year': movie_info[3],
         'certificate': movie_info[4],
         'rating': movie_info[5],
-        'imdbID': movie_info[6],
-        'imdb_link': imdb_id_to_imdb_link(movie_info[6])
+        'imdb_link': imdb_id_to_imdb_link(movie_info[6]),
+        'genres': ", ".join(map(lambda x: x[0], genres))
     }
     content['title'] = movie_info[1]
     return render_template('movie_detail.html', **content)
