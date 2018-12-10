@@ -1,9 +1,9 @@
-{% extends "index.html" %}
+{% extends "index_with_search_bar.html" %}
 {% block cssfile %}
     {{ super() }}
     <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
 {% endblock %}
-{% block content %}
+{% block movie_list %}
     <div class="container">
         <table class="table table-striped">
             <thead>
@@ -25,7 +25,7 @@
                                accept="image/x-png,image/gif,image/jpeg">
                     </div>
                 <td><input type="text" class="form-control name" value=""></td>
-                <td><input type="text" class="form-control inventory" value=""></td>
+                <td><input type="text" class="form-control amount" value=""></td>
                 <td><input type="text" class="form-control sale-price" value=""></td>
                 <td><input type="text" class="form-control cost" value=""></td>
                 <td>

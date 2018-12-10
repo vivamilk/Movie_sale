@@ -30,7 +30,12 @@
                     </div>
 
                     {{ form.search_term(class="form-control mr-sm-2", placeholder="Search") }}
-                    <button class="btn btn-secondary my-2 my-sm-0" type="submit" name="submit1" value="search"><span class="fas fa-search"></span></button>
+                    <div style="margin-right:8px;">
+                        <button class="btn btn-secondary my-2 my-sm-0" type="submit" name="submit1" value="search"><span class="fas fa-search"></span></button>
+                    </div>
+                        {% if not default %}
+                        <button data-toggle="hover" title="Reset" data-placement="right" class="btn btn-secondary my-2 my-sm-0" type="submit" name="submit1" value="reset"><span class="fas fa-ban"></span></button>
+                    {% endif %}
                 </form>
             </div>
             <div class="md-3 ">
@@ -45,4 +50,9 @@
         </div>
         {% block  movie_list %}{% endblock %}
     </div>
+    <script>
+    $(function () {
+        $("[data-toggle='hover']").tooltip({trigger:'hover'});
+    });
+    </script>
 {% endblock %}
