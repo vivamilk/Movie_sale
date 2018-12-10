@@ -1,52 +1,60 @@
 {% extends "template.html" %}
-{% block cssfile %}<link rel="stylesheet" href="/static/css/cart.css">{% endblock %}
+{% block cssfile %}
+<link rel="stylesheet" href="/static/css/cart.css?1010">{% endblock %}
 {% block body %}
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a class="navbar-brand" href="/"><span class="fas fa-video"></span> Movie World</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav mr-auto">
-                {% if current_user.type == 'customer' %}
-                    <li {% if current_page=='/list' %} class="nav-item active" {% endif %}><a class="nav-link" href="/list"> View All </a></li>
-                    <li {% if current_page=='/shopping' %} class="nav-item active" {% endif %}><a class="nav-link" href="/shopping"> Shopping </a></li>
-                {% elif current_user.type == 'senior_manager' or current_user.type == 'manager' %}
-                    <li {% if current_page=='/manager' %} class="nav-item active" {% endif %}><a class="nav-link" href="/manager"> Manage </a></li>
-                {% endif %}
-            </ul>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="/"><span class="fas fa-video"></span> Movie World</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+            {% if current_user.type == 'customer' %}
+            <li {% if current_page=='/list' %} class="nav-item active" {% endif %}><a class="nav-link" href="/list">
+                    View All </a></li>
+            <li {% if current_page=='/shopping' %} class="nav-item active" {% endif %}><a class="nav-link" href="/shopping">
+                    Shopping </a></li>
+            {% elif current_user.type == 'senior_manager' or current_user.type == 'manager' %}
+            <li {% if current_page=='/manager' %} class="nav-item active" {% endif %}><a class="nav-link" href="/manager">
+                    Manage </a></li>
+            {% endif %}
+        </ul>
 
-            <ul class="nav navbar-nav navbar-right running-nav-right">
-                {% if current_user.is_anonymous %}
-                    <li><a class="nav-link" href="/register"><span class="glyphicon glyphicon-user"></span> Sign Up </a></li>
-                    <li><a class="nav-link" href="/login"><span class="glyphicon glyphicon-log-in"></span> Login </a></li>
-                {% else %}
-                    {% if current_user.type == 'customer' %}
-                        <li><a class="nav-link" href="/show_history"><span class="fas fa-user"></span> Hi, {{ current_user.username }}</a></li>
-                    {% else %}
-                        <li><a class="nav-link" href="/manage_customer"><span class="fas fa-user"></span> Hi, {{ current_user.username }} </a></li>
-                    {% endif %}
+        <ul class="nav navbar-nav navbar-right running-nav-right">
+            {% if current_user.is_anonymous %}
+            <li><a class="nav-link" href="/register"><span class="glyphicon glyphicon-user"></span> Sign Up </a></li>
+            <li><a class="nav-link" href="/login"><span class="glyphicon glyphicon-log-in"></span> Login </a></li>
+            {% else %}
+            {% if current_user.type == 'customer' %}
+            <li><a class="nav-link" href="/show_history"><span class="fas fa-user"></span> Hi, {{ current_user.username
+                    }}</a></li>
+            {% else %}
+            <li><a class="nav-link" href="/manage_customer"><span class="fas fa-user"></span> Hi, {{
+                    current_user.username }} </a></li>
+            {% endif %}
 
-                    <li><a class="nav-link" href="{{ url_for('logout') }}"><span class="fas fa-sign-out-alt"></span>Logout</a></li>
+            <li><a class="nav-link" href="{{ url_for('logout') }}"><span class="fas fa-sign-out-alt"></span>Logout</a></li>
 
-                    {% if current_user.type == 'customer' %}
-                        <li class="dropdown">
-                            <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown" role="button" aria-expanded="false">
-                                <span class="fas fa-shopping-cart"></span>
-                                Cart
-                                <span class="badge">0</span>
-                                <span class="caret"></span>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-right dropdown-cart" id="cart_product" role="menu">
+            {% if current_user.type == 'customer' %}
+            <li class="dropdown">
+                <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown" role="button" aria-expanded="false">
+                    <span class="fas fa-shopping-cart"></span>
+                    Cart
+                    <span class="badge">0</span>
+                    <span class="caret"></span>
+                </a>
+                <div class="container">
+                    <ul class="dropdown-menu dropdown-menu-right dropdown-cart" id="cart_product" role="menu">
+                    </ul>
+                </div>
 
-                            </ul>
-                        </li>
-                    {% endif %}
-                {% endif %}
-            </ul>
-        </div>
-    </nav>
+            </li>
+            {% endif %}
+            {% endif %}
+        </ul>
+    </div>
+</nav>
 
-    {% block content %}{% endblock %}
+{% block content %}{% endblock %}
 {% endblock %}

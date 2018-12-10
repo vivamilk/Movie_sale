@@ -1,5 +1,5 @@
 ul.dropdown-cart{
-    width:400px;
+    width:280px;
 }
 ul.dropdown-cart li .item{
     display:block;
@@ -24,6 +24,7 @@ ul.dropdown-cart li .item-left{
 ul.dropdown-cart li .item-left img,
 ul.dropdown-cart li .item-left span.item-info{
     float:left;
+    margin-left:15px; 
 }
 ul.dropdown-cart li .item-left span.item-info{
     margin-left:10px;   

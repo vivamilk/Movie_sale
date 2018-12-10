@@ -1,4 +1,5 @@
 function count_item() {
+
     $.ajax({
         url: '/shopping/count_items',
         type: 'POST',
@@ -57,13 +58,15 @@ function bind_update_function() {
             success: function (response) {
                 count_item();
                 get_cart_item();
+                $('.dropdown-toggle').dropdown('toggle');
             },
             error: function (error) {
                 console.log(error);
             }
         });
     });
-    $('#cart_product .admin-p-remove-item').click(function () {
+    $('#cart_product .admin-p-remove-item').click(function (e) {
+        e.preventDefault();
         var item_id = this.id;
         $.ajax({
             url: '/shopping/remove/' + item_id,
@@ -73,6 +76,7 @@ function bind_update_function() {
             success: function (response) {
                 count_item();
                 get_cart_item();
+                $('.dropdown-toggle').dropdown('toggle');
             },
             error: function (error) {
                 console.log(error);
@@ -82,6 +86,7 @@ function bind_update_function() {
 }
 
 function get_cart_item() {
+
     $.ajax({
         url: '/shopping/get_items',
         type: "POST",
@@ -97,22 +102,22 @@ function get_cart_item() {
                 var subtotal = parseFloat(price) * parseFloat(amount);
                 subtotal = subtotal.toFixed(2);
                 total += parseFloat(subtotal);
-                let item = `
-                   <li>
-                        <span class="item">
-                            <span class="item-left">
-                                <span class="item-info">
-                                    <span>${title}</span>
-                                    <span>$${price}</span>
-                                </span>
-                            </span>
-                            <span class="item-right">
-                            <a href="#" id=${product_id} class="del-btn admin-p-remove-item pull-right"><span class="fas fa-minus"> </span></a>
-                            ${amount}
-                            <a href="#" id=${product_id} class="del-btn admin-p-add-item"><span class="fas fa-plus"> </span></a>
-                            </span>
+                let item =    `             
+                <li>
+                <span class="item">
+                    <span class="item-left">
+                        <span class="item-info">
+                            <span><b>${title}</b></span>
+                            <span>$${price}</span>
                         </span>
-                    </li>
+                    </span>
+                    <span class="item-right">
+                    <a href="#" id=${product_id} class="del-btn admin-p-remove-item pull-right"><span class="fas fa-minus"> </span></a>
+                    ${amount}
+                    <a href="#" id=${product_id} class="del-btn admin-p-add-item"><span class="fas fa-plus"> </span></a>
+                    </span>
+                </span>
+                </li>
                 `;
 
                 $('#cart_product').append(item);
