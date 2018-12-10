@@ -9,11 +9,11 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav mr-auto">
-                {% if current_user.type != 'customer' %}
-                    <li {% if current_page=='/manager' %} class="nav-item active" {% endif %}><a class="nav-link" href="/manager"> Manage </a></li>
-                {% else %}
+                {% if current_user.type == 'customer' %}
                     <li {% if current_page=='/list' %} class="nav-item active" {% endif %}><a class="nav-link" href="/list"> View All </a></li>
                     <li {% if current_page=='/shopping' %} class="nav-item active" {% endif %}><a class="nav-link" href="/shopping"> Shopping </a></li>
+                {% elif current_user.type == 'senior_manager' or current_user.type == 'manager' %}
+                    <li {% if current_page=='/manager' %} class="nav-item active" {% endif %}><a class="nav-link" href="/manager"> Manage </a></li>
                 {% endif %}
             </ul>
 
