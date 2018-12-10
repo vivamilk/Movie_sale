@@ -8,7 +8,8 @@
         <table class="table table-striped">
             <thead>
             <tr>
-                <th>Id</th>
+                <th>ID</th>
+                <th>ImdbID</th>
                 <th>Picture</th>
                 <th>Name</th>
                 <th>Inventory</th>
@@ -17,6 +18,7 @@
             </tr>
             <tr>
                 <td><input type="text" class="form-control movieid" value=""></td>
+                <td><input type="text" class="form-control imdbid" value=""></td>
                 <td>
                     <div class="img-container">
                         <img class="picture" height="42" width="42" alt="select a picture" title="select a picture"
@@ -33,10 +35,10 @@
                 </td>
             </tr>
             </thead>
-            {#            Manage the movie#}
             {% for movie in movies %}
                 <tr>
                     <td>{{ movie.id }}</td>
+                    <td>{{ movie.imdb_id }}</td>
                     <td>
                         <div class="img-container">
                             <img class="picture" height="42" width="42" alt="select a picture" title="select a picture"

@@ -259,12 +259,12 @@ def manage_all_customer():
 @roles_accepted('manager', 'senior_manager')
 def manage_data():
     # get movies from database
-    data, content = get_movies_with_params('M.movieID, M.title, S.salePrice, S.cost, S.amount')
+    data, content = get_movies_with_params('M.movieID, M.imdbID, M.title, S.salePrice, S.cost, S.amount')
 
     movie = []
     for select_data in data:
-        movie_id, title, price, cost, stock = select_data
-        movie.append({'id': str(movie_id), 'name': title, 'price': price, 'cost': cost, 'inventory': stock})
+        movie_id, imdb_id, title, price, cost, stock = select_data
+        movie.append({'id': str(movie_id), 'imdb_id':imdb_id, 'name': title, 'price': price, 'cost': cost, 'inventory': stock})
 
     content['movies'] = movie
     content['current_page'] = '/manager'
