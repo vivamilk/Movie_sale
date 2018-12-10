@@ -37,7 +37,7 @@ def get_movies_with_params(movie_columns):
         stores.append({'id': str(store[0]), 'name': store[1]})
 
     # retrieve movie info
-    range_sql, form = get_range_sql(form, store_id)
+    range_sql, form, is_default = get_range_sql(form, store_id)
     cur.execute("select {}".format(movie_columns) + range_sql)
     data = cur.fetchall()
 
@@ -46,6 +46,7 @@ def get_movies_with_params(movie_columns):
 
     content = copy(context_base)
     content['search_bar'] = True
+    content['default'] = is_default
     content['stores'] = stores
     content['form'] = form
     return data, content
@@ -55,6 +56,13 @@ def get_range_sql(form: SearchBarForm, store_id: int):
     """Generate specific SQL to retrieve movie info by given form"""
     # get keywords
     if form.is_submitted():
+        if request.form.get('submit1') == 'reset':
+            # reset all parameters
+            form.search_term.data = ''
+            form.order.data = 'None'
+            form.sort_by.data = 'None'
+            form.choice.data = 'None'
+
         search_term = form.search_term.data
         if not search_term or search_term == 'None':
             search_sql = ""
@@ -91,6 +99,7 @@ def get_range_sql(form: SearchBarForm, store_id: int):
             where S.storeID={} and genre='{}' {}
             {}
             '''.format(store_id, form.genres.data, search_sql, sort_sql)
+            default = False
         else:
             if choice == 'year' and form.year.data:
                 filter_sql = "and year={}".format(form.year.data)
@@ -105,14 +114,20 @@ def get_range_sql(form: SearchBarForm, store_id: int):
             where S.storeID={} {} {}
             {}
             '''.format(store_id, search_sql, filter_sql, sort_sql)
+            if search_sql == '' and filter_sql == '' and sort_sql == '':
+                default = True
+            else:
+                default = False
     else:
         # select movies from db
         range_sql = ('''
         from movie M
         join stock S on M.movieID = S.movieID
         where S.storeID={}
+        order by year desc
         '''.format(store_id))
-    return range_sql, form
+        default = True
+    return range_sql, form, default
 
 
 def get_items():
@@ -166,7 +181,7 @@ def record_transaction(response_dict: dict):
     cur.execute('delete from shopping_cart where customerID=? and storeID=?', (customer_id, store_id))
 
     # insert into database.transaction_info
-    cur.execute('insert into transactions_info values (?,?,?,?,?,?,?)',
+    cur.execute('insert into transaction_info values (?,?,?,?,?,?,?)',
                 (paypal_id, purchase_time, customer_id, store_id, total_payment, shipping_address, 0))
 
     for amount, movie_id, price in records:
@@ -175,7 +190,7 @@ def record_transaction(response_dict: dict):
         amount_all = cur.fetchone()[0]
         cur.execute('update stock set amount=? where movieID=? and storeID=?', (amount_all-amount, movie_id, store_id))
         # insert into database.transaction_detail
-        cur.execute('insert into transactions_detail values (?,?,?,?)',
+        cur.execute('insert into transaction_detail values (?,?,?,?)',
                     (paypal_id, movie_id, amount, price))
     conn.commit()
     return jsonify({"operation": "record transaction"})

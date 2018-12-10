@@ -1,14 +1,15 @@
-{% extends "index.html" %}
+{% extends "index_with_search_bar.html" %}
 {% block cssfile %}
     {{ super() }}
     <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
 {% endblock %}
-{% block content %}
+{% block movie_list %}
     <div class="container">
         <table class="table table-striped">
             <thead>
             <tr>
-                <th>Id</th>
+                <th>ID</th>
+                <th>ImdbID</th>
                 <th>Picture</th>
                 <th>Name</th>
                 <th>Inventory</th>
@@ -17,6 +18,7 @@
             </tr>
             <tr>
                 <td><input type="text" class="form-control movieid" value=""></td>
+                <td><input type="text" class="form-control imdbid" value=""></td>
                 <td>
                     <div class="img-container">
                         <img class="picture" height="42" width="42" alt="select a picture" title="select a picture"
@@ -25,7 +27,7 @@
                                accept="image/x-png,image/gif,image/jpeg">
                     </div>
                 <td><input type="text" class="form-control name" value=""></td>
-                <td><input type="text" class="form-control inventory" value=""></td>
+                <td><input type="text" class="form-control amount" value=""></td>
                 <td><input type="text" class="form-control sale-price" value=""></td>
                 <td><input type="text" class="form-control cost" value=""></td>
                 <td>
@@ -33,10 +35,10 @@
                 </td>
             </tr>
             </thead>
-            {#            Manage the movie#}
             {% for movie in movies %}
                 <tr>
                     <td>{{ movie.id }}</td>
+                    <td>{{ movie.imdb_id }}</td>
                     <td>
                         <div class="img-container">
                             <img class="picture" height="42" width="42" alt="select a picture" title="select a picture"

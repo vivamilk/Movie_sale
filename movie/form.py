@@ -5,19 +5,19 @@ import re
 
 
 class LoginForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[DataRequired()])
+    username = StringField('Username', validators=[DataRequired()], description='Username')
+    password = PasswordField('Password', validators=[DataRequired()], description='Password')
     remember_me = BooleanField('Remember Me')
     submit = SubmitField('Sign In')
 
 
 class RegistrationForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[DataRequired()])
-    password2 = PasswordField('Repeat Password', validators=[DataRequired(), EqualTo('password')])
-    name = StringField('Name', validators=[DataRequired()])
-    email = StringField('E-mail', validators=[Email()])
-    phone_number = IntegerField('Phone Number')
+    username = StringField('Username', validators=[DataRequired()], description='Username')
+    password = PasswordField('Password', validators=[DataRequired()], description='Password')
+    password2 = PasswordField('Repeat Password', validators=[DataRequired(), EqualTo('password')], description='Confirm Password')
+    name = StringField('Name', validators=[DataRequired()], description='Name')
+    email = StringField('E-mail', validators=[Email()], description='E-mail')
+    phone_number = IntegerField('Phone Number', description='Phone Number')
     submit = SubmitField('Register')
 
     def validate_username(self, username):

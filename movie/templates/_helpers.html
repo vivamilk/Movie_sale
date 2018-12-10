@@ -1,15 +1,13 @@
 <!-- use for form field render -->
 {% macro render_field(field) %}
-  <dt>{{ field.label }}
-  <dd>{{ field(size=32) }}
-  {% if field.errors %}
-    <ul class=errors>
-    {% for error in field.errors %}
-      <li>{{ error }}</li>
-    {% endfor %}
-    </ul>
-  {% endif %}
-  </dd>
+    {{ field(class="form-control input-lg", placeholder=field.description) }}
+    {% if field.errors %}
+        <ul class=errors>
+            {% for error in field.errors %}
+                <li><div style="color: red">{{ error }}</div></li>
+            {% endfor %}
+        </ul>
+    {% endif %}
 {% endmacro %}
 
 <!-- use for shipping status button in user history-->
