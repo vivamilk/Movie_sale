@@ -1,5 +1,9 @@
 import os
+import requests
+from PIL import Image
 from copy import copy
+import sqlite3
+from mysql import connector
 from werkzeug.urls import url_parse
 from flask import render_template, redirect, url_for, flash, request, session, jsonify
 from flask_login import current_user, login_required, login_fresh, login_user, logout_user
@@ -10,6 +14,7 @@ from movie.database import get_db, sql_translator
 from movie.form import LoginForm, RegistrationForm, MovieDetailForm
 from movie.models import User
 from movie.api import get_movies_with_params, get_max_movie_id
+from movie.retrieve_from_imdb import imdb_retrieve_movie_by_id
 
 
 # -----------------------------------
@@ -312,7 +317,25 @@ def manage_add_movie():
         img = request.files['img']
         img.save(os.path.join("movie/static/posters", "{}.{}".format(new_id, img.filename.split('.')[-1])))
 
-    if form.validate_on_submit():
+    # search on IMDB
+    if request.form.get('search') == '':
+        if form.imdb_id.data == '':
+            flash("Please enter IMDB ID")
+        else:
+            response = imdb_retrieve_movie_by_id(form.imdb_id.data)
+            form.title.data, form.summary.data, form.year.data, form.content_rating.data, form.rating.data, form.imdb_id.data, form.genres.data, poster_url = response
+            # download poster
+            img = requests.get(poster_url, allow_redirects=True)
+            img_filename = 'movie/static/posters/{}.{}'.format(new_id, poster_url.split(".")[-1])
+            open(img_filename, 'wb').write(img.content)
+            # resize img
+            im = Image.open(img_filename)
+            im = im.resize((600, 900), Image.ANTIALIAS)
+            im.save(img_filename, "JPEG")
+
+    if request.form.get('add') == '' and not form.validate():
+        flash("Please fill in required fields.")
+    elif form.validate_on_submit():
         # check if movie existed in movie table
         cur.execute(sql_translator('select movieID from movie where imdbID=? or title=?'), (form.imdb_id.data, form.title.data))
         exist_movie_id = cur.fetchall()
@@ -337,9 +360,13 @@ def manage_add_movie():
 
                 conn.commit()
                 flash("New Movie Added.")
-                return render_template(url_for('manage_movies'))
-            except:
-                raise ValueError
+                return redirect(url_for('manage_movies'))
+            except sqlite3.IntegrityError:
+                print('IntegrityError')
+            except connector.errors.IntegrityError:
+                print('IntegrityError')
+            except connector.errors.DataError:
+                print('DataError')
 
     content['form'] = form
     content['max_id'] = new_id

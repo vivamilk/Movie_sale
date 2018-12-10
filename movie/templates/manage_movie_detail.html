@@ -12,7 +12,7 @@
             <div class="col-md-6" style="margin-bottom: 0">
                 <form id="movie-detail" method="post" novalidate>
                     {{ form.hidden_tag() }}
-                    <h2 class="movie-title text-light">{{ form.title(value=movie_info.title, size=15, placeholder='Title') }}</h2>
+                    <h2 class="movie-title text-light">{{ form.title(value=movie_info.title, size=15, placeholder='Title', style="width: 100%;max-width: 500px; box-sizing: border-box;") }}</h2>
                     <strong class="text-light">{{ form.year(value=movie_info.year, size=4, placeholder='Year') }}</strong>
                     <hr><br>
                     <div class="movie-summary text-light">

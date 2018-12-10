@@ -21,16 +21,16 @@
             <div class="col-md-6" style="margin-bottom: 0">
                 <form id="movie-detail" method="post" novalidate>
                     {{ form.hidden_tag() }}
-                    <h2 class="movie-title">{{ form.title(size=15, placeholder='Title') }}</h2>
-                    <strong class="text-light">{{ form.year(size=4, placeholder='Year') }}</strong>
+                    <h2 class="movie-title">{{ form.title(size=15, placeholder='Title', style="width: 100%;max-width: 500px; box-sizing: border-box;") }}</h2>
+                    <strong class="text-light">{{ form.year(size=4, placeholder='Year', value=form.year.data) }}</strong>
                     <hr><br>
                     <div class="movie-summary">
-                        <textarea id="summary" name="summary" form="movie-detail" style="width: 400px; height: 200px" placeholder="Summary"></textarea>
+                        <textarea id="summary" name="summary" form="movie-detail" style="width: 400px; height: 200px" placeholder="Summary">{{ form.summary.data }}</textarea>
                     </div>
                     <br><br>
                     <div class="row">
                         <div class="col-md-6"><ul class="movie-meta">
-                            <li><strong>Rating:  </strong><span style="width:80%"><strong class="rating">{{ form.rating(size=1, placeholder='Rating') }}</strong></span></li>
+                            <li><strong>Rating:  </strong><strong>{{ form.rating(size=1, placeholder='Rating', value=form.rating.data) }}</strong></li>
                             <li><strong>Certificate:  </strong>{{ form.content_rating(size=6, placeholder='Certificate') }}</li>
                             <li><strong>Genres:  </strong>{{ form.genres(size=8, placeholder='split by ;') }}</li>
                             <li><strong>IMDB ID:  </strong>{{ form.imdb_id(size=8, placeholder='IMDB ID') }}</li>
@@ -45,10 +45,10 @@
                     <div class="container-fluid" style="margin: 5%; width: 80%">
                         <div class="row">
                             <div class="col-md-6 movie-detail">
-                                <button type="submit" class="btn btn-outline-dark">Add Movie</button>
+                                <button type="submit" name="add" class="btn btn-outline-dark">Add Movie</button>
                             </div>
                             <div class="col-md-6">
-                                <button class="btn btn-outline-info" onclick="location.href=''">Search on IMDB</button>
+                                <button type="submit" name="search" class="btn btn-outline-info">Search on IMDB</button>
                             </div>
                         </div>
                     </div>
